@@ -166,7 +166,7 @@ h1, h2, h3, h4 {
 /* — hero — */
 .hero {
   display: grid;
-  grid-template-columns: 1.05fr .95fr;
+  grid-template-columns: .95fr 1.05fr;
   align-items: stretch;
   gap: 0;
 }
@@ -212,7 +212,8 @@ h1, h2, h3, h4 {
 .hero__media {
   position: relative;
   min-height: clamp(420px, 68vh, 760px);
-  border-left: 1px solid rgba(var(--text-rgb), .14);
+  order: -1;
+  border-right: 1px solid rgba(var(--text-rgb), .14);
   overflow: hidden;
 }
 .hero__media img {
@@ -226,7 +227,7 @@ h1, h2, h3, h4 {
 
 @media (max-width: 860px) {
   .hero { grid-template-columns: 1fr; }
-  .hero__media { border-left: 0; border-top: 1px solid rgba(var(--text-rgb), .14); min-height: 320px; }
+  .hero__media { order: 0; border-right: 0; border-top: 1px solid rgba(var(--text-rgb), .14); min-height: 320px; }
 }
 
 /* — about — */
