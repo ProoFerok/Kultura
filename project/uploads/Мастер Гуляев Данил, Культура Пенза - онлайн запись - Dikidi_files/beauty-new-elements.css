@@ -1,0 +1,344 @@
+/* region checkbox */
+input.be-checkbox {
+	display: none;
+}
+
+input.be-checkbox + label
+{
+	color: #494949;
+	font-size: 12px;
+	cursor: pointer;
+	font-weight: 400;
+	margin-left: 18px;
+	margin-bottom: 0;
+	position: relative;
+}
+
+input.be-checkbox + label::before
+{
+	content: "";
+	display: inline-block;
+	background-color: #FFFFFF;
+	border: 1px solid #B8C6D7;
+	border-radius: 3px;
+	margin-left: -18px;
+	position: absolute;
+	top: 3px;
+	width: 12px;
+	height: 12px;
+}
+
+input.be-checkbox:checked + label:before
+{
+	background-color: #007AFF;
+	border-color: #007AFF;
+	background-image: url('/assets/images/sales/check.png');
+	background-size: 8px;
+	background-position: 1px center;
+	background-repeat: no-repeat;
+}
+
+input.be-checkbox[disabled] + label::before
+{
+	background-color: #dfdfdf;
+	border: 1px solid #dfdfdf;
+}
+
+input.be-checkbox:checked[disabled] + label:before
+{
+	background-color: #92C5FC;
+	border-color: #92C5FC;
+}
+/* endregion */
+
+/* region radio */
+input.be-radio {
+	display: none;
+}
+
+input.be-radio + label
+{
+	color: #272727;
+	cursor: pointer;
+	font-weight: normal;
+	margin-left: 25px;
+	margin-bottom: 0;
+	position: relative;
+}
+
+input.be-radio + label::before
+{
+	content: "";
+	display: inline-block;
+	background-color: #FFFFFF;
+	position: absolute;
+	top: 3px;
+	left: -25px;
+	width: 13px;
+	height: 13px;
+	border: 1px solid #a5b3c5;
+	border-radius: 50%;
+}
+
+input.be-radio:checked + label:before {
+	border-color: #007AFF;
+}
+
+input.be-radio:checked + label:after
+{
+	content: "";
+	display: inline-block;
+	position: absolute;
+	width: 7px;
+	height: 7px;
+	left: -22px;
+	top: 6px;
+	background: #007AFF;
+	border-radius: 50%;
+}
+
+input.be-radio[disabled] + label::before
+{
+	border-color: #D8E4F3;
+}
+
+input.be-radio:checked[disabled] + label:after
+{
+	background-color: #95C7FD;
+}
+/* endregion */
+
+/* region inputs and selects */
+textarea.be-input,
+input.be-input,
+select.be-select,
+select.be-select + div.bootstrap-select .dropdown-toggle {
+	padding: 8px 10px 9px;
+	border-radius: 8px;
+	border: solid 1px #DCE5F0;
+	background: #FFF;
+	box-shadow: none;
+
+	color: #272727;
+	font-size: 12px;
+	font-style: normal;
+	font-weight: 400;
+	line-height: normal;
+}
+
+textarea.be-input,
+input.be-input {
+	-webkit-appearance: menulist-textfield;
+}
+
+div.cleaning > .be-input + a {
+	height: 38px;
+}
+
+select.be-select + div.bootstrap-select .dropdown-menu.open {
+	border: unset;
+	background: #FFFFFF;
+	box-shadow: 0px 3px 20px #E1E7EE;
+	border-radius: 8px;
+	overflow: hidden;
+	padding: 0;
+}
+
+select.be-select + div.bootstrap-select .dropdown-menu.open a {
+	background-color: #ffffff;
+	padding: 8px 20px;
+}
+
+select.be-select + div.bootstrap-select .dropdown-menu.open a:hover {
+	background-color: #f5f5f5;
+}
+
+.be-select-container {
+	position: relative;
+	width: 100%;
+}
+
+.be-select-container > label {
+	pointer-events: none;
+	position: absolute;
+	top: 2px;
+	left: 10px;
+	z-index: 3;
+
+	color: #878E97;
+	font-size: 9px;
+	font-style: normal;
+	font-weight: 400;
+	line-height: normal;
+}
+
+.be-select-container div.bootstrap-select .btn.dropdown-toggle {
+	padding-top: 14px;
+	padding-bottom: 4px;
+}
+
+.be-select-container div.bootstrap-select div.dropdown-menu.open {
+	top: 45px;
+	padding: 4px;
+}
+
+.be-select-container div.bootstrap-select ul.dropdown-menu.inner {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	align-items: flex-start;
+	justify-content: flex-start;
+}
+
+.be-select-container div.bootstrap-select ul.dropdown-menu.inner > li {
+	width: 100%;
+	border-radius: 6px;
+	overflow: hidden;
+}
+
+.be-select-container div.bootstrap-select ul.dropdown-menu.inner > li.selected a {
+	background-color: #F2F2F7;
+}
+
+.be-select-container div.bootstrap-select ul.dropdown-menu.inner > li:hover a {
+	background-color: rgba(0, 122, 255, 0.15);
+}
+/* endregion */
+
+/* region modal */
+.be-modal .modal-dialog {
+	/*width: auto;*/
+}
+
+.be-modal .modal-content {
+	border: none;
+	border-radius: 12px;
+}
+
+.be-modal .modal-body {
+	padding: 0 40px;
+	background: #ffffff;
+	border-radius: 12px;
+}
+
+.be-modal .bootbox-close-button.close {
+	background-image: url('/assets/images/new_elements/cross.svg?v=1.00');
+	background-size: contain;
+	background-repeat: no-repeat;
+	background-position: initial;
+	opacity: unset;
+
+	top: 27px;
+	right: 29px;
+	height: 14px;
+	width: 14px;
+
+	font-size: 0;
+}
+
+.be-modal .header {
+	width: calc(100%);
+	max-height: 87px;
+	margin-left: 0px;
+	padding: 20px 0 16px;
+
+	background: #FFFFFF;
+	border-radius: 12px 12px 0px 0px;
+
+	color: #272727;
+	font-size: 20px;
+	font-style: normal;
+	font-weight: 700;
+	line-height: normal;
+	border-bottom: 2px solid #F3F6FA;
+}
+
+.be-modal .header  .sub-text {
+	color: #494949;
+	font-size: 12px;
+	font-style: normal;
+	font-weight: 400;
+}
+
+.be-modal .slimScrollDiv {
+	padding-right: 30px;
+	margin-right: -30px;
+}
+
+.be-modal .body {
+	padding-top: 20px;
+	padding-bottom: 40px;
+	padding-right: 30px;
+	margin-right: -30px;
+
+	max-height: calc(100vh - 220px);
+	overflow-y: auto;
+}
+
+.be-modal .body h2 {
+	color: #272727;
+	font-size: 16px;
+	font-style: normal;
+	font-weight: 600;
+	padding-left: 20px;
+	margin: 0;
+}
+
+.be-modal .body .sections {
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+}
+
+.be-modal .body .section {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.be-modal .body .section .section-body {
+	display: flex;
+	padding: 16px 20px;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 16px;
+	border-radius: 10px;
+	background: #FFFFFF;
+}
+
+.be-modal .body .section .section-body input,
+.be-modal .body .section .section-body select,
+.be-modal .body .section .section-body .bootstrap-select {
+	width: 100%;
+}
+
+.be-modal .body .sub-text {
+	color: #878E97;
+	font-size: 12px;
+	font-style: normal;
+	font-weight: 400;
+	line-height: normal;
+	margin-left: 20px;
+}
+
+.be-modal .body .section .section-body .sub-text {
+	margin-left: 0;
+}
+
+.be-modal .footer {
+	width: calc(100% + 60px);
+	height: 68px;
+	margin-left: -30px;
+	padding: 0 30px;
+
+	background-color: #FFFFFF;
+	border-radius: 0px 0px 12px 12px;
+	border-top: none;
+
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+	border-top: 2px solid #F3F6FA;
+}
+/* endregion */

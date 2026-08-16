@@ -1,0 +1,3355 @@
+
+function newrecord_scroll_init($el){
+	var $parent = $el.parent();
+	
+	$el.slimscroll({
+		alwaysVisible: true,
+		size: '3px',
+		color: '#E5E5E5',
+		opacity: 1
+	});
+	
+	$el.mouseenter();
+	
+	function on_resize(){
+		$el.outerHeight($parent.height(), true);
+		$el.slimscroll();
+	}
+	
+	$(window).on('resize', on_resize);
+	
+	$el.on('destroyed', function(){
+		$el.mouseleave();
+		$(window).off('resize', on_resize);
+	});
+	
+	$el.css('height', '0');
+	
+	setTimeout(function(){
+		$el.outerHeight($parent.height(), true);
+	}, 0);
+}
+
+function newrecord_divisor_init($el){
+	var $ul = $el;
+	var $ul_empty = $('<ul></ul>').attr('class', $ul.attr('class'));
+	var $html = $('<div class="newrecord-divisor"></div>');
+	
+	var $ul_new;
+	
+	$ul.find('> li').each(function(key){
+		var $li = $(this);
+		
+		if(key % 3 == 0){
+			$ul_new = $ul_empty.clone()
+				.appendTo($html);
+		}
+		
+		$ul_new.append($li);
+
+	});
+	
+	$el.replaceWith($html);
+}
+
+function newrecord_page1_init($el){
+	var $select_day = $el.find('.select-day');
+	var $select_day_ul = $select_day.find('>ul');
+	$select_day_ul.find('>li').click(function(){
+		$select_day_ul.find('>li').removeClass('active');
+		$(this).addClass('active');
+	});
+}
+
+// Выбор времени
+(function(){
+	var $selects = [];
+	
+	function selects_reset(){
+		$.each($selects, function(key, $select){
+			if(!$select.val()) return;
+			$select.val('').change();
+		});
+	}
+	
+	newrecord_select_time_init = function($el){
+		var $select = $el.hide();
+		var times = {};
+		var $box = $('<div class="select-time"></div>');
+		
+		function show_dropdown($button, times){
+			var $modal = $('<div class="modal modal-record-select-time"></div>')
+				.data('backdrop', false)
+				.addClass($el.data('modal-class'))
+				.click(function(e){
+					if(e.target!=this) return;
+					$modal.modal('hide')
+				})
+				;
+			var $dialog = $('<div class="modal-dialog-free"></div>')
+				.appendTo($modal);
+			var $ul = $('<ul class="nav nav-pills nav-stacked"></ul>')
+				.appendTo($dialog);
+			
+			$.each(times, function(key, time){
+				var title = moment(time.title, 'HH:mm').format(backend.user.time_format);
+				var $li = $('<li></li>')
+					.appendTo($ul);
+				var $a = $('<button type="button" class="btn btn-xs btn-default"></button>').text(title)
+					.appendTo($li)
+					.click(function(){
+						selects_reset();
+						$select.val(time.value).change();
+						$modal.modal('hide');
+					});
+				if(time.option.prop('selected')){
+					$a.addClass('active');
+				}
+			});
+			
+			$modal.appendTo('body');
+			
+			$modal.modal('show');
+			
+			function set_position(){
+				$dialog
+					.css('margin', 0)
+					.position({
+						my: 'center top',
+						at: 'center',
+						of: $button,
+						collision: 'none'
+					})
+					.css('margin', '');
+			}
+			
+			$(window).on('resize', set_position);
+			
+			$modal.on('hidden.bs.modal', function(){
+				$(window).off('resize', set_position);
+				$modal.remove();
+			});
+			
+			set_position();
+		}
+		
+		function render_box(){
+			if(!Object.keys(times).length){
+				$box.html([
+					'<div class="t1">' + __('К сожалению, в настоящее время запись невозможна – нет свободного времени!') + '</div>',
+					'<div class="t2">' + __('Пожалуйста, попробуйте позже или выберите другое место для записи.') + '</div>'
+				].join(''));
+				return;
+			}
+			
+			$box.html('');
+			$.each(times, function(i, row){
+				var $row = $('<div class="row"></div>')
+					.appendTo($box);
+				
+				var $header = $('<div class="select-time-header"></div>')
+					.appendTo($row);
+				
+				if(i=='0'){
+					$header.text(__('Ночь')+':')
+				}
+				if(i=='1'){
+					$header.text(__('Утро')+':')
+				}
+				if(i=='2'){
+					$header.text(__('День')+':')
+				}
+				if(i=='3'){
+					$header.text(__('Вечер')+':')
+				}
+
+				$.each(row, function(hour, times){
+					var title = times[ Object.keys(times)[0] ].title;
+					var $button = $('<button type="button" class="btn btn-xs btn-default"></button>')
+						.html(moment(title, 'HH:mm').format(backend.user.time_format))
+						.appendTo($row)
+						.click(function(){
+							if(Object.keys(times).length==1){
+								$.each(times, function(key, time){
+									selects_reset();
+									$select.val( times[ Object.keys(times)[0] ].value ).change();
+								});
+								return;
+							}
+							show_dropdown($button, times);
+						});
+					$.each(times, function(key, time){
+						if(time.option.prop('selected')){
+							$button.addClass('active')
+								.html(moment(time.title, 'HH:mm').format(backend.user.time_format));
+						}
+					});
+				});
+			});
+		}
+		
+		$selects.push($select);
+		
+		function update(){
+			times = {};
+			$select.find('option').each(function(){
+				var $option = $(this);
+				var title = $option.html();
+				var value = $option.val();
+				
+				if(!value) return;
+				
+				var r = value.match(/^(\d+)\:(\d+)/);
+				if(r.length<3) return;
+				var hour = parseInt(r[1], 10);
+				var min = parseInt(r[2], 10);
+				var i = Math.floor(hour/6);
+				
+				if(!times[i]){
+					times[i] = {};
+				}
+				
+				if(!times[i][hour]){
+					times[i][hour] = {};
+				}
+				
+				times[i][hour][min] = {
+					title: title,
+					value: value,
+					option: $option
+				};
+			});
+			
+			render_box();
+		}
+		
+		update();
+		$select
+			.change(render_box)
+			.on('update', update)
+			.after($box);
+	};
+})();
+
+
+// Социальные сети
+function record_social_init($el){
+	//if (window.pluso)if (typeof window.pluso.start == "function") return;
+	//if (window.ifpluso==undefined) {
+		window.ifpluso = 1;
+		var d = document, s = d.createElement('script'), g = 'getElementsByTagName';
+		s.type = 'text/javascript'; s.charset='UTF-8'; s.async = true;
+		s.src = ('https:' == window.location.protocol ? 'https' : 'http')  + '://share.pluso.ru/pluso-like.js';
+		var h=d[g]('body')[0];
+		h.appendChild(s);
+	//}
+}
+
+function newrecord_init($el){
+	var url_prefix = '';
+	
+	var is_beta = false;
+	
+	var $modal = $el.closest('.modal');
+	var $bootbox_body = $modal.find('.bootbox-body');
+	var data_main = $modal.data('data');
+	
+	var unique_key;
+	var is_from_journal;
+	
+	var record_id;
+	
+	var currency;
+	
+	var company_id;
+	var company_image;
+	var company_name;
+	var company_mintime;
+	var company_schedules;
+	var company_status_id;
+	var solarium_period;
+	var category_id = false;
+	var selected_category = false;
+	//var selected_service_id = false;
+	var companies;
+	
+	var records_popular;
+	var default_remind;
+	var default_color_label_id;
+
+	var current_datetime;
+	var is_master;
+	var action_source_id = data_main.action_source_id || 0;
+
+	var selected_services_id = [];
+	
+	var selected_old = {
+		services_id: [],
+		category_id: false,
+		master_id: false,
+		solarium_id: false,
+		date: false,
+		time: false,
+		month: false,
+		year: false
+	}
+	
+	function set_selected_old(){
+		selected_old = {
+			services_id: selected_services_id,
+			category_id: category_id,
+			master_id: selected_master_id,
+			solarium_id: selected_solarium_id,
+			date: (selected_day ? selected_day.format('YYYY-MM-DD') : false),
+			time: selected_time,
+			month: (selected_day ? selected_day.month()+1 : false),
+			year: (selected_day ? selected_day.year() : false)
+		};
+	}
+	
+	function diff_selected_old(){
+		if(selected_old.category_id != category_id) return true;
+		
+		if(category_id == the_solarium_id){
+			if(selected_old.solarium_id != selected_solarium_id) return true;
+		} else {
+			if(selected_old.master_id != selected_master_id) return true;
+		}
+		
+		if(!selected_day || selected_old.date != selected_day.format('YYYY-MM-DD')) return true;
+		if(selected_old.time != selected_time) return true;
+		
+		if(selected_old.services_id.length != selected_services_id.length) return true;
+		
+		var not_true = false;
+		$.each(selected_old.services_id, function(k, service_id){
+			if($.inArray(service_id, selected_services_id) == -1){
+				not_true = true;
+			}
+		});
+		
+		return not_true;
+	}
+	
+	function firstCharUp(s){
+		return s.charAt(0).toUpperCase() + s.substr(1).toLowerCase();
+	}
+	
+	function initMainData() {
+		unique_key = data_main.unique_key;
+		is_from_journal = data_main.is_from_journal;
+
+		if(is_from_journal){
+			$modal.addClass('is-from-journal');
+		}
+
+		currency = data_main.company.currency;
+
+		company_id = data_main.company_id;
+		company_image = data_main.company.image;
+		company_name = data_main.company.name;
+		company_mintime = data_main.company.mintime;
+		company_schedules = data_main.company.schedules;
+		company_status_id = data_main.company.status_id;
+		solarium_period = parseInt(data_main.company.solarium_period, 10)*60;
+		records_popular = data_main.records_popular;
+		default_remind = data_main.default_remind;
+		default_color_label_id = data_main.default_color_label_id;
+
+		is_master = parseInt(data_main.is_master, 10);
+		current_datetime = moment(data_main.current_datetime, 'YYYY-MM-DD HH:mm:ss');
+	}
+
+	// ID категории под которой обозначен солярий
+	var the_solarium_id = 100000;
+	
+	// Запись от мастера
+	var is_to_master = false;
+	
+	// Рарешение зарыть окно без запроса на выход
+	var is_close_enabled = false;
+	
+	// Запрет смены услуги
+	var is_select_services_disable = false;
+	
+	// Запрет смены услуги
+	var is_select_master_close_on_empty = false;
+	
+	// Отображать все доступное время
+	var is_show_all_times = false;
+	
+	var current_page = data_main.page;
+	var sorted_services_id = [];
+	var services = false;
+	//var selected_service = false;
+	var selected_services = [];
+	var selected_master = false;
+	var selected_solarium_id = false;
+	var selected_solarium = false;
+	var masters = false;
+	var solariums = false;
+	var categories = false;
+	var timeworks = false;
+	var appointments = false;
+	var freetime = false;
+	var times = false; // Время для записи
+	var dates_true = false;
+	var calendar_dates_true = false;
+	var services_search_filter = '';
+	var selected_day = false;
+	var selected_master_id = false;
+	var selected_time = false;
+	var appointment_info;
+	
+	var $mainbox = $('<form></form>')
+		.appendTo($el);
+	var $services;
+	var $select_master;
+	var $select_solarium;
+	var $select_datetime;
+	var $footer_buttons = $();
+	var $breadcrumb;
+	var $confirmation;
+
+	var selected_calendar_dates_true;
+	var selected_appointments;
+	var selected_timeworks;
+	var selected_times;
+
+	var first_name;
+	var last_name;
+	var phone;
+	var code;
+	var remid;
+	
+	if(is_master){
+		$el.addClass('is_master');
+	}
+	
+	numeral.language('ru');
+	
+	function time_str(datetime){
+		var datetime = moment(datetime);
+		var time_str = datetime.format('D MMMM');
+		var dateday = moment(datetime).startOf('day');
+		if(dateday.isSame( moment(current_datetime).startOf('day') )){
+			time_str = __('Сегодня');
+		}
+		time_str += ' ' + __('в') + ' '+datetime.format('HH:mm');
+		return time_str;
+	}
+	
+	function breadcrumb_main_refresh(){
+		$breadcrumb = get_block.breadcrumb_main();
+		$mainbox.find('.breadcrumb-main').replaceWith( $breadcrumb );
+	}
+	
+	function reset_time(){
+		selected_time = false;
+		selected_day = false;
+		
+		selected_old.date = false;
+		selected_old.time = false;
+		
+		selected_calendar_dates_true = null;
+		selected_appointments = null;
+		selected_timeworks = null;
+	}
+
+	function reset_all(){
+		selected_master_id = false;
+		selected_services_id = [];
+		selected_services = [];
+		category_id = false;
+		selected_day = false;
+		selected_time = false;
+
+		dates_true = null;
+		calendar_dates_true = null;
+		appointments = null;
+		timeworks = null;
+	}
+	
+	function show_page_before(){
+		if(current_page == 'confirmation'){
+			$confirmation = $confirmation.detach();
+		}
+	}
+	
+	function auto_height(){
+		var height_box = $bootbox_body.height();
+		
+		var height_blocks = 0;
+		$mainbox.find('> div').each(function(){
+			var $self = $(this);
+			if($self.is('.auto-height')) return;
+			height_blocks += $self.outerHeight(true);
+		});
+		
+		var height_free = height_box - height_blocks;
+		
+		$mainbox.find('> .auto-height').outerHeight(height_free, true);
+	}
+	
+	var $close_button = $modal.find('.bootbox-close-button');
+	
+	if(action_source_id==5) $close_button.hide();
+	
+	$modal.on('hidden.bs.modal', function(){
+		// Закрытие модального окна у виджета
+		window.parent.postMessage('dikidi.modal.beauty.record.hidden', '*');
+	})
+	.on('hide.bs.modal', function(){
+		if(is_close_enabled) return true;
+		if($modal.find('.newrecord-close-question').length) return false;
+		show_page.close();
+		return false;
+	});
+
+	// Календарь (размещение в нужном div)
+	function set_datepicker(options){
+		options = options || {};
+		
+		var $datepicker = options.datepicker;
+		var $loader = options.loader;
+		var onSelect = options.onSelect;
+		var master_id = options.master_id;
+		
+		var old_year = false;
+		var old_month = false;
+
+		function datepicker_load(year, month){
+			if(
+				old_year===false || old_month===false
+			){
+				if(is_to_master){
+					$datepicker.datepicker('refresh');
+					old_year = year;
+					old_month = month;
+					return;
+				}
+			}
+			
+			$loader.setLoader();
+			
+			var data = {
+				company_id: company_id,
+				year: year,
+				month: month,
+				action_source_id: action_source_id,
+				'is-from-journal': is_from_journal,
+			};
+			
+			if(category_id != the_solarium_id){
+				data.services_id = selected_services_id;
+			}
+			
+			if(is_to_master && master_id){
+				data.master_id = master_id;
+			}
+			
+			calendar_dates_true = [];
+			
+			if(is_to_master){
+				var url = url_prefix+'/ajax/newrecord/to_master_get_datetime/';
+			}else{
+				if(category_id == the_solarium_id){
+					var url = url_prefix+'/ajax/newrecord/get_solarium_dates_true/';
+				}else{
+					var url = url_prefix+'/ajax/newrecord/get_dates_true/';
+				}
+			}
+			
+			sw.get({
+				url: url,
+				data: data,
+				loader: $(),
+				success: function(data){
+					$loader.removeLoader();
+					
+					calendar_dates_true = data.dates_true;
+					
+					if(data.appointments){
+						appointments = data.appointments;
+					}
+					
+					if(data.timeworks){
+						timeworks = data.timeworks;
+					}
+					
+					$datepicker.datepicker('refresh');
+					
+					if(is_to_master){
+						reset_time();
+						
+						if(calendar_dates_true.length){
+							selected_day = moment(calendar_dates_true[0]);
+							times = data.times;
+						}else{
+							selected_day = false;
+							times = false;
+						}
+						
+						breadcrumb_main_refresh();
+						
+						if(selected_day) {
+							onSelect(selected_day.format('YYYY-MM-DD'));
+						}else{
+							onSelect(null);
+						}
+					}
+				}
+			});
+			
+			old_year = year;
+			old_month = month;
+		}
+		
+		$datepicker.datepicker({
+			//defaultDate: moment.unix(date_show_unixtime).format('DD.MM.YYYY'),
+			firstDay: backend.user.first_day,
+			dateFormat: 'yy-mm-dd',
+			minDate: current_datetime.toDate(),
+			onChangeMonthYear: function(year, month, inst) {
+				//console.log('onChangeMonthYear');
+				
+				/*
+				if(
+					is_to_master && (
+						old_month != month ||
+						old_year != year
+					)
+				){
+					selected_time = false;
+					breadcrumb_main_refresh();
+					//reset_time();
+				}*/
+				
+				datepicker_load(year, month);
+				
+			},
+			beforeShowDay: function(date){
+				var date = moment(date).format('YYYY-MM-DD');
+				var enable = false;
+				
+				if($.inArray(date, calendar_dates_true) != -1){
+					enable = true;
+				}
+				
+				return [enable, '', ''];
+			},
+			onSelect: onSelect,
+		});
+		
+		if(selected_day){
+			var _selected_day = selected_day;
+		}else{
+			var _selected_day = moment();
+		}
+		
+		$datepicker.datepicker('setDate', _selected_day.toDate());
+		
+		if(!calendar_dates_true){
+			datepicker_load(_selected_day.year(), _selected_day.month()+1);
+		}
+		
+		old_year = _selected_day.year();
+		old_month = _selected_day.month()+1;
+	}
+	
+	// Календарь (инициализация)
+	record_calendar_init = function($el){
+		$el.click(function(){
+			var $modal = $('<div class="modal modal-record-calendar"></div>')
+				.data('backdrop', false)
+				.click(function(e){
+					if(e.target!=this) return;
+					$modal.modal('hide')
+				})
+				.appendTo( $('body') );
+			var $dialog = $('<div class="modal-dialog-free"></div>')
+				.appendTo($modal);
+			
+			$modal.modal('show');
+			
+			var $datepicker = $('<div class="newrecord-calendar wrapper"></div>');
+			
+			set_datepicker({
+				datepicker: $datepicker,
+				loader: $dialog,
+				onSelect: function(date) {
+					selected_master_id = '';
+					
+					//if(selected_day.format('YYYY-MM-DD') != date){
+					reset_time();
+					selected_day = moment(date, 'YYYY-MM-DD');
+					//}
+					
+					$modal.modal('hide');
+					
+					if(category_id == the_solarium_id){
+						show_page.select_solarium();
+					}else{
+						show_page.select_master();
+					}
+					
+					//obj.set_date( unixtime );
+				}
+			});
+			
+			$dialog.append($datepicker);
+			
+			
+			$el.addClass('active');
+			
+			
+			function set_position(){
+				$dialog
+					.css('margin', 0)
+					.position({
+						my: 'right top',
+						at: 'right bottom',
+						of: $el,
+						collision: 'none'
+					})
+					.css('margin', '');
+			}
+			
+			$(window).on('resize', set_position);
+			
+			$modal.on('hidden.bs.modal', function(){
+				$(window).off('resize', set_position);
+				$el.removeClass('active');
+				$modal.remove();
+			});
+			
+			set_position();
+			
+		});
+	}
+	
+	// Генератор опций для выбора времени (select-time)
+	function gen_select_time(options){
+		options = options || {};
+		
+		var $select_time = options.select_time;
+		
+		var master = options.master;
+		
+		//var appointments = options.appointments;
+		
+		var services = selected_services;
+		
+		if(!selected_day){
+			selected_day = moment(current_datetime).startOf('day');
+		}
+		
+		$select_time.html('<option></option>');
+		
+		if(_.isEmpty(times)) return;
+		
+		var options = {};
+		
+		$.each(times[master.id], function(key, time){
+			var time_only = time.split(' ')[1];
+			options[time_only] = time_only.replace(/^(\d+\:\d+).*$/, '$1');
+		});
+		
+		if(!Object.keys(options).length) return;
+		
+		$.each(options, function(value, title){
+			var $option = $('<option></option>')
+				.text(title)
+				.attr('value', value)
+				.appendTo($select_time);
+			
+			if(master.id==selected_master_id && value==selected_time){
+				$option.prop('selected', true);
+			}
+			
+		});
+		
+	}
+	
+	// Генератор опций для выбора времени (select-time)
+	function _gen_select_time(options){
+		options = options || {};
+		
+		var $select_time = options.select_time;
+		
+		var solarium = options.solarium;
+		
+		if(!selected_day){
+			selected_day = moment(current_datetime).startOf('day');
+		}
+		
+		var week = parseInt(selected_day.format('E'), 10);
+		
+		timework = {
+			time_from: company_schedules[week].work_from,
+			time_to: company_schedules[week].work_to
+		}
+		
+		var seconds_from = time_to_seconds(timework.time_from);
+		var seconds_to = time_to_seconds(timework.time_to);
+		var period = parseInt(solarium.periodicity, 10) * 60;
+		
+		var options = {};
+		var duration = period;
+		
+		if(!period) return;
+		for(var sec=seconds_from; sec<=seconds_to-duration; sec+=period){
+			
+			var time = seconds_to_time(sec);
+			var sec_to = sec + duration;
+			
+			var datetime_from = selected_day.format('YYYY-MM-DD')+' '+time;
+			var datetime_to = selected_day.format('YYYY-MM-DD')+' '+seconds_to_time(sec_to);
+			
+			// Прошедшее время и "Начало записи онлайн не ранее чем"
+			if(moment(selected_day.format('YYYY-MM-DD')+' '+time).unix() < current_datetime.unix()+company_mintime*60)
+				continue;
+			
+			// Проверка на "время свободно"
+			var _break = true;
+			$.each(freetime, function(key, free){
+				if(free.solarium_id != solarium.id) return;
+				
+				if(
+					free.datetime_from <= datetime_from &&
+					free.datetime_to >= datetime_to
+				) _break = false;
+			});
+			if(_break) continue;
+			
+			options[time] = time.replace(/^(\d+\:\d+).*$/, '$1');
+		}
+		
+		$select_time.html('<option></option>');
+		
+		if(!Object.keys(options).length) return;
+		
+		$.each(options, function(value, title){
+			var $option = $('<option></option>')
+				.text(title)
+				.attr('value', value)
+				.appendTo($select_time);
+			
+			if(solarium.id==selected_solarium_id && value==selected_time){
+				$option.prop('selected', true);
+			}
+			
+		});
+		
+	}
+	
+	function services_update_link(options){
+		options = options || {};
+		
+		var floating = false;
+		var cost = 0;
+		$.each(selected_services, function(k, service){
+			cost += parseInt(service.cost, 10);
+			
+			if(parseInt(service.floating, 10)){
+				floating = true;
+			}
+		});
+		
+		var $_footer_buttons = options.$footer_buttons || $footer_buttons;
+		
+		if(!selected_services.length){
+			$_footer_buttons.find('.services_selected_link').hide();
+			$_footer_buttons.find('.services_selected').hide();
+		}else{
+			$_footer_buttons.find('.services_selected_link').show();
+		}
+		
+		var text = __('Выбрано услуг: :services на сумму', {':services': selected_services.length}) + ' ' + (floating ? __('от') + ' ' : '') + cost+' '+currency.abbr;
+		
+		$_footer_buttons.find('.services_selected_link').html(text);
+	}
+	
+	function service_insert(service_id){
+		selected_services_id.push(service_id);
+		selected_services.push(services[service_id]);
+		
+		var service = services[service_id];
+		
+		var $services_selected = $footer_buttons.find('.services_selected');
+		
+		$services_selected.find('.list').append( [
+			'<li data-service-id="'+service.id+'">',
+				'<span class="service">'+service.title+'</span>',
+				'<span class="price">'+(parseInt(service.floating, 10) ? __('от')+' ' : '')+' '+service.cost+' '+currency.abbr+'</span>',
+				'<a class="action_remove"><i class="glyphicon glyphicon-remove-sign"></i></a>',
+			'</li>',
+		].join('') );
+		
+		services_update_link();
+	}
+	
+	function service_remove(service_id){
+		for(var k in selected_services){
+			if(selected_services[k].id != service_id) continue;
+			
+			selected_services.splice(k, 1);
+			
+			break;
+		}
+		
+		selected_services_id = [];
+		$.each(selected_services, function(k, service){
+			selected_services_id.push(service.id.toString());
+		});
+		
+		var $services_selected = $footer_buttons.find('.services_selected');
+		
+		setTimeout(function(){
+			$services_selected.find('li[data-service-id='+service_id+']').remove();
+			$services.find('li[data-service-id='+service_id+']').removeClass('active');
+		}, 0);
+		
+		services_update_link();
+	}
+	
+	
+	// Функции отображения блоков
+	var get_block = {
+		select_to: function(options){
+			var $html = $(data_main.blocks.select_to);
+			
+			var $to_master = $html.find('.to_master')
+				.click(function(){
+					reset_all();
+					is_to_master = true;
+					show_page.to_master_select_master();
+				});
+			
+			var $to_service = $html.find('.to_service')
+				.click(function(){
+					reset_all();
+					is_to_master = false;
+					show_page.categories();
+				});
+			
+			if(companies) {
+				$html.find('.container-back-to-companies').show();
+				$html.find('.back-to-companies')
+					.click(function () {
+						reset_all();
+						show_page.select_company();
+					});
+			}
+			
+			return $html;
+		},
+		
+		to_service_breadcrumb_main: function(options){
+			var $html = $(data_main.blocks.breadcrumb_main);
+			
+			var active;
+			if(current_page=='category' || current_page=='services'){
+				active = 'category';
+			}
+			if(current_page=='select_master' || current_page=='select_solarium'){
+				active = 'master';
+			}
+			if(current_page=='confirmation'){
+				active = 'confirmation';
+			}
+			
+			if(active){
+				$html.find('.'+active).addClass('active');
+			}
+			
+			var $service_name = $html.find('.service_name').hide();
+			var $master_name = $html.find('.master_name').hide();
+			var $time = $html.find('.time').hide();
+			
+			if(active != 'category' && !is_select_services_disable){
+				$html.find('.category')
+					.addClass('enabled')
+					.click(function(){
+						if(selected_services_id.length){
+							show_page.services({skip_load: true});
+						}else{
+							show_page.categories({skip_load: true});
+						}
+					});
+			}
+			
+			if(selected_services_id.length || category_id == the_solarium_id){
+				if(category_id == the_solarium_id){
+					$service_name.html(selected_category.title).show();
+					
+					$html.find('.master .h').text(__('Солярий'));
+					
+				}else{
+					if(selected_services.length>1){
+						$service_name.html(__('Вы выбрали') +' '+ selected_services.length +' '+numToStr(selected_services.length, [__('услугу'), __('услуги'), __('услуг')]) ).show();
+					}else{
+						$service_name.html(selected_services[0].title).show();
+					}
+				}
+				
+				if(active != 'master')
+				$html.find('.master')
+					.addClass('enabled')
+					.click(function(){
+						if(category_id == the_solarium_id){
+							show_page.select_solarium({skip_load: true});
+						}else{
+							show_page.select_master({skip_load: true});
+						}
+					});
+			}
+			
+			if(selected_master_id || (category_id == the_solarium_id && selected_solarium_id)){
+				var master_name;
+				if(is_master){
+					master_name = company_name;
+				}else{
+					if(category_id == the_solarium_id){
+						
+					}else{
+						master_name = selected_master.username;
+					}
+				}
+				$master_name.html(master_name).show();
+				
+				if(active != 'confirmation')
+				$html.find('.confirmation')
+					.addClass('enabled')
+					.click(function(){
+						show_page.confirmation();
+					});
+			}
+			
+			if(selected_time){
+				$time.text( time_str( selected_day.format('YYYY-MM-DD')+' '+selected_time ) ).show();
+			}
+			
+			return $html;
+		},
+		to_master_breadcrumb_main: function(options){
+			var $html = $(data_main.blocks.to_master_breadcrumb_main);
+			
+			var active;
+			if(current_page=='category' || current_page=='services'){
+				active = 'category';
+			}
+			if(current_page=='select_master'){
+				active = 'master';
+			}
+			if(current_page=='select_datetime'){
+				active = 'datetime';
+			}
+			if(current_page=='confirmation'){
+				active = 'confirmation';
+			}
+			
+			if(active){
+				$html.find('.'+active).addClass('active');
+			}
+			
+			var $service_name = $html.find('.service_name').hide();
+			var $master_name = $html.find('.master_name').hide();
+			var $time = $html.find('.time').hide();
+			
+			//$service_name.text(selected_service.title).show();
+			if(active != 'master')
+			$html.find('.master')
+				.addClass('enabled')
+				.click(function(){
+					show_page.to_master_select_master({skip_load: true});
+				});
+			
+			if(!selected_master_id) return $html;
+			
+			// Отображение имени мастера
+			var master_name;
+			if(is_master){
+				master_name = company_name;
+			}else{
+				master_name = selected_master.username;
+			}
+			$master_name.html(master_name).show();
+			
+			// Вкладка услуги доступна для выбора
+			if(active != 'category')
+			$html.find('.category')
+				.addClass('enabled')
+				.click(function(){
+					if(category_id){
+						show_page.services({skip_load: true});
+					}else{
+						show_page.categories({skip_load: true});
+					}
+				});
+			
+			if(!selected_services_id.length) return $html;
+			
+			// Отображение наименования услуги
+			if(selected_services.length>1){
+				var service_name = __('Вы выбрали') + ' '+ selected_services.length +' '+numToStr(selected_services.length, [__('услугу'), __('услуги'), __('услуг')]);
+			}else{
+				var service_name = selected_services[0].title;
+			}
+			$service_name.html(service_name).show();
+			
+			// Вкладка "Дата и время" доступна для выбора
+			if(active != 'datetime')
+			$html.find('.datetime')
+				.addClass('enabled')
+				.click(function(){
+					show_page.to_master_select_datetime({skip_load: true});
+					//show_page.to_master_select_datetime();
+				});
+			
+			if(!selected_time){
+				if(current_page == 'select_datetime'){
+					$footer_buttons.find('.next').attr('disabled', 'disabled');
+				}
+				
+				return $html;
+			}
+
+			if(active != 'confirmation')
+			$html.find('.confirmation')
+				.addClass('enabled')
+				.click(function(){
+					show_page.confirmation();
+				});
+			
+			$time.text( time_str( selected_day.format('YYYY-MM-DD')+' '+selected_time ) ).show();
+			
+			return $html;
+		},
+		breadcrumb_main: function(options){
+			if(is_to_master){
+				return get_block.to_master_breadcrumb_main(options);
+			}else{
+				return get_block.to_service_breadcrumb_main(options);
+			}
+		},
+		
+		categories: function(options){
+			var $html = $(data_main.blocks.categories);
+			var $ul = $html.find('ul');
+			
+			function select_item($self){
+				$html.find('li').removeClass('active');
+				$self.closest('li').addClass('active');
+				
+				setTimeout(function(){
+					$footer_buttons.find('.next').removeAttr('disabled');
+				}, 0);
+			}
+			
+			$.each(categories, function(key, category){
+				var $li = $(data_main.blocks.categories_item);
+				
+				var $icon = $li.find('i').addClass('icon-'+category.class);
+				var $title = $li.find('span').html(category.title);
+				
+				$li.addClass(category.class);
+				
+				$li.find('.wrapper').click(function(){
+					var $self = $(this);
+					
+					category_id = category.id;
+					selected_category = category;
+					
+					if(!is_to_master){
+						selected_services_id = [];
+						selected_master_id = false;
+					}
+				
+					reset_time();
+					
+					if(category.id==the_solarium_id){
+						show_page.select_solarium();
+					}else{
+						show_page.services();
+					}
+					
+					//breadcrumb_main_refresh();
+					//select_item($self);
+				});
+				
+				if(category_id == category.id && !is_to_master){
+					$li.addClass('active');
+				}
+				
+				$ul.append($li);
+			});
+			
+			(function(){
+				if(!category_id) return;
+				
+				var $self = $html.find('*[data-category-id='+category_id+']');
+				if(!$self.length) return;
+				
+				select_item($self);
+			})();
+			
+			return $html;
+		},
+		toolbar: function(options){
+			var $html = $(data_main.blocks.toolbar);
+			var $categories = $html.find('*[name=category_id]');
+			var $search = $html.find('*[name=service-search]');
+			
+			$search.on('textchange', function(){
+				services_search_filter = $search.val();
+				show_page.services({
+					update: true,
+					skip_load: true
+				});
+			});
+
+            $search.on('keydown', function(e) {
+                if(e.keyCode === 13) {
+                    e.preventDefault();
+                    $(this).trigger('textchange');
+                    return false;
+                }
+            });
+			
+			$.each(categories, function(key, category){
+				if(category.id==the_solarium_id) return;
+				
+				var $option = $('<option></option>')
+					.attr('value', category.id)
+					.html(category.title);
+				
+				if(category.id == category_id){
+					$option.prop('selected', true);
+				}
+				
+				$categories.append($option);
+			});
+
+			$categories.change(function(){
+				services_search_filter = '';
+				$search.val('').on('textchange');
+				category_id = $categories.val();
+
+				if(!is_to_master){
+					selected_services_id = [];
+					selected_master_id = false;
+					reset_time();
+				}
+
+				show_page.services({
+					update: true
+				});
+				breadcrumb_main_refresh();
+				if(!selected_services_id.length){
+					$footer_buttons.find('.next').attr('disabled', 'disabled');
+				}
+			});
+
+			return $html;
+		},
+		services: function(options){
+			var $html = $(data_main.blocks.services);
+			var $item_tpl = $(data_main.blocks.services_item);
+			var $box = $html.find('ul');
+			
+			$.each(sorted_services_id, function(k, service_id){
+				var service = services[service_id];
+				var title = service.title;
+				
+				if(services_search_filter){
+					var s = services_search_filter.toLowerCase();
+					if(title.toLowerCase().indexOf(s) == -1) return;
+				}
+				
+				var $item = $item_tpl
+					.clone()
+					.attr('data-service-id', service_id);
+				
+				var $input = $item.find('input').val(service.id);
+				
+				function item_select(){
+					//$box.find('>li').removeClass('active');
+					$input.prop('checked', true);
+					$item.addClass('active');
+					
+					if(selected_services_id.length){
+						$footer_buttons.find('.next').removeAttr('disabled');
+					}else{
+						$footer_buttons.find('.next').attr('disabled', 'disabled');
+					}
+				}
+				
+				function item_unselect(){
+					$input.prop('checked', false);
+					$item.removeClass('active');
+					
+					if(selected_services_id.length){
+						$footer_buttons.find('.next').removeAttr('disabled');
+					}else{
+						$footer_buttons.find('.next').attr('disabled', 'disabled');
+					}
+				}
+				
+				$item.click(function(){
+					if(!is_to_master){
+						selected_master_id = false;
+					}
+					reset_time();
+					
+					if(!is_to_master){
+						selected_services_id = [service_id];
+						selected_services = [services[service_id]];
+						show_page.select_master();
+						return;
+					}
+					
+					if($.inArray(service_id, selected_services_id)==-1){
+						var max_services_count = is_from_journal ? 30 : 5;
+						if(selected_services_id.length>=max_services_count){
+							sw.alert(__('Разрешен выбор не более :number услуг!', {':number':max_services_count}));
+							return;
+						}
+						
+						service_insert(service_id);
+						item_select();
+					}else{
+						service_remove(service_id);
+						item_unselect();
+					}
+					
+					breadcrumb_main_refresh();
+				});
+				
+				$item.find('.name').html(title);
+				
+				if(parseInt(service.floating, 10)){
+					var cost = __('от') + ' '+numeral(service.cost).format();
+				}else{
+					var cost = numeral(service.cost).format();
+				}
+				
+				$item.find('.time').html(
+					(service.time_floating == 1 ? '<span class="time_floating">от</span> ' : '') 
+					+ seconds_to_str( parseInt(service.time, 10)*60 )
+				);
+				
+                $price = $item.find('.price');
+                if(cost != 0) {
+                    $item.find('.price').html(cost+' '+currency.abbr);
+                } else {
+                    $price.html(__('Бесплатно'))
+                }
+				
+				
+				//console.log(service_id, selected_services_id);
+				
+				if($.inArray(service_id, selected_services_id) != -1){
+					setTimeout(function(){
+						item_select();
+					}, 0);
+				}
+				
+				$box.append($item);
+			});
+			
+			return $html;
+		},
+		footer_buttons: function(options){
+			options = options || {};
+			var $html = $(data_main.blocks.footer_buttons);
+			
+			if(options.back){
+				if(options.back.click){
+					$html.find('.back').click(options.back.click);
+				}
+			}
+			
+			if(options.next){
+				if(options.next.click){
+					$html.find('.next').click(options.next.click);
+				}
+			}
+			
+			var $services_selected = $html.find('.services_selected').hide();
+			
+			if(!is_to_master){
+				$html.find('.services_selected_info').remove();
+			}
+			
+			var html_services = '';
+			$.each(selected_services, function(k, service){
+				html_services += [
+					'<li data-service-id="'+service.id+'">',
+						'<span class="service">'+service.title+'</span>',
+						'<span class="price">'+(parseInt(service.floating, 10) ? __('от') + ' ' : '')+' '+service.cost+' '+currency.abbr+'</span>',
+						'<a class="action_remove"><i class="glyphicon glyphicon-remove-sign"></i></a>',
+					'</li>',
+				].join('');
+			});
+			$services_selected.find('.list').append(html_services);
+			
+			var $services_selected_link = $html.find('.services_selected_link')
+				.click(function(){
+					$services_selected.toggle();
+				});
+			
+			$services_selected.find('.glyphicon-circle-arrow-down')
+				.click(function(){
+					$services_selected.hide();
+				});
+			
+			$services_selected.on('click', '.glyphicon-remove-sign', function(){
+				var $this = $(this);
+				var $service = $this.closest('li');
+				var service_id = $service.data('service-id');
+				
+				service_remove(service_id);
+				
+				selected_time = false;
+				
+				if(current_page == 'select_datetime'){
+					if(selected_services_id.length < 1){
+						show_page.services({skip_load: true});
+						return;
+					}
+					
+					$footer_buttons.find('.next').attr('disabled', 'disabled');
+					
+					(function(){
+						sw.get({
+							url: url_prefix+'/ajax/newrecord/to_master_get_datetime/',
+							loader: $mainbox,
+							data: {
+								company_id: company_id,
+								master_id: selected_master_id,
+								services_id: selected_services_id,
+								date: 'near',
+								action_source_id: action_source_id,
+								'is-from-journal': is_from_journal,
+							},
+							success: function(data){
+								appointments = data.appointments;
+								timeworks = data.timeworks;
+								calendar_dates_true = data.dates_true;
+								times = data.times;
+								
+								if(!_.isEmpty(data.dates_true)) {
+									selected_day = moment(data.dates_true[0], 'YYYY-MM-DD');
+								}
+								
+								var $_select_datetime = get_block.to_master_select_datetime();
+								$select_datetime.replaceWith( $_select_datetime );
+								$select_datetime = $_select_datetime;
+								
+								auto_height();
+							}
+						});
+					})();
+					
+				}
+				
+				if(current_page == 'services'){
+					if(selected_services_id.length < 1){
+						$footer_buttons.find('.next').attr('disabled', 'disabled');
+					}
+				}
+				
+				reset_time();
+				
+				breadcrumb_main_refresh();
+			});
+			
+			services_update_link({
+				'$footer_buttons': $html
+			});
+			
+			return $html;
+		},
+		select_day: function(options){
+			var $html = $(data_main.blocks.select_day);
+			var $ul = $html.find('ul');
+			var $item_tpl = $(data_main.blocks.select_day_item);
+			
+			var current_date = moment(current_datetime).startOf('day');
+			
+			$.each(dates_true, function(key, date){
+				date = moment(date, 'YYYY-MM-DD').startOf('day');
+				
+				var $item = $item_tpl.clone()
+					.appendTo($ul);
+				var $input = $item.find('input').val( date.format('YYYY-MM-DD') );
+				
+				var date_str = date.format('DD MMMM');
+				$item.find('.date').text( date_str );
+				
+				if(date.unix()==current_date.unix()){
+					$item.addClass('current');
+					var week = __('Сегодня') + ', ' + firstCharUp(date.format('dd'));
+				}else{
+					var week = firstCharUp(date.format('dddd'));
+				}
+				
+				if(date.unix()==selected_day.unix()){
+					$item.addClass('active');
+				}
+				
+				$item.find('.week').text(week);
+				
+				$item.click(function(){
+					selected_master_id = '';
+					selected_solarium_id = '';
+					reset_time();
+					$ul.find('> li').removeClass('active');
+					$item.addClass('active');
+					$input.prop('checked');
+					selected_day = moment($input.val(), 'YYYY-MM-DD');
+					
+					if(category_id == the_solarium_id){
+						show_page.select_solarium({
+							update_select_solarium: true
+						});
+					}else{
+						show_page.select_master({
+							update_select_master: true
+						});
+					}
+					
+					breadcrumb_main_refresh();
+				});
+			});
+			
+			return $html;
+		},
+		select_master: function(options){
+			function checked_next(){
+				if( selected_master_id && selected_time ){
+					$footer_buttons.find('.next').removeAttr('disabled');
+				}else{
+					$footer_buttons.find('.next').attr('disabled', 'disabled');
+				}
+			}
+			
+			var $html = $(data_main.blocks.select_master);
+			var $item_tpl = $(data_main.blocks.select_master_item);
+			var $ul = $html.find('ul');
+			
+			if(is_beta){
+				//Преобразование информации о занятом времени
+				var _appointments = {};
+				$.each(masters, function(master_id, master){
+					_appointments[master_id] = [];
+				});
+				$.each(appointments, function(key, appointment){
+					var master_id = appointment.master_id;
+					_appointments[master_id].push(appointment);
+				})
+			}
+			
+			$.each(masters, function(master_id, master){
+				var $item = $item_tpl.clone();
+				
+				if (master.image) {
+					$('.photo', $item).css('background-image', 'url(' + master.image + ')');
+				}
+				
+				if(is_master){
+					$item.find('.name').html( company_name );
+				}else{
+					$item.find('.name').html( master.username );
+				}
+				
+				if(master.post){
+					$item.find('.prof').html( master.post );
+				}
+				
+				$item.find('.time span').html( seconds_to_str( parseInt(master.time, 10)*60 ) );
+				
+                if(master.cost != 0) {
+                    if(parseInt(master.floating, 10)){
+                        var price = 'от '+numeral(master.cost).format();
+                    }else{
+                        var price = numeral(master.cost).format();
+                    }
+                    $item.find('.price span').text( price+' '+currency.abbr );
+                } else {
+                    $item.find('.price span').text(__('Бесплатно'))
+                }
+				
+				var $select_time = $item.find('.select-time');
+				
+				if(is_beta){
+					gen_select_time({
+						select_time: $select_time,
+						appointments: _appointments[master_id],
+						master: master
+					});
+				}else{
+					gen_select_time({
+						select_time: $select_time,
+						master: master
+					});
+				}
+				
+				$select_time.change(function(){
+					var time = $select_time.val();
+					if(!time) return;
+					
+					selected_master_id = master_id;
+					selected_master = master;
+					selected_time = time;
+					
+					show_page.confirmation();
+					//checked_next();
+					//breadcrumb_main_refresh();
+				});
+				
+				
+				$item.appendTo($ul);
+			});
+			
+			setTimeout(function(){
+				checked_next();
+			}, 0);
+			
+			$html.find('#show-all-times').prop('checked', !is_show_all_times);
+			
+			$html.on('change', '#show-all-times', function(){
+				is_show_all_times = $(this).prop('checked') ? 0 : 1;
+				show_page.select_master({
+					update_select_master: true
+				});
+			});
+			
+			return $html;
+		},
+		select_solarium: function(options){
+			var $html = $(data_main.blocks.select_solarium);
+			var $item_tpl = $(data_main.blocks.select_solarium_item);
+			var $ul = $html.find('ul');
+			
+			
+			//Преобразование информации о занятом времени
+			/*
+			var _appointments = {};
+			$.each(masters, function(master_id, master){
+				_appointments[master_id] = [];
+			});
+			$.each(appointments, function(key, appointment){
+				var master_id = appointment.master_id;
+				_appointments[master_id].push(appointment);
+			})
+			*/
+			
+			$.each(solariums, function(solarium_id, solarium){
+				var $item = $item_tpl.clone();
+				
+				if (solarium.image) {
+					$('.photo', $item).css('background-image', 'url(' + solarium.image + ')');
+				}
+				
+				$item.find('.name').html( solarium.name );
+				
+				//$item.find('.time span').html( seconds_to_str( parseInt(solarium.time, 10)*60 ) );
+				
+				var price = numeral(solarium.price).format();
+				
+				$item.find('.price span').text( price+' '+currency.abbr+' / ' + __('минута'));
+				
+				var $select_time = $item.find('.select-time');
+				
+				_gen_select_time({
+					select_time: $select_time,
+					//appointments: _appointments[master_id],
+					solarium: solarium
+				});
+				
+				if($select_time.find('option').length<2){
+					return;
+				}
+				
+				
+				$select_time.change(function(){
+					var time = $select_time.val();
+					if(!time) return;
+					
+					selected_solarium_id = solarium.id;
+					selected_solarium = solarium;
+					selected_time = time;
+					
+					show_page.confirmation();
+					//checked_next();
+					//breadcrumb_main_refresh();
+				});
+				
+				
+				$item.appendTo($ul);
+			});
+			
+			return $html;
+			
+		},
+		confirmation: function(options){
+			if(is_from_journal){
+				return get_block.confirmation_from_journal(options);
+			}
+			
+			function send_code(e){
+				if(e) e.preventDefault();
+				
+				var phone = $phone.val();
+				
+				sw.get({
+					url: url_prefix+'/ajax/newrecord/send_code/',
+					loader: $mainbox,
+					data: {
+						company_id: company_id,
+						phone: phone,
+						action_source_id: action_source_id
+					},
+					success: function(data){
+						var status = data.status;
+						var info = data.info;
+						
+						$phone.data('sended-phone', phone);
+						
+						$phone_info.html(info);
+						
+						if(status=='error'){
+							$html.find('.phone').addClass('has-error');
+							return;
+						}
+						
+						$html.find('.phone').removeClass('has-error');
+						
+						$button_send_code.hide();
+						$code.removeAttr('disabled');
+						$send_again.find('>*').show();
+					}
+				});
+			}
+			function validation($el){
+				if(!$el){
+					$el = $html.find('.required input');
+				}
+				
+				var error = false;
+				
+				$el.each(function(){
+					var $self = $(this);
+					
+					if($self.is('*[type=checkbox]')){
+						var value = $self.prop('checked');
+					}else{
+						var value = $self.val();
+					}
+					
+					var $form_group = $self.closest('.form-group');
+					var $help_block = $form_group.find('.help-block').first();
+					
+					if($self.is('*[disabled]')) return;
+					//if($self.is('*:hidden')) return;
+					
+					if(!value){
+						error = true;
+						
+						if(!$help_block.length){
+							$help_block = $('<div class="help-block"></div>')
+								.data('for-remove', true);
+							$form_group.append($help_block);
+						}else{
+							$help_block.data('old-html', $help_block.html());
+						}
+						
+						var required_text = __('Это поле не должно быть пустым');
+						if($self.data('required-text')){
+							required_text = $self.data('required-text');
+						}
+						
+						$help_block.html(required_text);
+						
+						$form_group.addClass('has-error');
+							
+					}else{
+						var old_html = $help_block.data('old-html');
+						if($help_block.data('for-remove')){
+							$help_block.remove();
+							$form_group.removeClass('has-error');
+						}else if(old_html){
+							$help_block.data('old-html', '');
+							$help_block.html(old_html);
+							$form_group.removeClass('has-error');
+						}
+					}
+				});
+				
+				if($remind.val()===null) return false;
+				
+				return !error;
+			}
+			
+			var $html = $(data_main.blocks.confirmation);
+			
+			var $icon_ok = $html.find('i[class$=-ok]').hide();
+			var $icon_error = $html.find('i[class$=-minus-sign]').hide();
+			var $phone = $html.find('input[name=phone]');
+			var $phone_info = $html.find('.phone .info');
+			var $first_name = $html.find('input[name=first_name]');
+			var $last_name = $html.find('input[name=last_name]');
+			var $remind = $html.find('select[name=remind]');
+			var $agreement = $html.find('input[name=agreement]');
+			var $comments = $html.find('textarea[name=comments]');
+			
+			if(data_main.client_phone) {
+				$agreement.closest('.form-group').remove();
+			}
+			
+			var $send_again = $html.find('.send_again');
+			
+			var $button_back = $html.find('.back')
+				.click(function(){
+					if(is_to_master){
+						show_page.to_master_select_datetime({skip_load: true});
+					}else{
+						if(category_id == the_solarium_id){
+							show_page.select_solarium({skip_load: true});
+						}else{
+							show_page.select_master({skip_load: true});
+						}
+					}
+				});
+			
+			var $button_next = $html.find('.next')
+				.click(function(){
+					if(!validation()) return;
+					
+					if(!$button_send_code.is('*:hidden')){
+						if($code.is('*[disabled]')){
+							$button_send_code.addClass('blink');
+							setTimeout(function(){
+								$button_send_code.removeClass('blink');
+							}, 300);
+							return;
+						}
+						
+						if($icon_ok.is(':hidden')) return;
+					}
+					
+					sw.post({
+						url: url_prefix+'/ajax/newrecord/record/?company_id=' + company_id,
+						loader: $mainbox,
+						data: {
+							first_name: $first_name.val(),
+							last_name: $last_name.val(),
+							phone: $phone.val(),
+							code: $code.val(),
+							remind: $remind.val(),
+							comments: $comments.val(),
+							action_source_id: action_source_id
+						},
+						success: function(data){
+							appointment_info = data.appointment_info;
+							show_page.completed();
+						},
+						error: function() {
+							selected_day = false;
+							selected_time = false;
+							show_page.to_master_select_datetime();
+							return true;
+						}
+					});
+				});
+			
+			var $code = $html.find('input[name=code]')
+				.on('textchange', function(){
+					var phone = $phone.val();
+					var code = $code.val();
+					code = code.replace(/\D/, '');
+					
+					$icon_ok.hide();
+					$icon_error.hide();
+					$html.find('.sms').removeClass('has-error');
+					
+					if(code.length!=4) return;
+					
+					sw.get({
+						url: url_prefix+'/ajax/newrecord/check_code/',
+						data: {
+							phone: phone,
+							code: code,
+							action_source_id: action_source_id,
+							company_id: company_id,
+						},
+						success: function(data){
+							var status = data.status;
+							
+							if(status=='ok'){
+								$icon_ok.show();
+								$html.find('.phone').removeClass('has-error');
+								return;
+							}
+							
+							if(status=='error'){
+								$html.find('.sms').addClass('has-error');
+								$icon_error.show();
+								
+							}
+						}
+					});
+					
+				});
+			
+			var $button_send_code = $html.find('.phone button')
+				.click(send_code);
+			
+			$html.find('.required input')
+				.on('textchange', function(){
+					var $self = $(this);
+					setTimeout(function(){
+						validation($self);
+					}, 0);
+				})
+				.blur(function(){
+					var $self = $(this);
+					setTimeout(function(){
+						validation($self);
+					}, 0);
+				});
+			
+			$send_again.find('a').click(send_code);
+			
+			$send_again.find('>*').hide();
+			
+			if(data_main.client_first_name){
+				$first_name.val(data_main.client_first_name);
+			}
+			if(data_main.client_last_name){
+				$last_name.val(data_main.client_last_name);
+			}
+			
+			$phone
+				.on('textchange', function(){
+					var phone = $phone.val();
+					var phone_default = data_main.client_phone || '';
+					var phone_sended = $phone.data('sended-phone') || '';
+					
+					phone = phone.replace(/\D/g, '');
+					phone_default = phone_default.replace(/\D/g, '');
+					phone_sended = phone_sended.replace(/\D/g, '');
+					
+					if(phone_default && phone==phone_default){
+						$button_send_code.hide();
+						$send_again.find('>*').hide();
+						$html.find('.sms').hide();
+						return;
+					}
+					
+					if(phone_sended && phone==phone_sended){
+						$button_send_code.hide();
+						$send_again.find('>*').show();
+						$html.find('.sms input').removeAttr('disabled');
+					}else{
+						$button_send_code.show();
+						$send_again.find('>*').hide();
+						$html.find('.sms').show();
+						$html.find('.sms input').attr('disabled', 'disabled');
+					}
+				});
+			
+			if(data_main.client_phone){
+				$phone
+					//~ .val(data_main.client_phone)
+					.data('sended-phone', data_main.client_phone);
+				$button_send_code.hide();
+				$html.find('.sms').hide();
+			}
+			
+			$remind.change(function(){
+				var $this = $(this);
+				var $form_group = $this.closest('.form-group');
+				
+				$form_group.removeClass('has-error');
+				$form_group.find('.help-block').remove();
+				
+				if($this.val()===null){
+					$form_group.addClass('has-error');
+						
+					var $help_block = $('<div class="help-block"></div>')
+						.html(__('Это значение не может быть указано - выберите другое'))
+						.appendTo($form_group);
+				}
+			});
+			
+			//console.log($html.html());
+			
+			return $html;
+		},
+		confirmation_from_journal: function(options){
+			var $html = $(data_main.blocks.confirmation_from_journal);
+			
+			var $button_back = $html.find('.back')
+				.click(function(){
+					if(is_to_master){
+						show_page.to_master_select_datetime({skip_load: true});
+					}else{
+						if(category_id == the_solarium_id){
+							show_page.select_solarium({skip_load: true});
+						}else{
+							show_page.select_master({skip_load: true});
+						}
+					}
+				});
+			
+			var $button_next = $html.find('.next')
+				.click(function(){
+					var data = $modal.find('form').serializeObject();
+					
+					data.record_id = record_id;
+					data.unique_key = unique_key;
+					
+					if(category_id == the_solarium_id){
+						var url = url_prefix+'/owner/ajax/journal_solariums/newrecord_record_save/?company='+company_id;
+					} else {
+						var url = url_prefix+'/owner/ajax/journal/newrecord_record_save/?company='+company_id;
+					}
+					
+					sw.post({
+						url: url,
+						data: data,
+						success: function(data){
+							is_close_enabled = true;
+							$modal.modal('hide');
+						}
+					});
+				});
+			
+			return $html;
+		},
+		completed: function(options){
+			var $html = $(_.template(data_main.blocks.completed)({
+				scope: appointment_info
+			}));
+			
+			return $html;
+		},
+		close: function(options){
+			var $html = $(data_main.blocks.close);
+			
+			return $html;
+		},
+		no_masters: function(options){
+			if(is_to_master){
+				var $html = $(data_main.blocks.to_master_no_masters);
+			}else{
+				var $html = $(data_main.blocks.no_masters);
+			}
+			
+			var $back = $html.find('.btn-back')
+				.click(function(){
+					if($(this).is('.for-close')){
+						$modal.modal('hide');
+						return;
+					}
+					
+					if(is_to_master){
+						show_page.select_to({skip_load: true});
+					}else{
+						show_page.services({skip_load: true});
+					}
+				});
+			
+			if(is_select_master_close_on_empty){
+				is_close_enabled = true;
+				$back.html('Закрыть').addClass('for-close');
+			}
+			
+			$modal.on('escape', function(){
+				$back.click();
+				return false;
+			});
+			
+			$html.on('destroyed', function(){
+				$modal.off('escape');
+			});
+			
+			return $html;
+		},
+		
+		to_master_select_master: function(){
+			var $html = $(data_main.blocks.to_master_select_master);
+			var $ul = $html.find('ul');
+			
+			$.each(masters, function(key, master){
+				var $item = $(data_main.blocks.to_master_select_master_item);
+				
+				if (master.image) {
+					$('.photo', $item).css('background-image', 'url(' + master.image + ')');
+				}
+				
+				if(selected_master_id == master.id){
+					$item.addClass('active');
+				}
+				
+				var $name = $item.find('.name').html(master.username);
+				var $prof = $item.find('.prof').html(master.post);
+				
+				$item.click(function(){
+					if(selected_master_id == master.id){
+						show_page.categories({skip_load: true});
+						return;
+					}
+					
+					function run(){
+						selected_master_id = master.id;
+						selected_master = master;
+						category_id = false;
+						selected_services_id = [];
+						selected_services = [];
+						reset_time();
+						show_page.categories();
+					}
+					
+					if(selected_services_id.length){
+						sw.confirm({
+							text: __('Вы выбрали') + ' '+selected_services_id.length+' '+numToStr(selected_services.length, [__('услугу'), __('услуги'), __('услуг')])+' ' + __('для записи к другому мастеру. При смене мастера, выбор услуг будет отменен'),
+							yes: run
+						});
+						return;
+					}
+					
+					run();
+				});
+				
+				$item.appendTo($ul);
+			});
+			
+			return $html;
+		},
+		to_master_select_datetime: function(){
+			var $html = $(data_main.blocks.to_master_select_datetime);
+			
+			var $datepicker = $html.find('.newrecord-calendar');
+			var $select_time = $html.find('.select-time');
+			
+			if(is_beta){
+				//Преобразование информации о занятом времени
+				var _appointments = [];
+				
+				$.each(appointments, function(key, appointment){
+					var master_id = appointment.master_id;
+					if(master_id != selected_master_id) return;
+					_appointments.push(appointment);
+				});
+			}
+
+			function gen_times(date){
+				if(is_beta){
+					gen_select_time({
+						select_time: $select_time,
+						appointments: _appointments,
+						master: selected_master,
+						date: date
+					});
+				}else{
+					gen_select_time({
+						select_time: $select_time,
+						//appointments: _appointments,
+						master: selected_master,
+						date: date
+					});
+				}
+			}
+			
+			gen_times();
+			
+			setTimeout(function(){
+				set_datepicker({
+					master_id: selected_master_id,
+					datepicker: $datepicker,
+					loader: $bootbox_body,
+					onSelect: function(date) {
+						//selected_master_id = '';
+						
+						if(!date){
+							gen_times();
+							$select_time.trigger('update');
+							return;
+						}
+						
+						if(selected_day.format('YYYY-MM-DD') != date){
+							reset_time();
+							selected_day = moment(date, 'YYYY-MM-DD');
+							selected_old.date = date;
+							breadcrumb_main_refresh();
+							
+							selected_calendar_dates_true = calendar_dates_true;
+							
+							if(is_beta){
+								selected_appointments = appointments;
+								selected_timeworks = timeworks;
+							}else{
+								sw.ajax({
+									url: url_prefix+'/ajax/newrecord/get_times/',
+									loader: $mainbox,
+									data: {
+										company_id: company_id,
+										master_id: selected_master_id,
+										services_id: selected_services_id,
+										date: selected_day.format('YYYY-MM-DD'),
+										action_source_id: action_source_id,
+										is_show_all_times: is_show_all_times,
+										'is-from-journal': is_from_journal,
+									},
+									success: function(data){
+										times = data.times;
+										selected_times = times;
+										
+										gen_times();
+										
+										$select_time.trigger('update');
+									}
+								}, 'get');
+								
+								return;
+							}
+							
+						}
+						
+						$datepicker.datepicker('setDate', date);
+						gen_times();
+						
+						$select_time.trigger('update');
+						
+						//$modal.modal('hide');
+						
+						//show_page.select_master();
+						
+						//obj.set_date( unixtime );
+					}
+				});
+			}, 0);
+			
+			$select_time.change(function(){
+				var time = $select_time.val();
+				if(!time) return;
+				
+				selected_time = time;
+				
+				selected_calendar_dates_true = calendar_dates_true;
+				
+				if(is_beta){
+					selected_appointments = appointments;
+					selected_timeworks = timeworks;
+				}else{
+					selected_times = times;
+				}
+
+				show_page.confirmation();
+				//checked_next();
+				//breadcrumb_main_refresh();
+			});
+			
+			$html.find('#show-all-times').prop('checked', !is_show_all_times);
+			
+			$html.on('change', '#show-all-times', function(){
+				is_show_all_times = $(this).prop('checked') ? 0 : 1;
+				show_page.to_master_select_datetime();
+			});
+			
+			return $html;
+		}
+	};
+	
+	function after_show(){
+		if(typeof sw.apply == 'function'){
+			sw.apply($mainbox);
+		}
+	}
+	
+	// Функции отображения страниц
+	var show_page = {
+		select_to: function(){
+			var $select_to = get_block.select_to();
+			
+			$mainbox.html('')
+				.append($select_to);
+		},
+		categories: function(options){
+			options = options || {};
+			
+			show_page_before();
+			
+			function show(){
+				current_page = 'category';
+				
+				if(Object.keys(categories).length==1){
+					category_id = Object.keys(categories)[0];
+					selected_category = categories[category_id];
+					
+					show_page.services({skip_load: options.skip_load});
+					return;
+				}
+				
+				var $categories = get_block.categories();
+				
+				$footer_buttons = get_block.footer_buttons({
+					next: {
+						click: function(){
+							if(category_id==the_solarium_id){
+								show_page.select_solarium({skip_load: true});
+							}else{
+								show_page.services({skip_load: true});
+							}
+						}
+					},
+					back: {
+						click: function(){
+							if(is_to_master){
+								show_page.to_master_select_master();
+							}else{
+								show_page.select_to();
+							}
+						}
+					}
+				});
+				
+				if(is_master){
+					$footer_buttons.find('.back').hide();
+				}
+				
+				$breadcrumb = get_block.breadcrumb_main();
+				
+				if($categories.find('li.active').length){
+					$footer_buttons.find('.next').removeAttr('disabled');
+				}
+				
+				$mainbox.html('')
+					.append($breadcrumb)
+					.append($categories)
+					.append($footer_buttons)
+					;
+				
+				auto_height();
+			}
+			
+			var data = {
+				company_id: company_id,
+				action_source_id: action_source_id,
+				'is-from-journal': is_from_journal
+			};
+			
+			if(is_to_master){
+				data.master_id = selected_master_id;
+			}
+			
+			if(options.skip_load == true) {
+				show();
+				return;
+			}
+			
+			sw.get({
+				url: url_prefix+'/ajax/newrecord/get_categories/',
+				data: data,
+				loader: $mainbox,
+				success: function(data){
+					categories = data.categories;
+					show();
+				}
+			});
+			
+		},
+		services: function(options){
+			show_page_before();
+			options = options || {};
+			
+			function show(){
+				current_page = 'services';
+				$services = get_block.services();
+				
+				if(!options.update){
+					$breadcrumb = get_block.breadcrumb_main();
+					
+					var $toolbar = get_block.toolbar();
+					
+					$footer_buttons = get_block.footer_buttons({
+						back: {
+							click: function(){
+								if(is_master && companies){
+									show_page.select_company();
+								}else{
+									if(Object.keys(categories).length==1){
+										if(is_to_master){
+											show_page.to_master_select_master({skip_load: true});
+										}else{
+											show_page.select_to({skip_load: true});
+										}
+									}else{
+										show_page.categories({skip_load: true});
+									}
+								}
+							}
+						},
+						next: {
+							click: function(){
+								//selected_service_id = $services.find('input:checked').val();
+								if(is_to_master){
+									show_page.to_master_select_datetime({skip_load: true});
+									//show_page.to_master_select_datetime();
+								}else{
+									show_page.select_master({skip_load: true});
+								}
+							}
+						}
+					});
+					
+					if(selected_services_id.length){
+						$footer_buttons.find('.next').removeAttr('disabled');
+					}else{
+						$footer_buttons.find('.next').attr('disabled', 'disabled');
+					}
+					
+					if(is_master && !companies){
+						$footer_buttons.find('.back').hide();
+					}
+					
+					$mainbox.html('')
+						.append($breadcrumb)
+						.append($toolbar)
+						.append($services)
+						.append($footer_buttons)
+						;
+					
+					auto_height();
+					
+					return;
+				}
+				
+				$mainbox.find('.services').replaceWith($services);
+				
+				auto_height();
+			}
+			
+			if(options.skip_load && services!==false){
+				show();
+				return;
+			}
+			
+			var data = {
+				company_id: company_id,
+				category_id: category_id,
+				action_source_id: action_source_id,
+				'is-from-journal': is_from_journal,
+			}
+			
+			if(is_to_master){
+				data.master_id = selected_master_id;
+			}
+			
+			sw.get({
+				url: url_prefix+'/ajax/newrecord/get_services/',
+				loader: $mainbox,
+				data: data,
+				success: function(data){
+					services = data.services;
+					sorted_services_id = data.sorted_services_id;
+					show();
+				}
+			});
+		},
+		select_master: function(options){
+			show_page_before();
+			options = options || {};
+			function show(){
+				if(!dates_true || !dates_true.length){
+					$mainbox.html( get_block.no_masters() );
+					return;
+				}
+				
+				current_page = 'select_master';
+				
+				function init_show_all_times(){
+					var show_check_all_times = false;
+					$.each(Object.keys(times), function(key, master_id){
+						if(!(
+							records_popular && records_popular[master_id] &&
+							records_popular[master_id].length
+						)) return;
+						
+						show_check_all_times = true;
+					});
+					if(!show_check_all_times){
+						$mainbox.find('.select-master-all-times').remove();
+					}
+					
+				}
+				
+				var $_select_master = get_block.select_master();
+				
+				if(options.update_select_master){
+					$mainbox.find('.select-master-all-times').remove();
+					$mainbox.find('.select-master').replaceWith($_select_master);
+				}
+				$select_master = $_select_master;
+				
+				if(
+					options.update_select_master
+				){
+					init_show_all_times();
+					after_show();
+					auto_height();
+					return;
+				}
+				
+				$breadcrumb = get_block.breadcrumb_main();
+				
+				var $select_day = get_block.select_day();
+				
+				$footer_buttons = get_block.footer_buttons({
+					back: {
+						click: function(){
+							show_page.services({
+								skip_load: true
+							});
+						}
+					},
+					next: {
+						click: function(){
+							show_page.confirmation();
+						}
+					}
+				});
+				
+				$mainbox.html('')
+					.append($breadcrumb)
+					.append($select_day)
+					.append($select_master)
+					.append($footer_buttons)
+					;
+				
+				init_show_all_times();
+				after_show();
+				auto_height();
+				
+			}
+			
+			if(options.skip_load){
+				show();
+				return;
+			}
+			
+			var data = {
+				company_id: company_id,
+				services_id: selected_services_id,
+				action_source_id: action_source_id,
+				is_show_all_times: is_show_all_times,
+				'is-from-journal': is_from_journal,
+			}
+			if(selected_day){
+				data.date = selected_day.format('YYYY-MM-DD');
+			}
+			sw.get({
+				url: url_prefix+'/ajax/newrecord/get_masters/',
+				loader: $mainbox,
+				data: data,
+				success: function(data){
+					masters = data.masters;
+					dates_true = data.dates_true;
+					
+					if(is_beta){
+						appointments = data.appointments;
+					}else{
+						times = data.times;
+					}
+					
+					if(!dates_true || !dates_true.length){
+						$mainbox.html( get_block.no_masters() );
+						return;
+					}
+					
+					if(!selected_day && dates_true[0]){
+						selected_day = moment( dates_true[0] ).startOf('day');
+					}
+					
+					is_select_master_close_on_empty = false;
+					
+					show();
+				}
+			});
+		},
+		select_solarium: function(options){
+			show_page_before();
+			options = options || {};
+			
+			function checked_next(){
+				if( selected_solarium_id && selected_time ){
+					$footer_buttons.find('.next').removeAttr('disabled');
+				}else{
+					$footer_buttons.find('.next').attr('disabled', 'disabled');
+				}
+			}
+			
+			function show(){
+				/*
+				if(!dates_true || !dates_true.length){
+					$mainbox.html( get_block.no_masters() );
+					return;
+				}*/
+				
+				current_page = 'select_solarium';
+				
+				
+				var $_select_solarium = get_block.select_solarium();
+				
+				if(options.update_select_solarium){
+					$select_solarium.replaceWith($_select_solarium);
+				}
+				
+				$select_solarium = $_select_solarium;
+				
+				if(
+					options.update_select_solarium
+				){
+					checked_next();
+					auto_height();
+					return;
+				}
+				
+				
+				$breadcrumb = get_block.breadcrumb_main();
+				
+				var $select_day = get_block.select_day();
+				
+				$footer_buttons = get_block.footer_buttons({
+					back: {
+						click: function(){
+							show_page.categories({skip_load: true});
+						}
+					},
+					next: {
+						click: function(){
+							show_page.confirmation();
+						}
+					}
+				});
+				
+				if(is_select_services_disable){
+					$footer_buttons.find('.back').attr('disabled', 'disabled');
+				}
+				
+				$mainbox.html('')
+					.append($breadcrumb)
+					.append($select_day)
+					.append($select_solarium)
+					.append($footer_buttons)
+					;
+				
+				checked_next();
+				
+				auto_height();
+				
+			}
+			
+			if(options.skip_load){
+				show();
+				return;
+			}
+			
+			var data = {
+				company_id: company_id,
+				action_source_id: action_source_id
+			}
+			
+			if(selected_day){
+				data.date = selected_day.format('YYYY-MM-DD');
+			}
+			
+			if(options.update_select_solarium){
+				data.get_only_freetime = '1';
+			}
+			
+			sw.get({
+				url: url_prefix+'/ajax/newrecord/select_solariums/',
+				loader: $mainbox,
+				data: data,
+				success: function(data){
+					if(options.update_select_solarium){
+						freetime = data.freetime;
+					}else{
+						solariums = data.solariums;
+						freetime = data.freetime;
+						dates_true = data.dates_true;
+						/*
+						if(!dates_true || !dates_true.length){
+							$mainbox.html( get_block.no_masters() );
+							return;
+						}
+						*/
+						if(!selected_day && dates_true[0]){
+							selected_day = moment( dates_true[0] ).startOf('day');
+						}						
+					}
+					
+					show();
+				}
+			});			
+		},
+		confirmation: function(options){
+			show_page_before();
+			current_page = 'confirmation';
+			$breadcrumb = get_block.breadcrumb_main();
+			
+			function show(){
+				var selected_datetime = [selected_day.format('YYYY-MM-DD'), selected_time].join(' ');
+				
+				var current_datetime_str = current_datetime.format('YYYY-MM-DD HH:mm:ss');
+				
+				var $remind = $confirmation.find('select[name="remind[]"]');
+				
+				$remind.find('option').each(function(){
+					var $this = $(this);
+					var minutes = parseInt($this.attr('value'), 10);
+					
+					var remind_datetime_str = moment(selected_datetime)
+						.subtract(minutes, 'minutes')
+						.format('YYYY-MM-DD HH:mm:ss');
+
+					var selected = false;
+					
+					if(remind_datetime_str < current_datetime_str){
+						$this.attr('disabled', 'disabled');
+					}else{
+						$this.removeAttr('disabled');
+						
+						if (default_remind.indexOf(minutes) != -1) {
+							selected = true;
+						}
+					}
+
+					$this.prop('selected', selected);
+				});
+				
+				$remind.selectpicker();
+				
+				var lastVals = [];
+				$remind.change(function() {
+					// сильное колдунство с сохранением предыдущего состояния селекта
+					var vals = $remind.val() || [];
+					if(lastVals[0] == '0' && lastVals.length == 1 && vals.length > 1) {
+						vals.splice(0, 1);
+						$remind.selectpicker('val', vals);
+					}
+					if(vals.length == 0 || vals[0]=='0') {
+						$remind.selectpicker('val', [0]);
+					}
+					// дизаблим варианты
+					vals = $remind.val();
+					$remind.find('option').each(function() {
+						var $this = $(this);
+						var minutes = $this.attr('value');
+						var remind_datetime_str = moment(selected_datetime)
+							.subtract(minutes, 'minutes')
+							.format('YYYY-MM-DD HH:mm:ss');
+						if(remind_datetime_str < current_datetime_str) {
+							$this.attr('disabled', 'disabled');
+						}
+						else if (minutes != '0' && vals.length >= 2 && vals.indexOf(minutes) == -1) {
+							$this.attr('disabled', 'disabled');
+						}
+						else {
+							$this.removeAttr('disabled');
+						}
+					});
+					$remind.selectpicker('refresh');
+					lastVals = vals;
+				});
+				
+				$remind.change();
+				
+				var $color_label = $confirmation.find('select[name=color_label_id]');
+				$color_label.val(default_color_label_id);
+				$color_label.change();
+				
+				$mainbox.html('')
+					.append($breadcrumb)
+					.append($confirmation)
+					;
+				
+				var $client_phone = $confirmation.find('input[name=client_phone]');
+				
+				$client_phone.on('textchange', function(){
+					if($client_phone.is('[data-is-mobile]')) {
+						if(parseInt($client_phone.attr('data-is-mobile'), 10)) {
+							$remind.removeAttr('disabled');
+						} else {
+							$remind.val('');
+							$remind.attr('disabled', 'disabled');
+						}
+						$remind.selectpicker('refresh');
+					}
+				});
+				
+				auto_height();
+			}
+			
+			if(!$confirmation){
+				$confirmation = get_block.confirmation();
+			}
+			
+			if(!diff_selected_old()){
+				show();
+				return;
+			}
+			
+			set_selected_old();
+			
+			var time = [selected_day.format('YYYY-MM-DD'), selected_time].join(' ');
+			
+			if(category_id == the_solarium_id){
+				var url = url_prefix+'/ajax/newrecord/solarium_time_reservation/';
+				var data = {
+					company_id: company_id,
+					solarium_id: selected_solarium_id,
+					time: time,
+					action_source_id: action_source_id,
+					'is-from-journal': is_from_journal,
+					'unique_key': unique_key
+				}
+			}else{
+				var url = url_prefix+'/ajax/newrecord/time_reservation/';
+				var data = {
+					company_id: company_id,
+					master_id: selected_master_id,
+					services_id: selected_services_id,
+					time: time,
+					action_source_id: action_source_id,
+					'is-from-journal': is_from_journal,
+					'unique_key': unique_key
+				}
+			}
+			
+			sw.get({
+				url: url,
+				loader: $mainbox,
+				data: data,
+				success: function(data){
+					record_id = data.record_id;
+					show();
+				}
+			});
+			
+		},
+		completed: function(options){
+			show_page_before();
+			
+			is_close_enabled = true;
+			
+			var $completed = get_block.completed();
+			
+			sw.apply($completed);
+			
+			$modal.addClass('modal-newrecord-completed');
+			
+			$mainbox.html('').append($completed);
+			
+			auto_height();
+		},
+		close: function(){
+			var $box = $mainbox.parent();
+			$mainbox.hide();
+			$close_button.hide();
+			
+			var $html = get_block.close();
+			
+			var $close = $html.find('.btn-close')
+				.click(function(){
+					sw.get({
+						url: url_prefix+'/ajax/newrecord/time_reservation_clear/',
+						data: {
+							action_source_id: action_source_id
+						},
+						loader: $el,
+						success: function(){
+							is_close_enabled = true;
+							$modal.modal('hide');
+						}
+					});
+				});
+			
+			if(is_from_journal){
+				$close.click();
+				return;
+			}
+			
+			var $resume = $html.find('.btn-resume')
+				.click(function(){
+					$html.remove();
+					$mainbox.show();
+					$close_button.show();
+				});
+			
+			$box.append($html);
+		},
+		to_master_select_master: function(options){
+			function show(){
+				var $select_master = get_block.to_master_select_master();
+				
+				if($select_master.find('li.active').length){
+					$footer_buttons.find('.next').removeAttr('disabled');
+				}
+				
+				$mainbox.html('')
+					.append($breadcrumb)
+					.append($select_master)
+					.append($footer_buttons)
+					;
+				
+				//sw.apply($select_master);
+				auto_height();				
+			}
+			
+			options = options || {};
+			
+			show_page_before();
+			
+			current_page = 'select_master';
+			
+			$breadcrumb = get_block.to_master_breadcrumb_main();
+			
+			$footer_buttons = get_block.footer_buttons({
+				back: {
+					click: function(){
+						show_page.select_to();
+					}
+				},
+				next: {
+					click: function(){
+						if(category_id){
+							show_page.services({skip_load: true});
+						}else{
+							show_page.categories();
+						}
+					}
+				}
+			});
+			
+			if(options.skip_load && masters!==false){
+				show();
+				return;
+			}
+			
+			sw.get({
+				url: url_prefix+'/ajax/newrecord/to_master_get_masters/',
+				loader: $mainbox,
+				data: {
+					company_id: company_id,
+					action_source_id: action_source_id,
+					'is-from-journal': is_from_journal,
+				},
+				success: function(data){
+					masters = data.masters;
+					
+					if(!masters || !Object.keys(masters).length){
+						$mainbox.html( get_block.no_masters() );
+						return;
+					}
+					
+					show();
+				}
+			});
+			
+		},
+		to_master_select_datetime: function(options){
+			options = options || {};
+			
+			show_page_before();
+			
+			function show(){
+				current_page = 'select_datetime';
+				
+				$select_datetime = get_block.to_master_select_datetime();
+				
+				$breadcrumb = get_block.to_master_breadcrumb_main();
+				
+				$footer_buttons = get_block.footer_buttons({
+					back: {
+						click: function(){
+							show_page.services({skip_load: true});
+						}
+					},
+					next: {
+						click: function(){
+							show_page.confirmation();
+						}
+					}
+				});
+				
+				if(selected_time){
+					$footer_buttons.find('.next').removeAttr('disabled');
+				}
+				
+				$mainbox.html('')
+					.append($breadcrumb)
+					.append($select_datetime)
+					.append($footer_buttons)
+					;
+				
+				if(!(
+					records_popular && records_popular[selected_master.id] &&
+					records_popular[selected_master.id].length
+				)){
+					$mainbox.find('.select-master-all-times').remove();
+				}
+				
+				auto_height();
+				after_show();
+				set_selected_old();
+			}
+			/*
+			console.log('to_master_select_datetime', {
+				selected_time: selected_time,
+				selected_calendar_dates_true: selected_calendar_dates_true,
+				selected_appointments: selected_appointments,
+				selected_timeworks: selected_timeworks,
+			});
+			*/
+			if(is_beta){
+				if(options.skip_load &&
+					!diff_selected_old() &&
+					selected_calendar_dates_true &&
+					selected_appointments &&
+					selected_timeworks //&&
+					//selected_time
+				){
+					calendar_dates_true = selected_calendar_dates_true;
+					appointments = selected_appointments;
+					timeworks = selected_timeworks;
+						
+					show();
+					return;
+				}else{
+					calendar_dates_true = null;
+					appointments = null;
+					timeworks = null;
+					times = null;
+				}
+			}else{
+				if(options.skip_load &&
+					!diff_selected_old() &&
+					selected_calendar_dates_true &&
+					selected_times
+				){
+					calendar_dates_true = selected_calendar_dates_true;
+					
+					times = selected_times;
+					
+					show();
+					return;
+				}else{
+					calendar_dates_true = null;
+					times = null;
+				}
+			}
+			
+			sw.get({
+				url: url_prefix+'/ajax/newrecord/to_master_get_datetime/',
+				loader: $mainbox,
+				data: {
+					company_id: company_id,
+					master_id: selected_master_id,
+					services_id: selected_services_id,
+					date: selected_day ? selected_day.format('YYYY-MM-DD') : 'near',
+					action_source_id: action_source_id,
+					is_show_all_times: is_show_all_times,
+					'is-from-journal': is_from_journal,
+				},
+				success: function(data){
+					calendar_dates_true = data.dates_true;
+					
+					if(!selected_day){
+						selected_day = moment(data.dates_true[0], 'YYYY-MM-DD');
+					}
+					
+					if(is_beta){
+						appointments = data.appointments;
+						timeworks = data.timeworks;
+					}else{
+						times = data.times;
+					}
+					
+					show();
+				}
+			});
+			
+		},
+		select_company: function (options) {
+			options = options || {};
+			
+			var companyById = {};
+			companies.forEach(function (company) {
+				companyById[company.id.toString()] = company;
+			});
+
+			var html = '';
+
+			html += '<div class="newrecord__select-company__heading">';
+			html += '<div class="h1">ОНЛАЙН-ЗАПИСЬ</div>';
+			html += '<div class="h2">Выберите нужный салон</div>';
+			html += '</div>';
+
+			html += '<div class="newrecord__select-company auto-height">';
+			
+			html += '<div class="block-top-shadow"></div>';
+			
+			html += '<div data-toggle="newrecord-scroll">';
+			
+			html += '<ul class="block-select-company list-unstyled">\n';
+			
+			companies.forEach(function (company) {
+				html += '<li><a data-id="' + company['id'] +'" data-role="select-company">';
+				html += '<img src="' + company['image'] +'">';
+				html += '<div class="block-select-company__name">' + company['name'] + '</div>';
+				html += '<div class="block-select-company__description">' 
+						+ '<span class="newrecord__select-company__icon-address"></span> '
+						+ company['city'] + ', ' + company['street'] + ' ' + company['house']
+						+ '</div>';
+				html += '<div class="block-select-company__description">'
+					+ '<span class="newrecord__select-company__icon-phone"></span> '
+					+ company['phone'] + '</div>';
+				html += '</a></li>\n';
+			});
+			
+			html += '</ul>\n';
+			
+			html += '</div>\n';
+
+			html += '<div class="block-bottom-shadow"></div>';
+
+			html += '</div>';
+			
+			$mainbox.html(html);
+
+			$mainbox.find('ul').on('click', '[data-role=select-company]', function () {
+				company_id = $(this).attr('data-id');
+				var company = companyById[company_id];
+
+				sw.get({
+					url: company['ajaxUrl'],
+					success: function (data) {
+						data_main = data;
+						current_page = data_main.page;
+						reset_all();
+						initMainData();
+						start_show();
+						is_close_enabled = false;
+					}
+				});
+			});
+			
+			function check_scroll($scroll_container) {
+				var isTop = $scroll_container.scrollTop() == 0;
+				var isBottom = $scroll_container[0].scrollHeight - $scroll_container.height() <= $scroll_container.scrollTop();
+
+				$mainbox.find('.newrecord__select-company').toggleClass('scroll-is-top', isTop);
+				$mainbox.find('.newrecord__select-company').toggleClass('scroll-is-bottom', isBottom);
+			}
+			
+			$mainbox.find('[data-toggle=newrecord-scroll]').on('scroll', function(e, pos){
+				check_scroll($(this));
+			});
+			
+			//sw.apply($select_master);
+			auto_height();
+
+			check_scroll($mainbox.find('[data-toggle=newrecord-scroll]'));
+		}
+	};
+	
+	// Подгоняем высоту модального
+	function on_resize(){
+		var height_window = $(window).height();
+		var height_box;
+		
+		//console.log('height_window', height_window);
+		
+		if(action_source_id == 3){
+			height_box = height_window - 100;
+		}else{
+			height_box = height_window;
+		}
+		
+		// Максимальный размер окна
+		height_box = Math.min(height_box, 670);
+		
+		// Минимальный размер окна
+		height_box = Math.max(height_box, 600);
+		
+		$bootbox_body.height(height_box);
+		
+	}
+	function on_window_resize(){
+		on_resize();
+		auto_height();
+	}
+	
+	$mainbox.click(function(e){
+		
+		if(
+			!$(e.target).closest('.services_selected').length &&
+			!$(e.target).closest('.services_selected_link').length
+		){
+			$mainbox.find('.services_selected').hide();
+		}
+	});
+	
+	// Отображаем страницу по умолчанию
+	function start_show()
+	{
+		on_resize();
+
+		$(window).off('resize', on_window_resize);
+		$(window).on('resize', on_window_resize);
+		$el.on('destroyed', function(){
+			$(window).off('resize', on_window_resize);
+		});
+		
+		if(current_page != 'select_company') {
+			initMainData();
+
+			// Проверка status_id у компании
+			if(typeof company_status_id != 'undefined' && company_status_id != '1' && !is_from_journal){
+				is_select_master_close_on_empty = true;
+				$mainbox.html( get_block.no_masters() );
+
+				$mainbox.find('.text').html(__('К сожалению, в настоящее время онлайн-запись заблокирована!'));
+				$mainbox.find('.comment').html(__('Пожалуйста, попробуйте позже.'));
+
+				return;
+			}
+		}
+		
+		if(current_page=='select_master'){
+			selected_services_id = $.map(data_main.services_id, function(v){
+				return v.toString();
+			});
+			selected_services = $.map(data_main.services, function(v){
+				return v;
+			});
+			
+			dates_true = data_main.dates_true;
+			masters = data_main.masters;
+			appointments = data_main.appointments;
+			times = data_main.times;
+			
+			selected_day = moment(data_main.date_near);
+			
+			category_id = data_main.category_id;
+			categories = data_main.categories;
+			
+			is_select_master_close_on_empty = true;
+			
+			show_page.select_master({skip_load: true});
+			
+			is_select_master_close_on_empty = false;
+		}else if(current_page=='select_services'){
+			is_to_master = true;
+			services = data_main.services;
+			sorted_services_id = data_main.sorted_services_id;
+			selected_master = data_main.master;
+			selected_master_id = data_main.master_id;
+			categories = data_main.categories;
+			show_page.categories({skip_load: true});
+		}else if(current_page=='select_datetime'){
+			is_to_master = true;
+			category_id = data_main.category_id;
+			selected_master = data_main.master;
+			selected_master_id = data_main.master_id;
+			
+			selected_services_id = $.map(data_main.services_id, function(v){
+				return v.toString();
+			});
+			selected_services = $.map(data_main.services, function(v){
+				return v;
+			});
+			
+			categories = data_main.categories;
+			dates_true = data_main.dates_true;
+			selected_calendar_dates_true = data_main.dates_true;
+			selected_timeworks = data_main.timeworks;
+			selected_appointments = data_main.appointments;
+			selected_times = data_main.times;
+			
+			selected_day = moment(dates_true[0], 'YYYY-MM-DD');
+
+			set_selected_old();
+			
+			show_page.to_master_select_datetime({skip_load: true});
+		}else if(current_page=='select_solarium') {
+			category_id = the_solarium_id;
+			categories = data_main.categories;
+			selected_category = categories[category_id];
+
+			dates_true = data_main.dates_true;
+			solariums = data_main.solariums;
+			freetime = data_main.freetime;
+
+			is_select_services_disable = true;
+
+			selected_day = moment(dates_true[0], 'YYYY-MM-DD');
+
+			show_page.select_solarium({skip_load: true});
+		}else if(current_page=='to_service_select_service') {
+			category_id = data_main['category_id'];
+			categories = data_main.categories;
+			selected_category = categories[category_id];
+			services = data_main.services;
+			sorted_services_id = data_main['sorted_services_id'];
+
+			show_page.services({skip_load: true});
+		}else if(current_page=='select_company') {
+			is_close_enabled = true;
+			companies = data_main['companies'];
+			show_page.select_company();
+		}else{
+			show_page.select_to();
+			categories = data_main.categories;
+		}
+	}
+	
+	$el.on('animationend', function(e){
+		$(e.target).removeClass('animate');
+	});
+	
+	// Костыль. При анимации модального окна, из-за того
+	// что элементы не сразу отображаются - баг с высотой
+	var interval;
+	if(!$modal.is(':visible')) {
+		interval = setInterval(function(){
+			if(!$modal.is(':visible')) return;
+			clearInterval(interval);
+			start_show();
+		}, 50);
+	} else {
+		start_show();
+	}
+}
+
+function newrecord_mobile_number_init($el)
+{
+	sw.apply($el.closest('.mobile-number').parent());
+	
+	// TODO поправить - костыль чтобы событие textchange было на hidden
+	$el.closest('.mobile-number').find('input[type="text"]')
+		.on('textchange', function(e){
+			setTimeout(function(){
+				$el.closest('.mobile-number').find('input[type="hidden"]')
+					.trigger('textchange');
+			}, 0);
+		});
+}
+
+

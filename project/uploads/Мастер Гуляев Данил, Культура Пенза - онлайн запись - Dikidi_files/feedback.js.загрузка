@@ -1,0 +1,322 @@
+const review = {
+    /* region Общий функционал списка и формы */
+
+    creationFromMyReviews: function (recordId) {
+        if (typeof unratedReviews !== 'undefined' && unratedReviews?.action === 'creationFromMyReviews') {
+            review.removeUnratedRecord(recordId);
+        }
+    },
+    createFromModalWithList: function (companyId) {
+        if (review?.listUnrated?.action === 'createFromModalWithList') {
+            review.checkForUnratedEntries(companyId);
+        }
+    },
+    // Удаление и проверка что есть элементы в списке
+    removeUnratedRecord: function (recordId) {
+        $(`.list-estimate[data-id='${recordId}']`).remove();
+        
+        if ($('.can-evaluate').children('.list-estimate').length === 0) {
+            $('.stub-custom').show();
+        }
+    },
+    // Функция, определяющая, какую звезду выбрали
+    getSelectedStar: function (e) {
+        const $clickedStarElement = $(e.currentTarget);
+        let width = $clickedStarElement.width() || 1;
+        let left = $clickedStarElement.offset().left;
+        let x = e.pageX - left;
+        let count = 5;
+        return Math.ceil(count * x / width);
+    },
+    // Инициализация кнопки "Не оценивать"
+    onDoNotRateClick: function(notEvaluateFunc) {
+        const companyId = this.$doNotRate.data('company-id');
+        const recordId = this.$doNotRate.data('record-id');
+        notEvaluateFunc(companyId, recordId);
+    },
+    // Модальное окно, с подтверждением действия "Не оценивать"
+    confirmCancelRecord: function(companyId, recordId) {
+        sw.confirm({
+            title: __('Внимание'),
+            text: __('Не оценивать этот визит?'),
+            className: 'new-elements-modal confirm leave-feedback-confirm',
+            yes_title: __('Оценить'),
+            no_title: __('Не оценивать'),
+            no: () => {
+                bootbox.hideAll();
+                review.cancelRecord(companyId, recordId);
+            },
+            yes: () => true
+        });
+    },
+    // Запрос "Не оценивать"
+    cancelRecord: function(companyId, recordId) {
+        sw.ajax({
+            url: sw.fixDomain( window.location.origin + '/api/reviews/cancel'),
+            data: { company: companyId, record_id: recordId }
+        })
+        .then(() => {
+            review.createFromModalWithList(companyId);
+            review.creationFromMyReviews(recordId);
+        });
+    },
+    // Отрисовка списка в модальном окне - визиты для оценки
+    checkForUnratedEntries: function(companyId) {
+        sw.ajax({
+            url: '/api/reviews/check/',
+            data: { company: companyId },
+            success: (response) => {
+                sw.ajax({
+                    url: '/ajax/profile/check_for_unrated_entries',
+                    data: { list: response.data.list, company: companyId }
+                }, 'POST');
+            }
+        });
+    },
+    
+    /* endregion */
+
+    /* region Форма создания и редактирования отзыва */
+    
+    leaveFeedback: {
+        starsMessage: {
+            0: { message: '', color: '#F3F6FA'},
+            1: { message: __('Ужасная работа'), color: '#F3F6FA' },
+            2: { message: __('Плохая работа'), color: '#F3F6FA' },
+            3: { message: __('Нормальная работа'), color: '#F3F6FA' },
+            4: { message: __('Хорошая работа!'), color: '#FFF3EC' },
+            5: { message: __('Отличная работа!'), color: '#FFF3EC' }
+        },
+        init: function(el) {
+            this.cacheElements(el);
+            this.bindEvents();
+        },
+        cacheElements: function(el) {
+            this.$el = $(el);
+            this.$modalFeedback = this.$el.closest('.modal');
+            this.$userFormStars = this.$el.find('.rating-stars');
+            this.$userFormStarsValue = this.$el.find('.rating-stars-value');
+            this.$userFormRatingField = this.$el.find('.rating');
+            this.$ratingBlock = this.$el.find('.rating-block');
+            this.$messageRating = this.$el.find('.message-rating');
+            this.$leaveReviewMessageBlock = this.$el.find('.leave-review-message-block');
+            this.$captionReview = this.$el.find('.caption-review');
+            this.starsCount =  parseInt(this.$el.find('.rating-value').val());
+            this.$textarea = this.$el.find('.feedback-textarea');
+            this.$doNotRate = this.$el.find('.do-not-rate-button');
+            this.$userFormPhotoList = this.$el.find('.nr-list.photo-list');
+            this.$files = this.$el.find('.files');
+            this.$userFormPhotoAdd = this.$el.find('.nr-add-photo');
+            this.fileServer = this.$el.find('.file-server').val();
+            this.mode = this.$el.find('.mode').val();
+            this.$rate = this.mode === 'create' ? this.$el.find('.rate-button') : this.$el.find('.edit-button');
+        },
+        bindEvents: function() {
+            this.$userFormStars.on('click', this.onStarClick.bind(this));
+            // Не оценивать при создании
+            this.$doNotRate.on('click', review.onDoNotRateClick.bind(this, review.confirmCancelRecord));
+            // Создание отзыва
+            if (this.mode === 'create') {
+                this.$rate.on('click', this.onRateClick.bind(this));
+            }
+            // Редактирование отзыва
+            if (this.mode === 'edit') {
+                this.$rate.on('click', this.onEditClick.bind(this));
+            }
+            this.initPhotoUpload();
+            this.updateStars(this.starsCount);
+        },
+        onStarClick: function(e) {
+            let starsCount = review.getSelectedStar(e);
+            this.updateStars(starsCount);
+        },
+        updateStars: function(starsCount) {
+            this.starsCount = starsCount;
+            this.$userFormRatingField.val(starsCount);
+            this.$userFormStarsValue.css({ width: `${(starsCount * 100) / 5}%` });
+            this.$ratingBlock.css({ background: this.starsMessage[starsCount].color });
+            this.$messageRating.text(this.starsMessage[starsCount].message);
+            this.$messageRating.show();
+
+            const shouldShowReviewMessage = starsCount <= 3;
+            this.$leaveReviewMessageBlock.toggle(shouldShowReviewMessage);
+            this.$rate.prop('disabled', shouldShowReviewMessage && this.$textarea.val().length === 0);
+            this.$textarea.attr('placeholder', !shouldShowReviewMessage
+                ? __('Расскажите, что особенно понравилось. Ваши оценки и отзывы помогут улучшить сервис')
+                : __('Расскажите, что не понравилось. Ваши оценки и отзывы помогут улучшить сервис')
+            );
+        },
+        onRateClick: function() {
+            const companyId = this.$rate.data('company-id');
+            const recordId = this.$rate.data('record-id');
+            sw.ajax({
+                url: sw.fixDomain( window.location.origin + '/api/reviews/save?company=') + companyId,
+                data: {
+                    record_id: recordId,
+                    files: this.getFilePaths(),
+                    stars: this.starsCount,
+                    text: this.$textarea.val(),
+                    anonymous: $('input[name="anonymous"]').is(':checked') ? 1 : 0
+                },
+                success: (response) => {
+                    review.creationFromMyReviews(recordId);
+                    sw.ajax({
+                        url: '/ajax/profile/getting_final_modal',
+                        data: {
+                            list: response.data,
+                            company: companyId
+                        }
+                    }, 'POST');
+                }
+            }, 'POST');
+        },
+        updateAbandonedItem: function (data) {
+            const $item = $(`.list-abandoned[data-review-id="${data.id}"]`);
+            
+            $item.find('.abandoned-center-text').text(data.text);
+            $item.find('.rating').get(0).style.setProperty('--stars', data.rating * 26 + 'px');
+            
+            if (parseInt(data.rating) > 3 ) {
+                $item.find('.button-tips')?.show();
+            } else {
+                $item.find('.button-tips')?.hide();
+            }
+
+            const $img = $item.find('.images');
+            $img.html('');
+            
+            if (data?.media?.length > 0) {
+                for(let i = 0; i < data.media.length; i++) {
+                    $img.append(`
+                        <a class="img-reviews" href="${data.media[i].url + '?size=b'}" rel="reviews-gallery-${data.media[i].id}">
+                            <img class="img-reviews" src="${data.media[i].url + '?size=s'}">
+                        </a>
+                    `);
+                }
+            }
+            
+            let userName = $item.find("input[name=user-" + data.id + "]").val();
+            if (data.anonymous) {
+                userName = __('Анонимный отзыв');
+            }
+            $item.find('.username').html(userName);
+        },
+        onEditClick: function() {
+            const reviewId = this.$rate.data('review-id');
+            const masterId = this.$rate.data('master-id');
+            const companyId = this.$rate.data('company-id');
+            const recordId = this.$rate.data('record-id');
+            const clientId = this.$rate.data('client-id');
+            const recordClientId = this.$rate.data('record-client-id');
+            sw.ajax({
+                url: sw.fixDomain( window.location.origin + '/api/reviews/edit?review_id=') + reviewId,
+                data: {
+                    master_id: masterId,
+                    company_id: companyId,
+                    record_id: recordId,
+                    client_id: clientId,
+                    record_client_id: recordClientId,
+                    files: this.getFilePaths(),
+                    rating: this.starsCount,
+                    comment: this.$textarea.val(),
+                    anonymous: $('input[name="anonymous"]').is(':checked') ? 1 : 0
+                },
+                success: (response) => {
+                    this.updateAbandonedItem(response.data);
+                    
+                    sw.ajax({
+                        url: '/user/reviews_evaluated/get_final_modal',
+                        data: {
+                            list: response.data,
+                            company: companyId
+                        }
+                    }, 'POST');
+                }
+            }, 'POST');
+        },
+        getFilePaths: function() {
+            return this.$userFormPhotoList.find('input').map(function() {
+                return this.value;
+            }).get();
+        },
+        initPhotoUpload: function() {
+            this.$userFormPhotoAdd.upload({
+                name: 'files[]',
+                server: this.fileServer,
+                container: this.$userFormPhotoList,
+                accept: 'image/*',
+                multiple: true,
+                imageFancybox: true,
+                template: '<li class="nr-item pr-photo file :exp loading">'
+            }).on('appendAfter', this.onPhotoUploadAppend.bind(this))
+                .on('removeAfter', this.onPhotoUploadRemove.bind(this));
+        },
+        onPhotoUploadAppend: function() {
+            let $files = this.$files.children('li');
+            $files.length >= 10 && this.$userFormPhotoAdd.hide();
+            $files.length > 10 && $files.slice(10, 11).remove();
+            $('.fancybox', this.$userFormPhotoList).fancybox({
+                prevEffect: 'none',
+                nextEffect: 'none'
+            });
+        },
+        onPhotoUploadRemove: function() {
+            this.$files.children('li').length < 10 && this.$userFormPhotoAdd.show();
+        },
+        initTextarea: function(element) {
+            const $element = $(element);
+            const maxLength = parseInt(this.$textarea.attr('maxLength'));
+
+            this.$captionReview.text(`${__('Осталось')}: ${maxLength} ${__('символов')}`);
+            
+            this.updateCaptionAndRate = () => {
+                const inputLength = this.$textarea.val().length;
+                this.$captionReview.text(`${__('Осталось')}: ${maxLength - inputLength} ${__('символов')}`);
+                this.$rate.prop('disabled', this.starsCount <= 3 && inputLength === 0 || (this.starsCount <= 0 || this.starsCount > 5));
+            };
+            
+            $element.on('input', '.feedback-textarea', () =>  this.updateCaptionAndRate());
+            this.updateCaptionAndRate();
+        }
+    },
+
+    /* endregion */
+
+    /* region Список визитов для оценки в модальном окне */
+
+    listUnrated: {
+        init: function(el) {
+            this.cacheElements(el);
+            this.bindEvents();
+        },
+        cacheElements: function(el) {
+            this.$el = $(el);
+            this.$modalList = this.$el.closest('.list-unrated');
+            this.$userFormStars = this.$el.find('.rating-stars');
+            this.$doNotRate = this.$el.find('.do-not-rate-button');
+            this.action = this.$el.find('.action').val();
+        },
+        bindEvents: function() {
+            this.$userFormStars.one('click', this.onFirstStarClick.bind(this));
+            this.$doNotRate.on('click', review.onDoNotRateClick.bind(this, review.cancelRecord));
+        },
+        onFirstStarClick: function(e) {
+            let starsCount = review.getSelectedStar(e);
+            this.$modalList.remove();
+            $('.modal-backdrop').remove();
+            
+            sw.ajax({
+                url: '/api/reviews/check/',
+                data: { appointment_id: $(e.currentTarget).data('record-id') },
+                success: (response) => {
+                    sw.ajax({
+                        url: '/ajax/profile/leave_feedback',
+                        data: { list: response.data.list, stars: starsCount }
+                    }, 'POST');
+                }
+            });
+        },
+    }
+
+    /* endregion */
+}

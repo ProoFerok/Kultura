@@ -1,0 +1,1977 @@
+$(document).ready(function () {
+
+	// region Выпадающий список
+
+	$(document).on('click', function (e) {
+		if (
+			!$(e.target).is($(document).find('.new-elements-expand-clicked'))
+			&& !$(e.target).is($(document).find('.new-elements-expand'))
+		) {
+			closeExpands();
+		}
+	});
+	
+	function closeExpands() {
+		$(document).find('.new-elements-expand.open').removeClass('open');
+		$(document).find('.new-elements-expand-btn.open').removeClass('open');
+	}
+	
+	$(document).on('click', '.new-elements-expand-clicked', function (e) {
+		e.stopPropagation();
+
+		if (
+			$(this).next().hasClass('new-elements-expand')
+			&& !$(this).next().hasClass('open')
+		) {
+			closeExpands();
+
+			$(this).next().addClass('open');
+		} else {
+			closeExpands();
+		}
+	});
+	
+	// endregion
+});
+
+const newElements= {
+	data: {
+		ruleSetWithParams: [
+			'length',
+			'percent',
+            'promocode'
+		],
+		ruleSetWithoutParams: [
+			'empty',
+			'digits',
+            'notZero'
+		],
+		validateTextByRules: {
+			empty: __('Поле не должно быть пустым'),
+			digits: __('Поле должно состоять только из цифр'),
+			length: __('Поле не должно быть длиннее :param символов'),
+			percent: __('Процент должен быть в диапазоне от 0 до :param'),
+            promocode: __('Промокод не должен содержать символы :param'),
+            notZero: __('Поле не должно быть пустым и не должно быть нулем')
+		},
+	},
+	utils: {
+		prepareRules: function (rulesString) {
+			const rules = rulesString.split(',').map(n => n.trim());
+			
+			if (!rules.length) {
+				throw new Error(__('Строка с правилами валидации пуста'));
+			}
+			
+			const preparedRules = [];
+			
+			for (const rule of rules) {
+				let rulePair = [];
+				
+				for (const r of newElements.data.ruleSetWithParams) {
+					if (!rule.startsWith(r)) {
+						continue;
+					}
+					
+					if (rule.split(':').length === 1) {
+						throw new Error(__('Неверный формат правила валидации'));
+					}
+					
+					rulePair = rule.split(':');
+					
+					if (rulePair.length === 2) {
+						rulePair[1] = parseInt(rulePair[1]);
+
+						if (isNaN(rulePair[1])) {
+							throw new Error(__('Неверный формат правила валидации'));
+						}
+					}
+				}
+				
+				for (const r of newElements.data.ruleSetWithoutParams) {
+					if (r !== rule) {
+						continue;
+					}
+					
+					rulePair.push(rule);
+				}
+				
+				if (
+					!rulePair.length
+					|| (
+						newElements.data.ruleSetWithParams.indexOf(rulePair[0]) === -1
+						&& newElements.data.ruleSetWithoutParams.indexOf(rulePair[0]) === -1
+					)
+				) {
+					throw new Error(__('Неизвестное правило валидации'));
+				}
+				
+				preparedRules.push(rulePair);
+			}
+			
+			return preparedRules;
+		},
+		getErrorTextByRule: function (rule, params) {
+			if (!newElements.data.validateTextByRules[rule]) {
+				throw new Error(__('Не указаны типы валидации для правила :rule', { ':rule': rule }));
+			}
+			
+			let text = newElements.data.validateTextByRules[rule];
+			
+			if (params) {
+				text = text.replace(':param', params);
+			}
+			
+			return text;
+		},
+		validate: function ($control, ruleSet) {
+			const _this = newElements;
+			const rules = newElements.utils.prepareRules(ruleSet);
+			const errors = [];
+			
+			for (const rs of rules) {
+				const rule = rs[0];
+				
+				switch (rule) {
+					case 'empty':
+						if ($control.is('input')) {
+							if ($control.data('datepicker')) {
+								if (!$control.data('original-date')) {
+									errors.push({
+										rule: rule,
+										text: _this.utils.getErrorTextByRule(rule),
+									});
+								}
+							} else {
+								if (!$control.val().trim()) {
+									errors.push({
+										rule: rule,
+										text: _this.utils.getErrorTextByRule(rule),
+									});
+								}
+							}
+						}
+						
+						if ($control.is('textarea')) {
+							if (!$control.val().trim()) {
+								errors.push({
+									rule: rule,
+									text: _this.utils.getErrorTextByRule(rule),
+								});
+							}
+						}
+
+						if ($control.is('select')) {
+							if (!$control.find('option[selected="selected"]').length) {
+								errors.push({
+									rule: rule,
+									text: _this.utils.getErrorTextByRule(rule),
+								});
+							}
+						}
+						
+						break;
+						
+					case 'percent':
+						if ($control.is('input')) {
+							const percentCount = rs[1];
+							
+							if (!(new RegExp(`^(\\d{1,2}|${ percentCount })$`)).test($control.val())) {
+								errors.push({
+									rule: rule,
+									text: _this.utils.getErrorTextByRule(rule, percentCount),
+								});
+							}
+						}
+						
+						break;
+
+					case 'length':
+						if ($control.is('input')) {
+							if ($control.val().length > rs[1]) {
+								errors.push({
+									rule: rule,
+									text: _this.utils.getErrorTextByRule(rule, rs[1]),
+								});
+							}
+						}
+						
+						break;
+						
+					case 'digits':
+						if ($control.is('input')) {
+							if (!$control.val().trim().match(/^\d+$/) && $control.val().trim().length > 0) {
+								errors.push({
+									rule: rule,
+									text: _this.utils.getErrorTextByRule(rule),
+								});
+							}
+						}
+						
+						break;
+                        
+                    case 'promocode':
+                        if ($control.is('input')) {
+                            const ruleArray = rs.splice(1)
+                            const comparisonArray = array_diff(ruleArray, $control.val().split(""))
+                            if (ruleArray.length !== comparisonArray.length) {
+                                errors.push({
+                                    rule: rule,
+                                    text: _this.utils.getErrorTextByRule(rule, ruleArray),
+                                });
+                            }
+                        }
+                        
+                        break;
+                        
+                    case 'notZero':
+                        if ($control.is('input')) {
+                            if ($control.val() === '' || $control.val() === '0') {
+                                errors.push({
+                                    rule: rule,
+                                    text: _this.utils.getErrorTextByRule(rule),
+                                });
+                            }
+                        }
+				}	
+			}
+			
+			return errors;
+		},
+		createErrorContentBlock: function (errorText, align) {
+			return $(`
+				<div class="new-elements-content-block error ${ align }">
+					<div class="warning-icon"></div>
+					<div class="error-text">${ errorText }</div>
+				</div>
+			`);
+		},
+		executeValidate: function ($control, parentElementSelector) {
+			const _this = newElements;
+			
+			if (!parentElementSelector) {
+				throw new Error(__('Не указан селектор родительского элемента'));
+			}
+			
+			if (!$control.is('[validatable]')) {
+				throw new Error(__('Вызов события валидации на невалидированном элементе'));
+			}
+
+			const validateRule = $control.attr('validate-rule');
+
+			if (!validateRule) {
+				throw new Error(__('Не указаны типы валидации'));
+			}
+            
+            // Если элемент скрыт, то пропускаем
+            if($control.is(":hidden")) {
+               return;
+            }
+
+            const validationErrors = _this.utils.validate($control, validateRule);
+			
+			if (!validationErrors.length) {
+				return;
+			}
+
+			$control.attr('validate-error', true);
+
+			let align = $control.attr('validate-align');
+
+			if (!align) {
+				align = 'left';
+			}
+			
+			let validateText = validationErrors[0]['text'];
+			
+			if ($control.attr('validate-text')) {
+				validateText = $control.attr('validate-text');
+			}
+			
+			const $parent = $control.closest(parentElementSelector);
+
+			$parent.find('.error').remove();
+			$parent.append(_this.utils.createErrorContentBlock(validateText, align));
+		},
+		executeValidateContentBlock: function ($block) {
+			$block.attr('validate-error', true);
+
+			const validateText = $block.attr('validate-text');
+			let align = $block.attr('validate-align');
+
+			if (!validateText) {
+				throw new Error(__('Не указан текст валидации у элемента'));
+			}
+
+			if (!align) {
+				align = 'left';
+			}
+			
+			$block.find('.error').remove();
+			$block.append(newElements.utils.createErrorContentBlock(validateText, align));
+		},
+		assertArray: function (a, b) {
+			a = a.sort();
+			b = b.sort();
+
+			if (a.length !== b.length) {
+				return false;
+			}
+
+			for (let i = 0; i < a.length; i++) {
+				if (a[i] !== b[i]) {
+					return false;
+				}
+			}
+
+			return true;
+		},
+        randomString: function (length) {
+            let result = '';
+            const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+            const charactersLength = characters.length;
+            let counter = 0;
+            
+            while (counter < length) {
+                result += characters.charAt(Math.floor(Math.random() * charactersLength));
+                counter += 1;
+            }
+            
+            return result;
+        }, 
+	},
+	initSelect: function (element) {
+		const $element = $(element);
+		const $select = $element.find('select');
+		
+        // Отрисовывает селект
+		$element.on('refresh', 'select', function () {
+			$element.find('.button').remove();
+			$element.find('.list').remove();
+			
+			$element.append(`
+				<div class="button">
+					<div class="placeholder"></div>
+					<div class="text"></div>
+				</div>
+				<div class="list">
+					<div class="elements"></div>
+				</div>
+			`);
+			
+			const $button = $element.closest('.new-elements-select').find('.button');
+			const $list = $element.find('.list');
+			const $placeholder = $element.find('.placeholder');
+			const placeholder = $(this).attr('placeholder') && $(this).attr('placeholder').length 
+				? $(this).attr('placeholder')
+				: __('Выберите элемент');
+			const $options = $select.find('option');
+			const $selectedOptions = $select.find('option[selected]');
+			const withLiveSearch = $(this).is('[live-search]');
+			const withQuickButtons = $(this).is('[quick-buttons]');
+            const liveSearchPlaceholder = $(this).attr('live-search-placeholder') && $(this).attr('live-search-placeholder').length
+                ? $(this).attr('live-search-placeholder')
+                : __('Поиск по названию')
+
+			$placeholder.text(placeholder);
+			
+			$list.find('.elements').empty();
+			
+			if (withQuickButtons && $select.attr('multiple')) {
+				$list.prepend(`
+					<div class="new-elements-combined-buttons">
+						<button class="select">${ __('Выбрать все') }</button>
+						<button class="remove">${ __('Снять выделения') }</button>
+					</div>
+				`);
+			}
+			
+			if (withLiveSearch) {
+				$list.prepend(`<input search-in-list autosubmit="false" type="text" class="search-field" placeholder="${ liveSearchPlaceholder }">`);
+			}
+			
+			let wasOneSelected = false;
+			
+			$options.each(function () {
+				const selected = $(this).attr('selected');
+				
+				const $option = `
+					<div 
+						class="option ${ selected ? 'active' : '' }" 
+						data-value="${ $(this).val() }"
+						data-text="${ $(this).html().toLowerCase() }"
+					>
+						${ $(this).html() }
+					</div>
+				`;
+				
+				$list
+					.find('.elements')
+					.append($option);
+
+				if (selected) {
+					$(this).prop('selected', true);
+
+					wasOneSelected = true;
+				}
+			});
+			
+			if ($select.attr('multiple')) {
+				const showCount = $select.attr('show-count') || 4;
+
+				if ($selectedOptions.length > showCount) {
+					$button.find('.text').text($selectedOptions.length + ' ' + __('из') + ' ' + $options.length + ' ' + __('выбрано'));
+				} else {
+					const selectedNames = [];
+					
+					$selectedOptions.each(function () {
+						selectedNames.push($(this).text().trim());
+					});
+					
+					$button.find('.text').text(selectedNames.join(', '));
+				}
+			} else {
+				$button.find('.text').text($selectedOptions.eq(0).text().trim());
+			}
+
+			if (!$selectedOptions.length) {
+				$button.find('.text').text('');
+			} else {
+				$button.addClass('active');
+			}
+			
+			if (wasOneSelected) {
+				$select.trigger('change');
+			}
+		});
+		
+        // Полностью чистит селект
+		$element.on('clear', 'select', function (e, data) {
+			$(this).trigger('reset', {withoutChange: data.withoutChange});
+			$(this).empty();
+			
+			$element.find('.list .elements').empty();
+		});
+		
+        // Сбрасывает выбранные элементы селекта
+		$element.on('selected-reset', 'select', function (e, data) {
+			$element.find('.button > .text').empty();
+			
+			$(this).find('option[selected="selected"]').each(function () {
+				$(this).attr('selected', false);
+				$(this).prop('selected', false);
+			});
+			
+			$element.find('.list > .elements > .option.active').removeClass('active');
+			
+			if (!data || !data.withoutChange) {
+				$(this).trigger('change');	
+			}
+		});
+        
+        // Сбрасывает выбранные элементы селекта и сбрасывает состояние
+		$element.on('reset', 'select', function (e, data) {
+			$(this).trigger('selected-reset', { withoutChange: data.withoutChange });
+			
+			$element.find('.button').removeClass('active');
+			$element.find('.button').removeClass('with-border');
+			$element.find('.list').removeClass('active');
+		});
+		
+		$element.on('list-item-click', '.list > .elements > .option', function (e, data) {
+			const $selectOption = data.option;
+			const $buttonText = $element.find('.button > .text');
+			
+			if ($selectOption.attr('selected')) {
+				$selectOption.attr('selected', false);
+				$selectOption.prop('selected', false);
+				
+				$(this).removeClass('active');
+			} else {
+				$selectOption.attr('selected', true);
+				$selectOption.prop('selected', true);
+				
+				$(this).addClass('active');
+			}
+			
+			const $options = $select.find('option');
+			const $selectedOptions = $select.find('option[selected="selected"]');
+			const selectedOption = [];
+			
+			$selectedOptions.each(function () {
+				selectedOption.push($(this).text().trim());
+			});
+			
+			const showCount = $select.attr('show-count') || 4;
+			
+			if ($selectedOptions.length > showCount) {
+				$buttonText.text($selectedOptions.length + ' ' + __('из') + ' ' + $options.length + ' ' + __('выбрано'));
+			} else {
+				$buttonText.text(selectedOption.join(', '));
+				
+				if (!$selectedOptions.length) {
+					$buttonText.text('');
+				}
+			}
+		});
+		
+		$element.on('validate', 'select', function () {
+			newElements.utils.executeValidate($(this), '.new-elements-select');
+		});
+		
+        // Событие по скрытию выпадающего списка селекта
+		$element.on('list-hidden', '.list', function () {
+			$(this).removeClass('active');
+			
+			if ($(this).closest('.new-elements-select').find('select').is('[live-search]')) {
+				$(this).find('input.search-field').val('');
+				$(this).find('.elements .option').removeClass('hidden');
+			}
+		})
+        
+		$element.on('click', '.list > .elements > .option', function () {
+			const $option = $element.find(`select > option[value=${ $(this).attr('data-value') }]`);
+			
+			if ($select.is('[multiple]')) {
+				$(this).trigger('list-item-click', { option: $option });
+			} else {
+				const $options= $select.find('option');
+				
+				$options.prop('selected', false);
+				$options.attr('selected', false);
+                
+				$option.prop('selected', true);
+				$option.attr('selected', true);
+				
+				$element.find('.button > .text').text($option.text());
+				
+				$(this).closest('.list').removeClass('active');
+				
+				if (!$(this).hasClass('active')) {
+					$(this).closest('.list').find('.option').removeClass('active');
+					$(this).addClass('active');
+				}
+			}
+			
+			$option.trigger('change');
+		});
+		
+        // Событие по вводу в поле поиска селекта
+		$element.on('input', '.list > .search-field', function () {
+			const $elements = $(this).closest('.list').find('.elements');
+			let value = $(this).val().trim().toLowerCase();
+			
+			if (!value.length) {
+				$elements.find('.option').removeClass('hidden');
+				
+				return;
+			}
+			
+			value = value.replaceAll('\\', '');
+			
+			$elements.find('.option').addClass('hidden');
+			$elements.find(`.option[data-text*="${ value }"]`).removeClass('hidden');
+		});
+		
+		$element.on('change', 'select', function () {
+			if ($(this).find('option[selected="selected"]').length && $(this).is('[validate-error]')) {
+				$(this).removeAttr('validate-error');
+				$(this).closest('.new-elements-select').find('.error').remove();
+			}
+		});
+		
+        // Клик по кнопкам выбора и сброса внутри
+		$element.on('click', '.new-elements-combined-buttons button', function (e) {
+			e.preventDefault();
+            
+			// Выбрать все
+			if ($(this).hasClass('select')) {
+                $select.trigger('selected-reset');
+                
+				const $options = $element.find(`.list > .elements > .option:not(.hidden)`);
+				let $lastOption = null;
+				
+				$options.each(function () {
+					const $option = $element.find(`select > option[value=${ $(this).attr('data-value') }]`);
+					$lastOption = $option;
+					
+					$(this).trigger('list-item-click', { option: $option });
+				});
+				
+				$lastOption.trigger('change');
+			} else if ($(this).hasClass('remove')) {
+                $select.trigger('selected-reset');
+			}
+		});
+		
+		$element.on('click', '.button, .button *', function () {
+			if ($select.prop('disabled')) {
+				return;
+			}
+			
+			const $list = $element.find('.list');
+			const $button = $element.find('.button');
+			
+			$button
+				.addClass('active')
+				.addClass('with-border');
+			$list.addClass('active');
+		});
+		
+		$(document).on('click', function (e) {
+			if (
+				$(e.target).is($element)
+				|| $(e.target).is($element.find('*'))
+			) {
+				return;
+			}
+
+			if ($element.find('select').prop('disabled')) {
+				return;
+			}
+
+			if ($element.find('.list').hasClass('active')) {
+				$element.find('.list').trigger('list-hidden');
+			}
+
+			if ($element.find('.button').hasClass('active')) {
+				const $button = $element.find('.button');
+
+				$button.removeClass('with-border');
+
+				if (!$element.find('select > option[selected]').length) {
+					$button.removeClass('active');
+				}
+			}
+		});
+        
+		$select.trigger('refresh');
+	},
+	initDatepicker: function (element) {
+		const $element = $(element);
+		
+		const monthNamesShort = [
+			'янв',
+			'фев',
+			'мар',
+			'апр',
+			'мая',
+			'июн',
+			'июл',
+			'авг',
+			'сен',
+			'окт',
+			'ноя',
+			'дек'
+		];
+		const monthNames = [
+			'января',
+			'февраля',
+			'марта',
+			'апреля',
+			'мая',
+			'июня',
+			'июля',
+			'августа',
+			'сентября',
+			'октября',
+			'ноября',
+			'декабря'
+		];
+		const dayNamesShort = [
+			'вс',
+			'пн',
+			'вт',
+			'ср',
+			'чт',
+			'пт',
+			'сб',
+		];
+		const dayNames = [
+			'воскресенье',
+			'понедельник',
+			'вторник',
+			'среда',
+			'четверг',
+			'пятница',
+			'суббота',
+		];
+		
+		const selectorsWithScrolls = [
+			'.scroll-block',
+		];
+		
+		$element.on('refresh', 'input', function () {
+			const value = $(this).data('original-date');
+				
+			if (!value) {
+				return;
+			}
+
+			$element
+				.find('label')
+				.addClass('focus');
+			$(this)
+				.addClass('focus');
+
+			let year, month, day;
+			
+			[day, month, year] = value.split('.');
+			
+			const formattedDate = $.datepicker.formatDate(
+				'D, d M',
+				new Date(parseInt(year), parseInt(month) - 1, parseInt(day)),
+				{
+					monthNamesShort: monthNamesShort,
+					monthNames: monthNames,
+					dayNamesShort: dayNamesShort,
+					dayNames: dayNames,
+				}
+			);
+
+			$(this).val(formattedDate);
+		});
+		
+		$element.on('focus', 'input', function () {
+			const $input = $(this);
+
+			$element
+				.find('label')
+				.addClass('focus');
+			$input
+				.addClass('focus')
+				.addClass('with-border');
+			
+			const options = {
+				firstDay: backend.user.first_day,
+				autoclose:true,
+				onSelect: function(dateText, inst) {
+					const formattedDate = $.datepicker.formatDate(
+						'D, d M',
+						new Date(inst.selectedYear, inst.selectedMonth, inst.selectedDay),
+						{
+							monthNamesShort: monthNamesShort,
+							monthNames: monthNames,
+							dayNamesShort: dayNamesShort,
+							dayNames: dayNames,
+						}
+					);
+
+					inst.input.val(formattedDate);
+					inst.input.attr('data-original-date', dateText);
+					inst.input.data('original-date', dateText);
+
+					$input.removeClass('with-border');
+
+					$element
+						.find('label')
+						.addClass('focus');
+					inst.input.addClass('focus');
+
+					inst.input.trigger('change');
+				},
+			};
+			
+			if (!$input.is('[with-previous-dates]')) {
+				options.minDate = new Date();
+			}
+
+            if ($input.is('[min-date]')) {
+                options.minDate = new Date($input.attr('min-date'));
+            }
+
+            if ($input.is('[max-date]')) {
+                options.maxDate = new Date($input.attr('max-date'));
+            }
+			
+			$input.datepicker(options);
+		});
+		
+		$element.on('validate', 'input', function () {
+			newElements.utils.executeValidate($(this), '.new-elements-datepicker');
+		});
+		
+		$element.on('change', 'input', function () {
+			if ($(this).val() && $(this).is('[validate-error]')) {
+				$(this).removeAttr('validate-error');
+				$(this).closest('.new-elements-datepicker').find('.error').remove();
+			}
+
+			if (!$(this).val()) {
+				$(this).removeAttr('data-original-date');
+				$(this).data('original-date', null);
+			}
+		});
+
+		$element.on('input', 'input', function () {
+			$(this).removeAttr('data-original-date');
+			$(this).data('original-date', null);
+		});
+		
+		$element.on('reset', 'input', function () {
+			$(this).data('original-date', null);
+			$(this).val('');
+
+			$element
+				.find('label')
+				.removeClass('focus');
+			$(this)
+				.removeClass('focus');
+		})
+		
+		$(document).on('click', function (e) {
+			if (
+				$(e.target).is($element)
+				|| $(e.target).is($element.find('*'))
+			) {
+				$element.find('input').trigger('focus');
+
+				return;
+			}
+
+			const $input = $element.find('input');
+
+			if ($input.val() && $input.val().length) {
+				$element
+					.find('input')
+					.removeClass('with-border');
+			} else {
+				$element
+					.find('label')
+					.removeClass('focus');
+				$element
+					.find('input')
+					.removeClass('focus')
+					.removeClass('with-border');
+			}
+		});
+	}, 
+	initInput: function (element) {
+		const $element = $(element),
+			$input = $element.find('input'),
+			$label = $element.find('label');
+		
+		$element.on('focus', 'input', function () {
+			$element
+				.find('label')
+				.addClass('focus');
+			$element
+				.find('input')
+				.addClass('focus')
+				.addClass('with-border');
+		});
+
+		$element.on('blur', 'input', function () {
+			const $input = $element.find('input');
+
+			if ($input.val().length) {
+				$element
+					.find('input')
+					.removeClass('with-border');
+			} else {
+				$element
+					.find('label')
+					.removeClass('focus');
+				$element
+					.find('input')
+					.removeClass('focus')
+					.removeClass('with-border');
+				$element
+					.find('.clear')
+					.remove();
+			}
+		});
+
+		$element.on('input', 'input', function () {
+			const $input = $(this);
+
+			if ($input.is('[clearable]') && $input.val()) {
+				$element.find('.clear').remove();
+				$element.append('<div class="clear"></div>');
+			}
+			
+			if ($input.val() && $input.is('[validate-error]')) {
+				$input.removeAttr('validate-error');
+				$input.closest('.new-elements-input').find('.error').remove();
+			}
+		});
+		
+		$element.on('refresh', 'input', function (e, data = { triggerInput: true }) {
+			if (!$(this).val()) {
+				return;
+			}
+			
+			$element
+				.find('label')
+				.addClass('focus');
+			$element
+				.find('input')
+				.addClass('focus');
+
+			if (data.triggerInput) {
+				$(this).trigger('input');	
+			}
+		});
+		
+		$element.on('click', '.clear', function (e, data) {
+			const $input = $element.find('input');
+			
+			if ($input.is('[disabled]')) {
+				return;
+			}
+
+			$input.val('');
+
+			$(this).remove();
+
+			$input.trigger('blur');
+			
+			if (!data || !data.withoutChange) {
+				$input.trigger('input');	
+			}
+		});
+
+		$element.on('validate', 'input', function () {
+			newElements.utils.executeValidate($(this), '.new-elements-input');
+		});
+		
+		$element.on('reset', 'input', function (e, data) {
+			$element.find('.clear').trigger('click', { withoutChange: data.withoutChange });
+		});
+
+		if ($input.val().length) {
+			$input.addClass('focus');
+			$label.addClass('focus');
+		}
+	},
+	initInputAjax: function (element) {
+		const $elem = $(element);
+		const $input = $elem.find('input');
+		const $results = $elem.find('.search-result');
+		const inputTime = $elem.data('input-time');
+		const url = $elem.data('url');
+		let timeout;
+		
+		newElements.initInput(element);
+		
+		$elem.on('input', 'input', function(evt) {
+			if ($input.prop('disabled')) {
+				return;
+			}
+			
+			clearTimeout(timeout);
+			
+			timeout = setTimeout(function () {
+				sw.ajax({
+					url: url,
+					data: {
+						query: $input.val(),
+					},
+					success: function (data) {
+						if (data.html) {
+							$results.removeClass('hidden');
+							$results.html(data.html);
+						}
+					},
+					error: function () {
+						$input.trigger('suggestion-clear');
+					}
+				}, 'post');
+			}, inputTime);
+		});
+		
+		$elem.on('focus', 'input', function () {
+			if ($results.html()) {
+				$results.removeClass('hidden');
+			}
+		});
+		
+		$elem.on('suggestion-clear', 'input', function () {
+			$results.empty();
+			$results.addClass('hidden');
+		});
+
+		$(document).on('click', function (e) {
+			if (
+				$(e.target).is($elem)
+				|| $(e.target).is($elem.find('*'))
+			) {
+				return;
+			}
+			
+			if ($input.prop('disabled')) {
+				return;
+			}
+			
+			$results.addClass('hidden');
+		});
+	},
+	initCheckBox: function (element) {
+		const $element = $(element);
+		
+		$element.on('reset', 'input', function () {
+			$(this).attr('checked', false);
+			$(this).prop('checked', false);
+		});
+	},
+	initTextarea: function (element) {
+		const $element = $(element);
+		const textarea = $element.find('textarea');
+
+		$element.on('refresh', 'textarea', function () {
+			if (!$(this).val()) {
+				return;
+			}
+
+			$element
+				.find('label')
+				.addClass('focus');
+			$element
+				.find('textarea')
+				.addClass('focus');
+		});
+		
+		$element.on('focus', 'textarea', function () {
+			$element
+				.find('label')
+				.addClass('focus');
+			$element
+				.find('textarea')
+				.addClass('focus')
+				.addClass('with-border');
+		});
+
+		$element.on('blur', 'textarea', function () {
+			const $textarea = $element.find('textarea');
+
+			if ($textarea.val().length) {
+				$element
+					.find('input')
+					.removeClass('with-border');
+			} else {
+				$element
+					.find('label')
+					.removeClass('focus');
+				$element
+					.find('textarea')
+					.removeClass('focus')
+					.removeClass('with-border');
+			}
+		});
+		
+		$element.on('input', 'textarea', function () {
+			$(this).outerHeight(76).outerHeight(this.scrollHeight);
+
+			if ($(this).val().trim() && $(this).is('[validate-error]')) {
+				$(this).removeAttr('validate-error');
+				$(this).closest('.new-elements-textarea').find('.error').remove();
+			}
+		});
+		
+		$(document).on('click', function (e) {
+			if (
+				$(e.target).is($element)
+				|| $(e.target).is($element.find('*'))
+			) {
+				$element.find('textarea').trigger('focus');
+
+				return;
+			}
+
+			const $textarea = $element.find('textarea');
+
+			if ($textarea.val() && $textarea.val().length) {
+				$element
+					.find('textarea')
+					.removeClass('with-border');
+			} else {
+				$element
+					.find('label')
+					.removeClass('focus');
+				$element
+					.find('textarea')
+					.removeClass('focus')
+					.removeClass('with-border');
+			}
+		});
+
+		$element.find('textarea').trigger('input');
+		
+		$element.on('validate', 'textarea', function () {
+			newElements.utils.executeValidate($(this), '.new-elements-textarea');
+		});
+		
+		if (!textarea.val().trim().length) {
+			textarea.val('');
+		}
+	},
+	initCheckResetContentBlock: function (element) {
+		const $element = $(element);
+		
+		$element.on('change', 'input.check-all', function () {
+			const $list = $element.find('.list');
+			const $resetButton = $element.find('.reset');
+			
+			if ($(this).is(':checked')) {
+				$list.find('input[type="checkbox"]').prop('checked', true).trigger('change');
+
+				const checkedCount = $list.find('input[type="checkbox"]:checked').length;
+
+				$resetButton.text(__('Сбросить') + ' ' + checkedCount);
+				$resetButton.removeClass('hidden');
+			} else {
+				$list.find('input[type="checkbox"]').prop('checked', false).trigger('change');
+
+				$resetButton.addClass('hidden');
+				$resetButton.text(__('Сбросить'));
+			}
+		});
+		
+		$element.on('click', '.reset', function () {
+			const $checkAllButton = $element.find('input.check-all');
+			
+			$element.find('.list input[type="checkbox"]:checked').prop('checked', false).trigger('change');
+		
+			if ($checkAllButton.is(':checked')) {
+				$checkAllButton.prop('checked', false);
+			}
+			
+			$(this).addClass('hidden');
+			$(this).text(__('Сбросить'));
+		});
+		
+		$element.on('change', '.list .item input[type="checkbox"]', function () {
+			const $checkAllButton = $element.find('input.check-all');
+			const $resetButton = $element.find('.reset');
+			const checkedCount = $element.find('.list input[type="checkbox"]:checked').length;
+			const allCount = $element.find('.list input[type="checkbox"]').length;
+			
+			if (!$(this).is(':checked') && $checkAllButton.is(':checked')) {
+				$checkAllButton.prop('checked', false);
+			}
+			
+			if (checkedCount === allCount) {
+				$checkAllButton.prop('checked', true);
+			}
+			
+			if ($resetButton.hasClass('hidden') && checkedCount !== 0) {
+				$resetButton.removeClass('hidden');
+				$resetButton.text(__('Сбросить') + ' ' + checkedCount);
+			}
+
+			if (checkedCount !== 0) {
+				$resetButton.text(__('Сбросить') + ' ' + checkedCount);
+			} else {
+				$resetButton.addClass('hidden');
+				$resetButton.text(__('Сбросить'));
+			}
+		});
+	},
+	validatedContentBlock: function (element) {
+		const $element = $(element);
+
+		$element.on('error', function (e) {
+			e.preventDefault();
+			
+			newElements.utils.executeValidateContentBlock($element);
+		});
+		
+		$element.on('clear-error', function (e) {
+			e.preventDefault();
+			
+			$element.removeAttr('validate-error');
+			$element.find('.error').remove();
+		});
+	},
+	listInit: function (element, changeBg = true) {
+		const $element = $(element);
+		const $reset = $element.find('.reset');
+        
+        if (changeBg) {
+            $element.closest('body').css('background-color', 'var(--new-elements-background-color-page)');
+        }
+		
+		$reset.addClass('hidden');
+		$reset.text($reset.attr('reset-text'));
+
+		$element.on('input', '.filters input[type="text"]:not([search-in-list])', function () {
+			checkCountFilters();
+		});
+		
+		$element.on('change', '.filters select, .filters input:not([search-in-list])', function () {
+			checkCountFilters();
+		});
+		
+		function checkCountFilters() {
+			let countFilters= 0;
+
+			$element
+				.find('.filters')
+				.find('select, input')
+				.each(function () {
+					if ($(this).is('select')) {
+						if ($(this).find('option[selected="selected"][value!="0"]').length) {
+							countFilters++;
+						}
+					} else {
+						if ($(this).attr('type') === 'radio' || $(this).attr('type') === 'checkbox') {
+							if ($element.find(`.filters input[name="${ $(this).attr('name') }"]:checked`).length) {
+								countFilters++;
+							}
+						} else if (
+							$(this).attr('type') !== 'hidden'
+							&& ! $(this).attr('search-in-list')
+							&& $(this).val()
+						) {
+							countFilters++;
+						}
+					}
+				});
+			
+			if (countFilters !== 0) {
+				$reset.text($reset.attr('reset-text') + ' ' + countFilters);
+				$reset.removeClass('hidden');
+			} else {
+				$reset.text($reset.attr('reset-text'));
+				$reset.addClass('hidden');
+			}
+		}
+		
+		$element.on('click', '.filters .reset', function () {
+			$element.find('.filters select').trigger('reset', { withoutChange: true });
+			$element.find('.filters input').trigger('reset', { withoutChange: true });
+
+			$reset.addClass('hidden');
+			$reset.text($reset.attr('reset-text'));
+			
+			$element.trigger('submit');
+		});
+		
+		$element.on('click', '.show-more-button', function (e) {
+			e.preventDefault();
+			
+			const $button = $(this);
+
+			$button.text(__('Загрузка'));
+			
+			const formData = $element.serializeObject();
+			const $offset = $element.find('input[name="offset"]');
+			const $limit = $element.find('input[name="limit"]');
+
+			if ('offset' in formData) {
+				formData.offset = parseInt($offset.val()) + parseInt($limit.val());
+				formData.more = 1;
+			}
+			
+			sw.ajax({
+				url: $element.attr('action'),
+				loader: '',
+				data: formData,
+				errorClass: 'new-elements-modal alert',
+				success: function (result) {
+					$button.closest('.more-block').remove();
+
+					$element.find('input[name="offset"]').val(result.offset);
+
+					if ('offset' in formData) {
+						$offset.val(formData.offset);
+					}
+				},
+			}, 'post');
+		});
+	},
+	initTabs: function (element) {
+		const $element = $(element);
+		
+		$element.on('click', 'button', function () {
+			$element.find('button').removeClass('active');
+			
+			$(this).addClass('active');
+		});
+	},
+	combineButtonsInit: function (element) {
+		const $element = $(element);
+		
+		$element.on('click', 'button', function () {
+			$(this)
+				.closest('.new-elements-combined-buttons')
+				.find('button')
+				.removeClass('active');
+			$(this).addClass('active');
+		});
+	},
+	rangePicker: function (еlement) {
+		var filter = {
+				'endDay': [moment().startOf('day'), moment().endOf('day')],
+				'day': [moment().startOf('day'), moment().endOf('day')],
+				'week': [moment().startOf('week'), moment().endOf('week')],
+				'month': [moment().startOf('month'), moment().endOf('month')],
+				'year': [moment().startOf('year'), moment().endOf('year')],
+			},
+			format = $(еlement).data('format'),
+			setParams = function(start, end) {
+				$('input[name="date_from"]', еlement).val(start.format(format));
+				$('input[name="date_to"]', еlement).val(end.format(format));
+				
+				start = moment(start.format('YYYY-MM-DD'));
+				end = moment(end.format('YYYY-MM-DD'));
+				
+				var period = get_period_from_dates(start, end),
+					text = '';
+				
+				if ($('input[name="pre_start"]', еlement).length) {
+					var prePeriod = get_period_turn(1),
+						preStart = prePeriod[0],
+						preEnd = prePeriod[1];
+					
+					$('input[name="pre_start"]', еlement).val(preStart.format(format));
+					$('input[name="pre_end"]', еlement).val(preEnd.format(format));
+				}
+				
+				prePeriodSelectChange(period);
+				
+				text = getTextFormat(period, start, end);
+				
+				$('.range', еlement).html(text);
+                
+                let activeButton = $('button.date-select.active', еlement);
+                if(activeButton.data('value') === 'endDay') {
+                    let currentDate = $(еlement).find('input[name="current_date"]').val();
+
+                    $('input[name="date_from"]', еlement).attr('disabled', true)
+                    $('button.new-elements-daterange-date-button', еlement).data('daterangepicker')
+                        .setMaxDate(currentDate)
+                } else {
+                    $('input[name="date_from"]', еlement).removeAttr('disabled')
+                    $('button.new-elements-daterange-date-button', еlement).data('daterangepicker')
+                        .setMaxDate(null)
+                }
+
+				backend.autosubmit(еlement);
+			},
+			updateBtnTitle = function() {
+				var start = moment($('input[name="date_from"]', еlement).val(), 'DD.MM.YYYY');
+				var end = moment($('input[name="date_to"]', еlement).val(), 'DD.MM.YYYY');
+				var period = get_period_from_dates(start, end);
+				$('.range', еlement).html(getTextFormat(period, start, end));
+			},
+			updateFastFilter = function() {
+				var start = $('input[name="date_from"]', еlement).val(),
+					end = $('input[name="date_to"]', еlement).val(),
+					index = 0;
+				
+				$('label.btn.active', еlement).removeClass('active');
+				
+				for (var i in filter) {
+					if (start == filter[i][0].format(format) && end == filter[i][1].format(format)) {
+						$('label.btn:eq('+index+')', еlement).addClass('active');
+					}
+					
+					index++;
+				}
+			},
+			ranges = {};
+		var single = !!$(еlement).data('single');
+		var lang = $(еlement).closest('html').attr('lang');
+		
+		moment.locale(lang);
+		
+		$('button.date-select[data-value]', еlement).on('click', function(e) {
+            e.preventDefault();
+			$(this).siblings('.active').removeClass('active');
+			$(this).addClass('active');
+			
+			var value = $(this).data('value');
+            
+            let activeButton = $('button.date-select.active', еlement)
+            if(activeButton.data('value') === 'now' && $('input[name="date_type"]', еlement).length > 0) {
+                $('input[name="date_type"]', еlement).val(activeButton.data('value'));
+            }
+            
+            if($(еlement).find('input[name="current_date"]').get(0)) {
+                if(activeButton.data('value') === 'endDay' || activeButton.data('value') === 'day') {
+                    filter[value][0] = moment($(еlement).find('input[name="current_date"]').val(), 'DD.MM.YYYY');
+                    filter[value][1] = moment($(еlement).find('input[name="current_date"]').val(), 'DD.MM.YYYY');
+                }
+            }
+			
+			setParams(filter[value][0], filter[value][1]);
+		});
+		
+		var isTime = format.indexOf('HH') >= 0;
+		
+		function resolve_range_title(name) {
+			return name == 'day'       ? __('День')
+				:  name == 'week'      ? __('Неделя')
+					:  name == 'month'     ? __('Месяц')
+						:/*name == 'year'*/      __('Год');
+		}
+		
+		var prePeriodSelectChange = function(periodType) {
+			if ($('select.selectpicker.btn-pre-period').length) {
+				var selectPrePeriod = $('select.selectpicker.btn-pre-period'),
+					start = $('input[name="date_from"]', еlement).val(),
+					end = $('input[name="date_to"]', еlement).val(),
+					preStart = $('input[name="pre_start"]', еlement).val(),
+					preEnd = $('input[name="pre_end"]', еlement).val();
+				
+				start = moment(start, 'DD.MM.YYYY');
+				end = moment(end, 'DD.MM.YYYY');
+				preStart = moment(preStart, 'DD.MM.YYYY');
+				preEnd = moment(preEnd, 'DD.MM.YYYY');
+				
+				if (!periodType) {
+					periodType = get_period_from_dates(start, end);
+				}
+				
+				var htmlOptions = getPrePeriodOptions(periodType, preStart, preEnd);
+				
+				selectPrePeriod.html(htmlOptions).selectpicker('refresh');
+				
+			}
+		};
+		
+		var getTextFormat = function(period, start, end) {
+			var text = '';
+			
+			if (period == 'day') {
+				text = start.format('dd, DD MMMM');
+			}
+			else if (period == 'year') {
+				text = start.format('MMM YYYY') + ' — ' + end.format('MMM YYYY');
+			}
+			else {
+				text = start.format('DD MMM') + ' — ' + end.format('DD MMM');
+			}
+			
+			return text;
+		};
+		
+		var getPrePeriodOptions = function(periodType, preStart, preEnd) {
+			var htmlReturn = '';
+			
+			var period = get_period_turn(1);
+			var prePeriod;
+			
+			if (preStart && preEnd) {
+				prePeriod = [preStart, preEnd]
+			}
+			
+			if (periodType == 'day') {
+				htmlReturn += get_option_template(__('Предыдущий день'), periodType, period, prePeriod);
+				
+				period = get_period_turn(1, 'week');
+				htmlReturn += get_option_template(__('На прошлой неделе'), periodType, period, prePeriod);
+			} else if (periodType == 'week') {
+				htmlReturn += get_option_template(__('Предыдущие 7 дней'), periodType, period, prePeriod);
+				
+				period = get_period_turn(1, 'week', 4);
+				htmlReturn += get_option_template(__('4 недели назад'), periodType, period, prePeriod);
+				
+				period = get_period_turn(1, 'year', false, 1);
+				htmlReturn += get_option_template(__('В прошлом году'), periodType, period, prePeriod);
+			} else if (periodType == 'month') {
+				htmlReturn += get_option_template(__('Предыдущий месяц'), periodType, period, prePeriod);
+				
+				period = get_period_turn(1, 'year', false, 1);
+				htmlReturn += get_option_template(__('В прошлом году'), periodType, period, prePeriod);
+			} else if (periodType == 'year') {
+				htmlReturn += get_option_template(__('Предыдущий год'), periodType, period, prePeriod);
+			} else if (periodType == 'custom') {
+				htmlReturn += get_option_template(__('Предыдущий период'), periodType, period, prePeriod);
+			}
+			
+			return htmlReturn;
+		};
+		
+		var get_option_template = function(name, periodType, period, prePeriod) {
+			var $htmlReturn = '',
+				selectedElement = '',
+				periodFormatFrom = period[0].format(format),
+				periodFormatTo = period[1].format(format);
+			
+			if (periodFormatFrom == prePeriod[0].format(format) && periodFormatTo == prePeriod[1].format(format)) {
+				selectedElement = 'selected';
+			}
+			
+			$htmlReturn += '<option ' + selectedElement + ' data-content="';
+			$htmlReturn += '	<span class=\'btn-name-head\'>' + __('Период для сравнения') + '</span>';
+			$htmlReturn += '	<span class=\'btn-name\'>' + name + '</span>';
+			$htmlReturn += '	<span class=\'pre-period\'>' + getTextFormat(periodType, period[0], period[1]) + '</span>';
+			$htmlReturn += '" value="' + periodFormatFrom + '_' + periodFormatTo + '"></option>';
+			
+			return $htmlReturn;
+		}
+		
+		var get_period_from_dates = function(start, end) {
+			var from = moment(start).startOf('day'),
+				to = moment(end).endOf('day'),
+				diff = to.diff(from, 'days');
+			
+			if(diff == 0) {
+				return 'day'
+			}
+			else if(diff == 6 && from.isoWeekday() == 1) {
+				return 'week';
+			}
+			else if(
+				to.diff(from, 'month') == 0
+				&& moment(from).startOf('month').isSame(from, 'days')
+				&& moment(to).endOf('month').isSame(to, 'days')
+			) {
+				return 'month'
+			}
+			else if(
+				to.diff(from, 'year') == 0
+				&& moment(from).startOf('year').isSame(from, 'days')
+				&& moment(to).endOf('year').isSame(to, 'days')
+			) {
+				return 'year'
+			}
+			return 'custom';
+		};
+		
+		var get_period_turn = function(back, jumpPeriod, count, withoutOffs) {
+			var start = moment($('input[name="date_from"]', еlement).val(), 'DD.MM.YYYY'),
+				end = moment($('input[name="date_to"]', еlement).val(), 'DD.MM.YYYY'),
+				diff = end.diff(start, 'days') + 1,
+				sign = (back ? -1 : 1),
+				period = get_period_from_dates(start.format('YYYY-MM-DD'), end.format('YYYY-MM-DD'));
+			
+			if (jumpPeriod) {
+				period = jumpPeriod;
+			}
+			
+			if (count) {
+				sign = sign * count;
+			}
+			
+			switch(period) {
+				case 'day':
+					start.add(sign, 'd');
+					end.add(sign, 'd');
+					break;
+				case 'week':
+					start.add(sign, 'w');
+					end.add(sign, 'w');
+					break;
+				case 'month':
+					start.add(sign, 'M');
+					end.add(sign, 'M');
+					if (!withoutOffs) {
+						start.startOf('month');
+						end.endOf('month');
+					}
+					break;
+				case 'year':
+					start.add('years', sign);
+					end.add('years', sign);
+					if (!withoutOffs) {
+						start.startOf('year');
+						end.endOf('year');
+					}
+					break;
+				case 'custom':
+				default :
+					start.add(diff * sign, 'd');
+					end.add(diff * sign, 'd');
+					break;
+			}
+			
+			return [start, end];
+		};
+		
+		$('a.new-elements-calendar-prev', еlement).on('click', function() {
+			var value = get_period_turn(1);
+			
+			setParams(value[0], value[1]);
+			updateFastFilter();
+		});
+		
+		$('a.new-elements-calendar-next', еlement).on('click', function() {
+			var value = get_period_turn();
+            
+            let currentDate = $(еlement).find('input[name="current_date"]').val();
+            if(value[1].format('DD.MM.YYYY') > currentDate) {
+                let activeElement = $('button.date-select.active', еlement).data('value');
+                if(activeElement === 'endDay') {
+                    return;
+                }
+            }
+			
+			setParams(value[0], value[1]);
+			updateFastFilter();
+		});
+		
+		$.each(filter, function(k, r) {
+			ranges[resolve_range_title(k)] = r;
+		});
+        
+        let activeButton = $('button.date-select.active', еlement);
+        maxDate = false;
+        if(activeButton.data('value') === 'endDay') {
+            maxDate = $(еlement).find('input[name="current_date"]').val();
+            $('input[name="date_from"]', еlement).val(maxDate)
+            $('input[name="date_to"]', еlement).val(maxDate)
+        }
+
+		$('button.new-elements-daterange-date-button', еlement).daterangepicker({
+			locale: {
+				format: format,
+				firstDay: backend.user.first_day
+			},
+			parentEl: '.crisper',
+			startDate: $('input[name="date_from"]', еlement).val(),
+			endDate: $('input[name="date_to"]', еlement).val(),
+            maxDate: maxDate,
+			autoUpdateInput: false,
+			opens: 'center',
+			singleDatePicker: single,
+			timePicker: isTime,
+			timePicker24Hour: isTime,
+			ranges: ranges
+		}, function(start, end, label) {
+			setParams(start, end);
+			updateFastFilter();
+		});
+		
+		updateFastFilter();
+		prePeriodSelectChange();
+		updateBtnTitle();
+	},
+    initExpandTextButton: function (element) {
+        const $element = $(element);
+        
+        $element.on('click', '.new-elements-expand > .item', function (e) {
+            e.preventDefault();
+            
+            $element.find('.new-elements-expand > .item').removeClass('active');
+            $(this).addClass('active');
+        });
+    },
+    initHorizontalList: function (element) {
+        const $element = $(element);
+        const randomId = newElements.utils.randomString(10);
+        
+        $element.addClass(randomId);
+        
+        new Swiper(`.${randomId}.swiper-container`, {
+            direction: 'horizontal',
+            slidesPerView: 'auto',
+            freeMode: {
+                enabled: true,
+                sticky: false,
+            },
+            spaceBetween: 10,
+            scrollbar: {
+                el: `.${randomId} .swiper-scrollbar`,
+                draggable: true,
+                hide: true,
+            },
+            mousewheel: {
+                sensitivity: 1,
+            },
+            keyboard: {
+                enabled: true,
+                onlyInViewport: true,
+            },
+        })
+    },
+    rangePickerSelect: function (еlement) {
+        var filter = {
+                'day': [moment().startOf('day'), moment().endOf('day')],
+                'week': [moment().startOf('week'), moment().endOf('week')],
+                'month': [moment().startOf('month'), moment().endOf('month')],
+                'year': [moment().startOf('year'), moment().endOf('year')],
+            },
+            format = $(еlement).data('format'),
+            setParams = function(start, end) {
+                $('input[name="date_from"]', еlement).val(start.format(format));
+                $('input[name="date_to"]', еlement).val(end.format(format));
+
+                start = moment(start.format('YYYY-MM-DD'));
+                end = moment(end.format('YYYY-MM-DD'));
+
+                var period = get_period_from_dates(start, end),
+                    text = '';
+
+                if ($('input[name="pre_start"]', еlement).length) {
+                    var prePeriod = get_period_turn(1),
+                        preStart = prePeriod[0],
+                        preEnd = prePeriod[1];
+
+                    $('input[name="pre_start"]', еlement).val(preStart.format(format));
+                    $('input[name="pre_end"]', еlement).val(preEnd.format(format));
+                }
+
+                prePeriodSelectChange(period);
+
+                text = getTextFormat(period, start, end);
+
+                $('.range', еlement).html(text);
+
+                backend.autosubmit(еlement);
+            },
+            updateBtnTitle = function() {
+                var start = moment($('input[name="date_from"]', еlement).val(), 'DD.MM.YYYY');
+                var end = moment($('input[name="date_to"]', еlement).val(), 'DD.MM.YYYY');
+                var period = get_period_from_dates(start, end);
+                $('.range', еlement).html(getTextFormat(period, start, end));
+            },
+            updateFastFilter = function() {
+                var start = $('input[name="date_from"]', еlement).val(),
+                    end = $('input[name="date_to"]', еlement).val();
+
+                $('select[name="period"] option', еlement).each(function() {
+                    var value = $(this).val();
+                    if (start == filter[value][0].format(format) && end == filter[value][1].format(format)) {
+                        $(this).prop('selected', true);
+                    } else {
+                        $(this).prop('selected', false);
+                    }
+                });
+            };
+        ranges = {};
+        var single = !!$(еlement).data('single');
+        var lang = $(еlement).closest('html').attr('lang');
+
+        moment.locale(lang);
+
+        $('select[name="period"]', еlement).on('change', function() {
+            var value = $(this).val(); // Получаем выбранный период
+            setParams(filter[value][0], filter[value][1]); // Применяем новые даты
+        });
+
+        var isTime = format.indexOf('HH') >= 0;
+
+        function resolve_range_title(name) {
+            return name == 'day'       ? __('День')
+                :  name == 'week'      ? __('Неделя')
+                    :  name == 'month'     ? __('Месяц')
+                        :/*name == 'year'*/      __('Год');
+        }
+
+        var prePeriodSelectChange = function(periodType) {
+            if ($('select.selectpicker.btn-pre-period').length) {
+                var selectPrePeriod = $('select.selectpicker.btn-pre-period'),
+                    start = $('input[name="date_from"]', еlement).val(),
+                    end = $('input[name="date_to"]', еlement).val(),
+                    preStart = $('input[name="pre_start"]', еlement).val(),
+                    preEnd = $('input[name="pre_end"]', еlement).val();
+
+                start = moment(start, 'DD.MM.YYYY');
+                end = moment(end, 'DD.MM.YYYY');
+                preStart = moment(preStart, 'DD.MM.YYYY');
+                preEnd = moment(preEnd, 'DD.MM.YYYY');
+
+                if (!periodType) {
+                    periodType = get_period_from_dates(start, end);
+                }
+
+                var htmlOptions = getPrePeriodOptions(periodType, preStart, preEnd);
+
+                selectPrePeriod.html(htmlOptions).selectpicker('refresh');
+
+            }
+        };
+
+        var getTextFormat = function(period, start, end) {
+            var text = '';
+
+            if (period == 'day') {
+                text = start.format('dd, DD MMMM');
+            }
+            else if (period == 'week') {
+                text = start.format('D') + ' – ' + end.format('D MMM');
+            }
+            else if (period == 'month') {
+                text = start.format('D') + ' – ' + end.format('D MMM');
+            }
+            else if (period == 'year') {
+                text = 'янв. – дек. ' + start.format('YYYY');
+            }
+            else {
+                text = start.format('DD MMM') + ' — ' + end.format('DD MMM');
+            }
+
+            return text;
+        };
+
+
+        var getPrePeriodOptions = function(periodType, preStart, preEnd) {
+            var htmlReturn = '';
+
+            var period = get_period_turn(1);
+            var prePeriod;
+
+            if (preStart && preEnd) {
+                prePeriod = [preStart, preEnd]
+            }
+
+            if (periodType == 'day') {
+                htmlReturn += get_option_template(__('Предыдущий день'), periodType, period, prePeriod);
+
+                period = get_period_turn(1, 'week');
+                htmlReturn += get_option_template(__('На прошлой неделе'), periodType, period, prePeriod);
+            } else if (periodType == 'week') {
+                htmlReturn += get_option_template(__('Предыдущие 7 дней'), periodType, period, prePeriod);
+
+                period = get_period_turn(1, 'week', 4);
+                htmlReturn += get_option_template(__('4 недели назад'), periodType, period, prePeriod);
+
+                period = get_period_turn(1, 'year', false, 1);
+                htmlReturn += get_option_template(__('В прошлом году'), periodType, period, prePeriod);
+            } else if (periodType == 'month') {
+                htmlReturn += get_option_template(__('Предыдущий месяц'), periodType, period, prePeriod);
+
+                period = get_period_turn(1, 'year', false, 1);
+                htmlReturn += get_option_template(__('В прошлом году'), periodType, period, prePeriod);
+            } else if (periodType == 'year') {
+                htmlReturn += get_option_template(__('Предыдущий год'), periodType, period, prePeriod);
+            } else if (periodType == 'custom') {
+                htmlReturn += get_option_template(__('Предыдущий период'), periodType, period, prePeriod);
+            }
+
+            return htmlReturn;
+        };
+
+        var get_option_template = function(name, periodType, period, prePeriod) {
+            var $htmlReturn = '',
+                selectedElement = '',
+                periodFormatFrom = period[0].format(format),
+                periodFormatTo = period[1].format(format);
+
+            if (periodFormatFrom == prePeriod[0].format(format) && periodFormatTo == prePeriod[1].format(format)) {
+                selectedElement = 'selected';
+            }
+
+            $htmlReturn += '<option ' + selectedElement + ' data-content="';
+            $htmlReturn += '	<span class=\'btn-name-head\'>' + __('Период для сравнения') + '</span>';
+            $htmlReturn += '	<span class=\'btn-name\'>' + name + '</span>';
+            $htmlReturn += '	<span class=\'pre-period\'>' + getTextFormat(periodType, period[0], period[1]) + '</span>';
+            $htmlReturn += '" value="' + periodFormatFrom + '_' + periodFormatTo + '"></option>';
+
+            return $htmlReturn;
+        }
+
+        var get_period_from_dates = function(start, end) {
+            var from = moment(start).startOf('day'),
+                to = moment(end).endOf('day'),
+                diff = to.diff(from, 'days');
+
+            if(diff == 0) {
+                return 'day'
+            }
+            else if(diff == 6 && from.isoWeekday() == 1) {
+                return 'week';
+            }
+            else if(
+                to.diff(from, 'month') == 0
+                && moment(from).startOf('month').isSame(from, 'days')
+                && moment(to).endOf('month').isSame(to, 'days')
+            ) {
+                return 'month'
+            }
+            else if(
+                to.diff(from, 'year') == 0
+                && moment(from).startOf('year').isSame(from, 'days')
+                && moment(to).endOf('year').isSame(to, 'days')
+            ) {
+                return 'year'
+            }
+            return 'custom';
+        };
+
+        var get_period_turn = function(back, jumpPeriod, count, withoutOffs) {
+            var start = moment($('input[name="date_from"]', еlement).val(), 'DD.MM.YYYY'),
+                end = moment($('input[name="date_to"]', еlement).val(), 'DD.MM.YYYY'),
+                diff = end.diff(start, 'days') + 1,
+                sign = (back ? -1 : 1),
+                period = get_period_from_dates(start.format('YYYY-MM-DD'), end.format('YYYY-MM-DD'));
+
+            if (jumpPeriod) {
+                period = jumpPeriod;
+            }
+
+            if (count) {
+                sign = sign * count;
+            }
+
+            switch(period) {
+                case 'day':
+                    start.add(sign, 'd');
+                    end.add(sign, 'd');
+                    break;
+                case 'week':
+                    start.add(sign, 'w');
+                    end.add(sign, 'w');
+                    break;
+                case 'month':
+                    start.add(sign, 'M');
+                    end.add(sign, 'M');
+                    if (!withoutOffs) {
+                        start.startOf('month');
+                        end.endOf('month');
+                    }
+                    break;
+                case 'year':
+                    start.add('years', sign);
+                    end.add('years', sign);
+                    if (!withoutOffs) {
+                        start.startOf('year');
+                        end.endOf('year');
+                    }
+                    break;
+                case 'custom':
+                default :
+                    start.add(diff * sign, 'd');
+                    end.add(diff * sign, 'd');
+                    break;
+            }
+
+            return [start, end];
+        };
+
+        $('a.new-elements-calendar-prev', еlement).on('click', function() {
+            var value = get_period_turn(1);
+
+            setParams(value[0], value[1]);
+            updateFastFilter();
+        });
+
+        $('a.new-elements-calendar-next', еlement).on('click', function() {
+            var value = get_period_turn();
+
+            setParams(value[0], value[1]);
+            updateFastFilter();
+        });
+
+        $.each(filter, function(k, r) {
+            ranges[resolve_range_title(k)] = r;
+        });
+
+        $('button.new-elements-daterange-date-button', еlement).daterangepicker({
+            locale: {
+                format: format,
+                firstDay: backend.user.first_day
+            },
+            parentEl: '.crisper',
+            startDate: $('input[name="date_from"]', еlement).val(),
+            endDate: $('input[name="date_to"]', еlement).val(),
+            autoUpdateInput: false,
+            opens: 'center',
+            singleDatePicker: single,
+            timePicker: isTime,
+            timePicker24Hour: isTime,
+            ranges: ranges
+        }, function(start, end, label) {
+            setParams(start, end);
+            updateFastFilter();
+        });
+
+        updateFastFilter();
+        prePeriodSelectChange();
+        updateBtnTitle();
+    },
+
+};

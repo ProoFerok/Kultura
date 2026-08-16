@@ -1,0 +1,1011 @@
+$(document).ready(function() {
+	sw.base.apply('body');
+}).on('hidden.bs.modal', function(e) {
+	if ($('body > .modal.in').length == 0) {
+		$('body').css('padding-right', '0').removeClass('modal-open');
+	} else {
+		$('body').addClass('modal-open');
+	}
+});
+
+$.extend(sw, {
+	base: {
+		apply: function(e) {
+			$('.input-phone', e).inputPhone();
+			$('.countdown', e).countdown();
+
+			$('select.selectpicker', e).each(function(){
+				$(this).selectpicker({
+					size: $(this).data('size') || 10,
+					countSelectedText: __('{0} из {1} выбрано'),
+					noneSelectedText: __('Ничего не выбрано'),
+					noneResultsText: __('Ничего не нашли') + ' {0}',
+					doneButtonText: __('Закрыть'),
+					deselectAllText: __('Снять выделения'),
+					selectAllText: __('Выбрать все'),
+				});
+			});
+		},
+	},
+	sms: {
+		captcha: function(e) {
+			var $form = $(e);
+			var $box = $('#key', e);
+			var $key = $('input', $box);
+			var $pow = $('[name="pow"]', $form);
+			var $cleaning = $('.cleaning a', $box);
+			
+			setTimeout(function() {
+				$pow.val(sw.sms.getPow($pow.data('pow')));
+			}, 0);
+			
+			clearTimeout(sw.sms.checkStatusTimer);
+			$form.on('success', function(e, ob) {
+				sw.sms.checkStatus(ob.session);
+			});
+			
+			$form.on('error', function(e, ob) {
+				$box.addClass('has-error');
+				$('.help-block', $box).html(ob.message);
+				$key.focus();
+			}).unbind('submit');
+			
+			$('.captcha-refresh', e).on('click', function() {
+				$('img', e).attr('src', sw.fixDomain('https://sms.dikidi.ru/captcha/default/?' + Math.random(), false));
+				$cleaning.trigger('click');
+			});
+			
+			$key.on('textchange', function() {
+				$box.removeClass('has-error');
+				$('.help-block', $box).html(null);
+			});
+			
+			$cleaning.on('click', function() {
+				$key.focus();
+			});
+		},
+		recaptcha: function(el) {
+			var $form = $(el);
+			var $token = $('[name="token"]', $form);
+			var $pow = $('[name="pow"]', $form);
+			var $captcha = $('.recaptcha', $form);
+			var $check = $('.help-block.check', $form);
+			var widgetId;
+			
+			var finish = function() {
+				if(!$token.val() || !$pow.val()) return;
+				$form.submit();
+			}
+			
+			setTimeout(function() {
+				$pow.val(sw.sms.getPow($pow.data('pow')));
+				finish();
+			}, 0);
+			
+			recaptchaTool.add(function() {
+				widgetId = grecaptcha.render($captcha[0], {
+					'sitekey' : $captcha.data('sitekey'),
+					'callback': function(token) {
+						$token.val(token);
+						$check.html(null);
+						finish()
+					},
+					'expired-callback': function() {
+						$token.val('');
+					}
+				});
+			});
+			
+			clearTimeout(sw.sms.checkStatusTimer);
+			$form.on('success', function(e, ob) {
+				console.log(ob);
+				sw.sms.checkStatus(ob.session);
+			});
+			$form.on('error', function(e, ob) {
+				$check.html(ob.message);
+				recaptchaTool.add(function() {
+					grecaptcha.reset(widgetId)
+				});
+			});
+		},
+		yacaptcha: function(el) {
+			var $form = $(el);
+			var $token = $('[name="token"]', $form);
+			var $pow = $('[name="pow"]', $form);
+			var $captcha = $('.yacaptcha', $form);
+			var $check = $('.help-block.check', $form);
+			var widgetId;
+			
+			var finish = function() {
+				if(!$token.val() || !$pow.val()) return;
+				$form.submit();
+			}
+			
+			setTimeout(function() {
+				$pow.val(sw.sms.getPow($pow.data('pow')));
+				finish();
+			}, 0);
+			
+			yacaptchaTool.add(function() {
+				widgetId = smartCaptcha.render($captcha[0], {
+					'sitekey' : $captcha.data('sitekey'),
+					'callback': function(token) {
+						$token.val(token);
+						$check.html(null);
+						finish();
+					},
+				});
+			});
+			
+			clearTimeout(sw.sms.checkStatusTimer);
+			$form.on('success', function(e, ob) {
+				sw.sms.checkStatus(ob.session);
+			});
+			$form.on('error', function(e, ob) {
+				$check.html(ob.message);
+				yacaptchaTool.add(function() {
+					smartCaptcha.reset(widgetId);
+				});
+			});
+		},
+		getPow: function(source) {
+			var parts = (source||'').split(':');
+			var pow = {head:parts[0], tail:parts[1], hash:parts[2], time:parts[3], sign:parts[4]};
+			var index = 0;
+			var token;
+			while (true) {
+				index++;
+				if(md5('' + pow.head + index + pow.tail) === pow.hash) {
+					token = [index, pow.head, pow.tail, pow.hash, pow.time, pow.sign].join(':');
+					break;
+				}
+				if(index > 1000000) break;
+			}
+			return token;
+		},
+		checkStatusTimer: null,
+		checkStatus: function(session) {
+			if(sw.sms.checkStatusTimer)
+				clearTimeout(sw.sms.checkStatusTimer);
+			var counter = 1;
+			var check = function() {
+				sw.sms.checkStatusTimer = setTimeout(function() {
+					var timer = sw.sms.checkStatusTimer;
+					sw.ajax({
+						url: sw.fixDomain('https://sms.dikidi.ru/api/sms/check/?session='+session),
+						loader: false
+					}, 'get', true).done(function(data) {
+						if(timer !== sw.sms.checkStatusTimer) return;
+						if(data && data.data && data.data.success == 1) return;
+						counter++;
+						if(counter <= 10)
+							check();
+					});
+				}, 3000);
+			};
+			check();
+		}
+	},
+	auth: {
+		modal: function() {
+			sw.auth.bootbox = bootbox.dialog({
+				message: $('#auth-modal').html(),
+				backdrop: $('body > .modal-backdrop').length ? false : true,
+				className: 'sw-dialog durable auth',
+				animate: true,
+			});
+			
+			var $back = $('#back', sw.auth.bootbox);
+			
+			sw.auth.form = $('.container.auth form', sw.auth.bootbox);
+
+			sw.auth.bootbox.on('container', function(e, name) {
+				var $box = $('.container.' + name, sw.auth.bootbox);
+				
+				$('.container:visible', sw.auth.bootbox).hide();
+				$box.show();
+				
+				if (name == 'base') {
+					$back.hide();
+				} else {
+					$back.show();
+				}
+				
+				$('input[tabindex="1"]', $box).focus();
+			});
+			
+			$back.on('click', function() {
+				sw.auth.bootbox.trigger('container', 'base');
+			}).trigger('click');
+			
+			$('.base .number .btn', sw.auth.bootbox).on('click', function() {
+				sw.auth.bootbox.trigger('container', 'auth');
+			});
+			
+			$('.social > a[id]', sw.auth.bootbox).on('click', function() {
+				var u = sw.fixDomain('https://auth.dikidi.ru/social/' + $(this).attr('id'));
+				
+                if($(this).attr('id') === 'alfa_id') {
+                    window.popupAuth = window.open(u, $('body').attr('agent-mobile') ? '_self' : '_blank', 'height=680,width=1024');
+                } else {
+                    window.popupAuth = window.open(u, $('body').attr('agent-mobile') ? '_self' : '_blank', 'height=700,width=680');   
+                }
+			});
+			
+			$('#number', sw.auth.form).on('textchange', function() {
+				var $pocket = $('.pocket', sw.auth.form);
+				
+				if ($('> div', $pocket).length != 0) {
+					sw.auth.form.attr('action', sw.fixDomain('https://auth.dikidi.ru/ajax/check/auth/'));
+					$pocket.html('');
+				}
+				
+				if (this.value.length == this.getAttribute('data-maxlength')) {
+					if (this.getAttribute('code') == '7' && (this.value.substring(0, 2) == '77' || this.value.substring(0, 2) == '78')) {
+						return;
+					}
+					sw.auth.form.submit();
+				}
+			});
+
+			sw.auth.form.on('click', 'a.forgot', function() {
+				sw.ajax({
+					url: sw.fixDomain('https://auth.dikidi.ru/ajax/check/number/'),
+					loader: false,
+					data: {
+						callback: sw.fixDomain('https://auth.dikidi.ru/ajax/user/forgot/'),
+						number: $('#number', sw.auth.form).val(),
+						type: 'recovery',
+						csrf: $('[name=csrf]', sw.auth.form).val()
+					},
+				}, 'post', true);
+			});
+			
+			window.addEventListener('message', function(event) {
+				if (typeof event.data == 'object') {
+					if ('_ym' in event.data) {return;} // Авторизация через яндекс ID
+					window.popupAuth.close();
+					
+					if ('token' in event.data) {
+						window.location.reload();
+					} else if ('error' in event.data) {
+						sw.alert(event.data.error);
+					} else if ('code' in event.data) {
+						sw.ajax({
+							url: sw.fixDomain('https://auth.dikidi.ru/ajax/social/activation/'),
+							loader: false,
+							data: {
+								code: event.data.code,
+							},
+							success: function(ob) {
+								sw.auth.bootbox.trigger('container', 'dynamic');
+							}
+						}, 'get', true);
+					}
+				}
+			}, false);
+            
+            // Резервный вариант закрытия, так как facebook теряет window.opener
+            var bc = new BroadcastChannel('auth');
+            bc.addEventListener('message', function (event) {
+                if (typeof event.data == 'object') {
+                    window.postMessage(event.data, '*');
+                }
+            });
+		},
+		apple: function() {
+			$('#appleid-signin').trigger('click');
+		},
+        telegram: function (botId, redirect = true, isMobile = false) {
+            const $socialMain = $('.social-main')
+            let theme = 'light'
+            
+            if($socialMain.get(0)) {
+                if($socialMain.hasClass('dark')) {
+                    theme = 'dark'
+                }
+            }
+            sw.ajax({
+                url: sw.fixDomain('https://auth.dikidi.ru/ajax/social/telegram/?isRedirect='+redirect
+                    + '&isMobile=' + isMobile + '&theme=' + theme),
+                loader: false,
+                success: function (response) {
+                    if(response.isReload) {
+                        window.location.href = response.callback
+                    }
+                }
+            }, 'post', true)
+        },
+        telegramCheck: function(form) {
+            const $form = $(form);
+            const $isRedirect = $form.find('input[name="isRedirect"]').val();
+            const $sessionId = $form.find('input[name="sessionId"]').val();
+            const $theme = $form.find('input[name="theme"]').val();
+            const $lang = $form.find('input[name="lang"]').val();
+            
+            $form.find('.container.base button').click();
+            
+            const $back = $form.find('#back');
+            $back.show();
+            const $container = $('.container:visible', sw.auth.bootbox);
+            $container.hide()
+            
+            $back.on('click', function() {
+                clearInterval(checkInterval)
+                $('.telegram-auth').hide();
+                $form.hide();
+                $container.show();
+            });
+            
+            $('.telegram-auth .bootbox-close-button.close').on('click', function() {
+                clearInterval(checkInterval)
+                $container.show();
+            });
+            
+            const checkInterval = setInterval(async () => {
+                const $url = $form.find('input[name="url"]').val();
+ 
+                sw.ajax({
+                    url: $url + '/?isRedirect='+$isRedirect + '&sessionId='+$sessionId + '&theme=' + $theme + '&lang=' + $lang,
+                    loader: false,
+                    success: function (response) {
+                        if(response.dialog) {
+                            clearInterval(checkInterval)
+                            $('.modal.telegram-auth').hide();
+                            $('.modal.auth').hide();   
+                        } else if (response.callbackUrl) {
+                            window.location.href = response.callbackUrl
+                        }
+                    }
+                }, 'get');
+
+            }, 3000);
+        },
+        telegramUser: function(form) {
+            $('.telegram-auth-user .bootbox-close-button.close').on('click', function() {
+                $('.modal-backdrop.fade').remove();
+            });
+        },
+        telegramAuth: function (form) {
+            const $form = $(form).parent().parent();
+            const $isRedirect = $form.find('input[name="isRedirect"]').val();
+            const $sessionId = $form.parent().find('input[name="sessionId"]').val();
+
+            if((!$form.find('#agreements').get(0) && !$form.find('#not-child').get(0)) || ($form.find('#agreements').is(':checked') && $form.find('#not-child').is(':checked'))) {
+                sw.ajax({
+                    url: sw.fixDomain('https://auth.dikidi.ru/ajax/social/telegram_auth') + '/?sessionId='+$sessionId,
+                    loader: false,
+                    success: function (response) {
+                        let data = response;
+                        
+                        if(!data.auth && data.callbackUrl) {
+                            if($isRedirect == 'false') {
+                                window.location.href = window.location.href
+                            } else {
+                                window.location.href = data.callbackUrl
+                            }
+                            return;
+                        }
+                        if(data.auth && data.callback) {
+                            if($isRedirect == 'false') {
+                                window.location.href = window.location.href
+                            } else {
+                                window.location.href = data.callback;
+                            }
+                            return;
+                        }
+                    }
+                }, 'post', true)   
+            }
+        },
+        telegramCancel: function(event) {
+            event.preventDefault();
+            $('.modal.telegram-auth-user').remove();
+            $('.modal-backdrop.fade').remove();
+        },
+        telegramPhoneError: function(form) {
+            const $form = $(form);  
+            
+            $form.find('button').on('click', function() {
+                $('.modal.telegram-auth-user').remove();
+                $('.modal-backdrop.fade').remove();
+            });
+        },
+		login: function(e) {
+			$('input[tabindex]:first', e).focus();
+			
+			sw.auth.form.attr('action', sw.fixDomain('https://auth.dikidi.ru/ajax/user/auth/'));
+			
+			if (sw.auth.form.hasEvent('success')) {
+				sw.auth.form.unbind('success');
+			}
+		},
+		registration: function(e) {
+			$('input[tabindex]:first', e).focus();
+			
+			sw.auth.form.attr('action', sw.fixDomain('https://auth.dikidi.ru/ajax/check/number/'));
+		},
+		recovery: function(e) {
+			$('input[tabindex]:first', e).focus();
+			
+			$('form', e).on('submit', function() {
+				var $pass = $('input[type="password"]:first', this),
+					$conf = $('input[type="password"]:last', this);
+				
+				if ($pass.val() != $conf.val()) {
+					$conf.parent().addClass('has-error');
+					$conf.siblings('.help-block').html(__('Пароли не совпадают')).show();
+					return false;
+				}
+				
+				return sw.form(this);
+			}).on('error', function(e, ob) {
+				var $box = $('.form-group:first', this),
+					$help = $('.help-block', $box);
+
+				$box.addClass('has-error');
+				$help.html(ob.message).show();
+			});
+		},
+		activation: function(el) {
+			$('form', el).on('error', function(e, ob) {
+				var $box = $('#number', el),
+					$help = $('.help-block', $box);
+
+				$box.addClass('has-error');
+				$help.html(ob.message).show();
+			});
+		},
+		verification: function(e) {
+			if ('bootbox' in sw.auth) {
+				sw.auth.bootbox.trigger('container', 'dynamic');
+			}
+			
+			var $captcha = $('#captcha', e),
+				$form = $('#verification', e), 
+				$counting = $('.help-block .timer', $form);
+
+			$counting.on('complete', function() {
+				var text = $(this).data('text-after') || __('Отправить код еще раз'),
+					$a = $('<a id="resend-code">' + text + '</a>');
+				
+				$a.on('click', function() {
+					var ob = $form.serializeObject();
+					
+					ob.callback = $form.attr('action');
+					ob.type = $(e).data('type');
+					ob.csrf = $('[name=csrf]', $form).val();
+					ob.repeat_email = ob.email;
+					ob.email = '';
+					delete ob.key;
+					
+					sw.ajax({
+						url: sw.fixDomain('https://auth.dikidi.ru/ajax/check/number/'),
+						loader: false,
+						data: ob,
+					}, 'post', true);
+				});
+				
+				$('#key .help-block', $form).html($a);
+			});
+
+			if ($captcha.is(':visible')) {
+				$('form:first', $captcha).on('success', function(ev, ob) {
+					$counting.countdown();
+					$captcha.hide();
+					$('.verification-container', e).removeClass('hidden');
+				}).on('error', function(e, ob) {
+					var $box = $('#key', $captcha),
+						$help = $('.help-block', $box);
+
+					$box.addClass('has-error');
+					$help.html(ob.message);
+				});
+			} else {
+				$counting.countdown();
+			}
+
+			var $key = $('#key', $form);
+
+			var resetKeyError = function () {
+				if ($key.hasClass('has-error')) {
+					$key.removeClass('has-error');
+					$('.error', $key).html(null);
+				}
+			}
+
+			$('.cleaning a', $key).on('click', function() {
+				resetKeyError();
+				$('input', $key).focus();
+			});
+
+			$('input', $key).on('textchange', resetKeyError);
+
+			$form.on('error', function(e, ob) {
+				var $box = $('#key', $form);
+				$box.addClass('has-error');
+				$('.error', $box).html(ob.message);
+			});
+			
+			$(e).find('.mobile-id-confirm').click(function (evt) {
+				var phone = $form.find('input[name="number"]').val();
+				var u = sw.fixDomain('https://auth.dikidi.ru/social/mobile_id?phone=' + phone);
+				var is_mobile = !!$('body').attr('agent-mobile');
+				
+				window.popupAuth = window.open(u, is_mobile ? '_self' : '_blank', 'height=700,width=680');
+				
+				if (!is_mobile) {
+					setTimeout(function() {
+						sw.auth.check_validation(phone);
+					}, 2000);
+				}
+			});
+		},
+		webViewVerification: function (e) {
+			var data = $(e).data('variables');
+			sw.ajax({
+				url: sw.fixDomain('https://auth.dikidi.ru/ajax/check/number/'),
+				loader: false,
+				data: data,
+			}, 'post', true);
+			
+		},
+		check_validation: function (phone) {
+			sw.ajax({
+				url: sw.fixDomain('https://auth.dikidi.ru/ajax/user/check_mobile_id'),
+				data: {
+					phone: phone,
+				},
+				loader: null,
+				success: function (data) {
+					var action = $('div.verification[data-type]').data('type');
+					if (data.validated > 0) {
+						if (action == 'recovery') {
+							// Восстановление пароля
+							sw.ajax({
+								url: sw.fixDomain('https://auth.dikidi.ru/ajax/user/forgot/'),
+								loader: false,
+								data: {
+									number: phone,
+								},
+							}, 'post', true);
+						}
+						if (action == 'registration') {
+							// регистрация
+							var r_form = $('div.registration');
+							sw.ajax({
+								url: sw.fixDomain('https://auth.dikidi.ru/ajax/user/create/'),
+								loader: false,
+								data: {
+									number: phone,
+									name: r_form.find('input[name="name"]').val(),
+									email: r_form.find('input[name="email"]').val(),
+									password: r_form.find('input[name="password"]').val(),
+									csrf: r_form.find('input[name="csrf"]').val(),
+								},
+							}, 'post', true);
+						}
+						if (action == 'social-link') {
+							// проверка номера после соцсетей
+							var v_container = $('div.verification-container');
+							var url = v_container.find('form').attr('action');
+							sw.ajax({
+								url: sw.fixDomain(url),
+								loader: false,
+								data: {
+									number: phone,
+									csrf: v_container.find('input[name="csrf"]').val(),
+								},
+							}, 'post', true);
+						}
+						return;
+					}
+					if (data.failed > 0) {
+						var container = $('div.verification-container'),
+							sms_form = container.find('> form'),
+							sms_title = sms_form.find('div.help-block'),
+							mobile_id_form = container.find('> .mobile_id ');
+						
+						sms_form.removeClass('hidden');
+						mobile_id_form.addClass('hidden');
+						
+						sms_title.text(__("Произошла ошибка подтверждения через Mobile ID, попробуйте подтвердить другим способом"));
+						$('#resend-code').trigger('click');
+						return;
+					}
+					setTimeout(function() {sw.auth.check_validation(phone)}, 2000);
+				},
+				fail: function () {
+					setTimeout(function() {sw.auth.check_validation(phone)}, 2000);
+				},
+			}, 'POST');
+		},
+		complete: function(token) {
+			if (sw.isInIframe() && token) {
+				var get = window.location.href.indexOf('?') > 0 ? '&' : '?';
+				window.location.href = (window.location.href + get + 'token=' + token).replace('#', '');
+			} else {
+				window.location.reload();
+			}
+		},
+        setAppMetricUser(userId, metrika_id) {
+            ym(metrika_id ?? window.METRIKA_ID, 'setUserID', userId);
+        }
+	},
+	form: function(e) {
+		var $e = $(e), $submit = $('button[type="submit"]', $e);
+
+		$submit.setLoader();
+		
+		var ob = {
+			url: $e.attr('action'),
+			data: $e.serialize(),
+			type: $e.attr('method'),
+			dataType: 'json',
+			success: function(ob) {
+				if ($e.hasEvent('success')) {
+					if (typeof ob == 'object' && 'data' in ob) {
+						ob = ob.data;
+					}
+					
+					$e.trigger('success', ob);
+				} else {
+					sw.result(ob, $e);
+				}
+			},
+			error: function(ob) {
+				var er;
+				
+				try {
+					er = ob.responseJSON.error;
+				} catch (e) {
+					er = {
+						code: 500,
+						message: __('Ошибка при выполнении запроса'),
+					};
+					
+					console.error(e.name + ': ' + e.message);
+				}
+				
+				if ($e.hasEvent('error')) {
+					$e.trigger('error', er);
+				} else {
+					sw.alert(er.message);
+				}
+			},
+			complete: function() {
+				$submit.removeLoader();
+			}
+		};
+		
+		if (ob.url.indexOf('//') > 0 && ob.url.indexOf('dikidi.') > 0) {
+			ob.crossDomain = true;
+			ob.xhrFields = {
+				withCredentials: true,
+			};
+		}
+		
+		$.ajax(ob);
+		
+		return false;
+	},
+});
+
+(function($){
+	$.fn.countdown = function(){
+		this.each(function() {
+			var $this = $(this),
+				timer = $(this).data('seconds'),
+				template = $(this).data('template') || '%m:%s',
+				n = new Date().getTime();
+			
+			n += timer * 1000;
+
+			if (!is_done()) {
+				var x = setInterval(function() {
+					var t = new Date().getTime(),
+						d = n - t;
+
+					if (is_done()) {
+						clearInterval(x);
+						return true;
+					}
+
+					var m = Math.floor((d % (1000 * 60 * 60)) / (1000 * 60));
+					var s = Math.floor((d % (1000 * 60)) / 1000);
+
+					if (m < 10) m = '0' + m;
+					if (s < 10) s = '0' + s;
+
+					$this.html(template.replace('%m', m).replace('%s', s));
+				}, 1000);
+
+				$this.on('destroyed', function(){
+					clearInterval(x);
+				});
+			}
+
+			function is_done() {
+				var t = new Date().getTime(),
+					d = n - t;
+
+				if (d <= 0) {
+					$this.trigger('complete');
+					return true;
+				}
+				return false;
+			}
+		});
+	};
+
+	$.fn.hasEvent = function(event) {
+		if (!event) {
+			return false;
+		}
+		
+		var has = false, events = $._data(this[0], 'events');
+
+		if (typeof events == 'object') {
+			$.each(events, function(on) {
+				if (on == event) {
+					has = true; 
+				}
+			});
+		}
+		
+		return has;
+	};
+
+	$.fn.formToObject = function(){
+		var ob = {};
+		
+		this.each(function() {
+			var s = $(this).serializeArray();
+			
+			console.log(this, s);
+		});
+	};
+
+	$.fn.inputPhone = function(){
+		this.each(function() {
+			var $box = $(this),
+				$tel = $('input[type="tel"]', $box),
+				ctrlDown = false;
+
+			var checkPattern = function(pattern, value) {
+				pattern = new RegExp(pattern);
+
+				return pattern.test(value);
+			}
+
+			$tel.on('keydown', function(e) {
+				var key = e.keyCode;
+
+				if (!ctrlDown && in_array(key, [17, 91])) {
+					ctrlDown = true;
+				}
+
+				if (ctrlDown) {
+					return true;
+				}
+
+				var pattern = e.target.getAttribute('pattern'),
+					char = String.fromCharCode((96 <= key && key <= 105)? key-48 : key);
+
+				if (in_array(key, [8,9,13,35,36,37,39,46]) && checkPattern(pattern, this.value)) {
+					return true;
+				}
+				
+				return checkPattern(pattern, this.value + char);
+			}).on('keyup', function(e) {
+				if (ctrlDown && in_array(e.keyCode, [17, 91])) {
+					ctrlDown = false;
+				}
+				
+				var code = e.target.getAttribute('code'),
+					pattern = e.target.getAttribute('pattern'),
+					maxLength = e.target.getAttribute('data-maxlength');
+				
+				// Сначала попытаемся отбросить все не цифры
+				if (!checkPattern(pattern, this.value)) {
+					this.value = this.value.replaceAll(/\D/g, '');
+				}
+
+				// Частный случай для России - оставляем только 7
+				// если в начале номера 77 или 78 И длина номера на 1 больше максимальной длины
+				// (ошибка при вставке номера произошла)
+				if (this.value.length - 1 == maxLength
+					&& code == '7'
+					&& (this.value.substring(0, 2) == '77' || this.value.substring(0, 2) == '78')) {
+					this.value = code + this.value.substring(2, this.value.length);
+				}
+				
+				// Если прошлые шаги не помогли - тогда выкидываем всё.
+				if (!checkPattern(pattern, this.value)) {
+					this.value = code;
+				}
+				
+				// отрезаем лишнее
+				var maxLength = this.getAttribute('data-maxlength');
+				if (maxLength && this.value.length > maxLength) {
+					this.value = this.value.substring(0, maxLength);
+				}
+			});
+
+			var setFlag = function (e) {
+				var $a = $(e),
+					pattern = $a.data('pattern');
+
+				if (!checkPattern(pattern, $tel.val())) {
+					$tel.val($a.data('code'));
+				}
+
+				$tel.attr('data-maxlength', $a.data('limit'))
+					.attr('minlength', $a.data('min'))
+					.attr('code', $a.data('code'))
+					.attr('pattern', pattern)
+					.focus();
+
+				$('.input-group-btn .btn .flag', $box).attr('class', 'flag ' + $a.data('flag'));
+			}
+
+			$('li > a', $box).on('click', function() {
+				setFlag(this);
+			});
+
+			var $used = $('a[data-flag="' + $tel.attr('flag') + '"]', $box);
+			
+			// Костыль для телефонов по которым не определяется страна
+			if($tel.val() && !checkPattern($used.data('pattern'), $tel.val())) {
+				var $unknown = $('<li><a data-min="7" data-limit="18" data-flag="" data-code="" data-pattern="^\\d+$"><span class="flag"></span><span class="country">Unknown</span><span class="code"></span></a></li>');
+				$used = $unknown.find('a');
+				$('ul>li:eq(0)', $box).before($unknown);
+			}
+
+			if ($used.length) {
+				setFlag($used);
+			} else {
+				$('li:first > a', $box).trigger('click');
+			}
+		});
+	};
+})(jQuery);
+
+(function($, w) {
+	w.recaptchaTool = {
+		injected: false,
+		ini: false,
+		cbs: [],
+		inject: function() {
+			if(recaptchaTool.injected) return;
+			recaptchaTool.injected = true;
+			$.ajax({
+				url: '//www.google.com/recaptcha/api.js?onload=onloadRecaptchaCallback&render=explicit',
+				dataType: 'script'
+			});
+		},
+		add: function(cb) {
+			recaptchaTool.inject();
+			if(recaptchaTool.ini)
+				cb();
+			else
+				recaptchaTool.cbs.push(cb);
+		},
+		run: function() {
+			for(var key in recaptchaTool.cbs)
+				if (recaptchaTool.cbs.hasOwnProperty(key))
+					recaptchaTool.cbs[key]();
+		}
+	};
+	w.onloadRecaptchaCallback = function() {
+		recaptchaTool.ini = true;
+		recaptchaTool.run();
+	};
+	w.yacaptchaTool = {
+		injected: false,
+		ini: false,
+		cbs: [],
+		inject: function() {
+			if(yacaptchaTool.injected) return;
+			yacaptchaTool.injected = true;
+			$.ajax({
+				url: 'https://captcha-api.yandex.ru/captcha.js?render=onload&onload=onloadYacaptchaCallback',
+				dataType: 'script'
+			});
+		},
+		add: function(cb) {
+			yacaptchaTool.inject();
+			if(yacaptchaTool.ini)
+				cb();
+			else
+				yacaptchaTool.cbs.push(cb);
+		},
+		run: function() {
+			for(var key in yacaptchaTool.cbs)
+				if (yacaptchaTool.cbs.hasOwnProperty(key))
+					yacaptchaTool.cbs[key]();
+		}
+	};
+	w.onloadYacaptchaCallback = function() {
+		yacaptchaTool.ini = true;
+		yacaptchaTool.run();
+	}
+	w.md5 = function(d){result = M(V(Y(X(d),8*d.length)));return result.toLowerCase()};function M(d){for(var _,m="0123456789ABCDEF",f="",r=0;r<d.length;r++)_=d.charCodeAt(r),f+=m.charAt(_>>>4&15)+m.charAt(15&_);return f}function X(d){for(var _=Array(d.length>>2),m=0;m<_.length;m++)_[m]=0;for(m=0;m<8*d.length;m+=8)_[m>>5]|=(255&d.charCodeAt(m/8))<<m%32;return _}function V(d){for(var _="",m=0;m<32*d.length;m+=8)_+=String.fromCharCode(d[m>>5]>>>m%32&255);return _}function Y(d,_){d[_>>5]|=128<<_%32,d[14+(_+64>>>9<<4)]=_;for(var m=1732584193,f=-271733879,r=-1732584194,i=271733878,n=0;n<d.length;n+=16){var h=m,t=f,g=r,e=i;f=md5_ii(f=md5_ii(f=md5_ii(f=md5_ii(f=md5_hh(f=md5_hh(f=md5_hh(f=md5_hh(f=md5_gg(f=md5_gg(f=md5_gg(f=md5_gg(f=md5_ff(f=md5_ff(f=md5_ff(f=md5_ff(f,r=md5_ff(r,i=md5_ff(i,m=md5_ff(m,f,r,i,d[n+0],7,-680876936),f,r,d[n+1],12,-389564586),m,f,d[n+2],17,606105819),i,m,d[n+3],22,-1044525330),r=md5_ff(r,i=md5_ff(i,m=md5_ff(m,f,r,i,d[n+4],7,-176418897),f,r,d[n+5],12,1200080426),m,f,d[n+6],17,-1473231341),i,m,d[n+7],22,-45705983),r=md5_ff(r,i=md5_ff(i,m=md5_ff(m,f,r,i,d[n+8],7,1770035416),f,r,d[n+9],12,-1958414417),m,f,d[n+10],17,-42063),i,m,d[n+11],22,-1990404162),r=md5_ff(r,i=md5_ff(i,m=md5_ff(m,f,r,i,d[n+12],7,1804603682),f,r,d[n+13],12,-40341101),m,f,d[n+14],17,-1502002290),i,m,d[n+15],22,1236535329),r=md5_gg(r,i=md5_gg(i,m=md5_gg(m,f,r,i,d[n+1],5,-165796510),f,r,d[n+6],9,-1069501632),m,f,d[n+11],14,643717713),i,m,d[n+0],20,-373897302),r=md5_gg(r,i=md5_gg(i,m=md5_gg(m,f,r,i,d[n+5],5,-701558691),f,r,d[n+10],9,38016083),m,f,d[n+15],14,-660478335),i,m,d[n+4],20,-405537848),r=md5_gg(r,i=md5_gg(i,m=md5_gg(m,f,r,i,d[n+9],5,568446438),f,r,d[n+14],9,-1019803690),m,f,d[n+3],14,-187363961),i,m,d[n+8],20,1163531501),r=md5_gg(r,i=md5_gg(i,m=md5_gg(m,f,r,i,d[n+13],5,-1444681467),f,r,d[n+2],9,-51403784),m,f,d[n+7],14,1735328473),i,m,d[n+12],20,-1926607734),r=md5_hh(r,i=md5_hh(i,m=md5_hh(m,f,r,i,d[n+5],4,-378558),f,r,d[n+8],11,-2022574463),m,f,d[n+11],16,1839030562),i,m,d[n+14],23,-35309556),r=md5_hh(r,i=md5_hh(i,m=md5_hh(m,f,r,i,d[n+1],4,-1530992060),f,r,d[n+4],11,1272893353),m,f,d[n+7],16,-155497632),i,m,d[n+10],23,-1094730640),r=md5_hh(r,i=md5_hh(i,m=md5_hh(m,f,r,i,d[n+13],4,681279174),f,r,d[n+0],11,-358537222),m,f,d[n+3],16,-722521979),i,m,d[n+6],23,76029189),r=md5_hh(r,i=md5_hh(i,m=md5_hh(m,f,r,i,d[n+9],4,-640364487),f,r,d[n+12],11,-421815835),m,f,d[n+15],16,530742520),i,m,d[n+2],23,-995338651),r=md5_ii(r,i=md5_ii(i,m=md5_ii(m,f,r,i,d[n+0],6,-198630844),f,r,d[n+7],10,1126891415),m,f,d[n+14],15,-1416354905),i,m,d[n+5],21,-57434055),r=md5_ii(r,i=md5_ii(i,m=md5_ii(m,f,r,i,d[n+12],6,1700485571),f,r,d[n+3],10,-1894986606),m,f,d[n+10],15,-1051523),i,m,d[n+1],21,-2054922799),r=md5_ii(r,i=md5_ii(i,m=md5_ii(m,f,r,i,d[n+8],6,1873313359),f,r,d[n+15],10,-30611744),m,f,d[n+6],15,-1560198380),i,m,d[n+13],21,1309151649),r=md5_ii(r,i=md5_ii(i,m=md5_ii(m,f,r,i,d[n+4],6,-145523070),f,r,d[n+11],10,-1120210379),m,f,d[n+2],15,718787259),i,m,d[n+9],21,-343485551),m=safe_add(m,h),f=safe_add(f,t),r=safe_add(r,g),i=safe_add(i,e)}return Array(m,f,r,i)}function md5_cmn(d,_,m,f,r,i){return safe_add(bit_rol(safe_add(safe_add(_,d),safe_add(f,i)),r),m)}function md5_ff(d,_,m,f,r,i,n){return md5_cmn(_&m|~_&f,d,_,r,i,n)}function md5_gg(d,_,m,f,r,i,n){return md5_cmn(_&f|m&~f,d,_,r,i,n)}function md5_hh(d,_,m,f,r,i,n){return md5_cmn(_^m^f,d,_,r,i,n)}function md5_ii(d,_,m,f,r,i,n){return md5_cmn(m^(_|~f),d,_,r,i,n)}function safe_add(d,_){var m=(65535&d)+(65535&_);return(d>>16)+(_>>16)+(m>>16)<<16|65535&m}function bit_rol(d,_){return d<<_|d>>>32-_}
+    w.serializeArrayToObject = function (data) {
+        let result = {};
+        
+        $.each(data, function () {
+            result[this.name] = this.value;
+        });
+        
+        return result;
+    }
+    w.swAsyncPolling = function(url, data, loader = null, timeout = 3000, successFunction = null, isWarningError = false) {
+        if (loader == null) {
+            loader = 'body';
+        }
+        
+        $(loader).setLoader();
+        
+        let stopped = false;
+        
+        data.asyncProcessId = null;
+        
+        function polling() {
+            if (stopped) {
+                $(loader).removeLoader();
+                
+                return;
+            }
+            
+            sw.ajax({
+                url: url,
+                loader: '',
+                data: data,
+                success: function (response) {
+                    if (response.redirect_link) {
+                        stopped = true;
+                        
+                        window.location.href = response.redirect_link;
+                    } else {
+                        if (response.status !== 'waiting') {
+                            stopped = true;
+
+                            if (successFunction !== null) {
+                                successFunction();
+                            }
+                        } else {
+                            if (response.asyncProcessId) {
+                                if (data.asyncProcessId === null) {
+                                    data.asyncProcessId = response.asyncProcessId
+                                }
+                            }
+                        }
+                    }
+                    
+                    if (! stopped) {
+                        setTimeout(polling, timeout);
+                    } else {
+                        $(loader).removeLoader();
+                    }
+                },
+                error: function (response) {
+                    if (isWarningError) {
+                        var message = response.message;
+
+                        bootbox.alert({
+                            className: 'sw-dialog modal-alert ' + data.theme,
+                            title: __('Внимание!'),
+                            message: message,
+                        });
+                    }
+                    
+                    stopped = true;
+                    setTimeout(polling, timeout);
+                }
+            }, 'post');
+        }
+        
+        polling();
+    }
+})(jQuery, window);

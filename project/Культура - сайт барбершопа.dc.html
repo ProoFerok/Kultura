@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/classical-5038a801-53de-47c3-b172-fb583a4b4052/styles.css">
+<script src="_ds/classical-5038a801-53de-47c3-b172-fb583a4b4052/_ds_bundle.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Lora:ital,wght@0,400;0,500;1,400&family=Prata&display=swap">
+<script src="./image-slot.js"></script>
+<style>
+  html { scroll-behavior: smooth; }
+  body { background: #0e0e0d; color: #f1efe9; margin: 0; }
+  a { color: #4ea89c; text-decoration: none; }
+  a:hover { color: #7ecfc2; }
+  h1, h2, h3, h4 { color: #f1efe9; font-family: "Prata", var(--font-heading); font-weight: 400; }
+  ::selection { background: rgba(78,168,156,.35); }
+  :focus-visible { outline: 2px solid #4ea89c; outline-offset: 3px; }
+</style>
+</helmet>
+
+<div style="background:#0e0e0d;color:#f1efe9;font-family:var(--font-body);min-height:100vh">
+
+  <header style="position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:24px;padding:14px clamp(20px,5vw,64px);background:rgba(14,14,13,.92);backdrop-filter:blur(8px);border-bottom:1px solid rgba(241,239,233,.14)">
+    <a href="#top" style="display:block;flex:none"><img src="assets/logo-mark.png" alt="Культура" style="height:30px;width:auto"></a>
+    <nav style="display:flex;align-items:center;gap:clamp(14px,2.4vw,34px);font-family:var(--font-heading);font-size:14px;letter-spacing:.1em;text-transform:uppercase">
+      <a href="#services" style="color:rgba(241,239,233,.72)" style-hover="color:#f1efe9">Услуги</a>
+      <a href="#masters" style="color:rgba(241,239,233,.72)" style-hover="color:#f1efe9">Мастера</a>
+      <a href="#gallery" style="color:rgba(241,239,233,.72)" style-hover="color:#f1efe9">Галерея</a>
+      <a href="#reviews" style="color:rgba(241,239,233,.72)" style-hover="color:#f1efe9">Отзывы</a>
+      <a href="#contacts" style="color:rgba(241,239,233,.72)" style-hover="color:#f1efe9">Контакты</a>
+      <a href="https://dikidi.net/ru/profile/kultura_1645652" target="_blank" rel="noopener" style="color:#4ea89c;border:1px solid #4ea89c;border-radius:var(--radius-md);padding:9px 18px;letter-spacing:.08em" style-hover="background:rgba(78,168,156,.14);color:#7ecfc2">Записаться</a>
+    </nav>
+  </header>
+
+  <section id="top" style="display:grid;grid-template-columns:1.05fr .95fr;align-items:stretch;gap:0;border-bottom:1px solid rgba(241,239,233,.14)">
+    <div style="padding:clamp(40px,6vw,88px) clamp(20px,5vw,64px);display:flex;flex-direction:column;justify-content:center;gap:26px">
+      <div style="font-family:var(--font-heading);font-size:13px;letter-spacing:.24em;text-transform:uppercase;color:#4ea89c;font-feature-settings:'tnum'">Барбершоп · Пенза</div>
+      <img src="assets/logo-mark.png" alt="КУЛЬТУРА" style="width:min(100%,620px);height:auto;margin:0">
+      <p style="max-width:46ch;font-size:18px;line-height:1.62;color:rgba(241,239,233,.78);margin:0;text-wrap:pretty">Мужская стрижка, борода и бритьё на Кулакова, 14А. Место, где к себе относятся с уважением.</p>
+      <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;font-size:14px;color:rgba(241,239,233,.62);font-feature-settings:'tnum'">
+        <span style="color:#c9a24a;letter-spacing:.14em;font-size:16px">★★★★★</span>
+        <span style="color:#f1efe9;font-family:var(--font-heading);font-size:18px">5.0</span>
+        <span>99 оценок · 77 отзывов</span>
+      </div>
+      <div style="display:flex;gap:14px;flex-wrap:wrap;padding-top:6px">
+        <a href="https://dikidi.net/ru/profile/kultura_1645652" target="_blank" rel="noopener" style="font-family:var(--font-heading);font-size:16px;letter-spacing:.06em;color:#4ea89c;border:1px solid #4ea89c;border-radius:var(--radius-md);padding:14px 26px" style-hover="background:rgba(78,168,156,.14);color:#7ecfc2">Записаться онлайн</a>
+        <a href="tel:+79869379863" style="font-family:var(--font-heading);font-size:16px;letter-spacing:.06em;color:#f1efe9;border:1px solid rgba(241,239,233,.28);border-radius:var(--radius-md);padding:14px 26px;font-feature-settings:'tnum'" style-hover="border-color:rgba(241,239,233,.6)">+7 (986) 937-98-63</a>
+      </div>
+    </div>
+    <div style="position:relative;min-height:clamp(420px,68vh,760px);border-left:1px solid rgba(241,239,233,.14);overflow:hidden">
+      <img src="assets/interior-chairs.webp" alt="Интерьер барбершопа «Культура»" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:contrast(1.04) saturate(.92)">
+    </div>
+  </section>
+
+  <div style="height:6px;background:repeating-linear-gradient(45deg,#1f7a72 0 7px,#0e0e0d 7px 14px,#f1efe9 14px 21px,#0e0e0d 21px 28px)"></div>
+
+  <section id="about" style="padding:clamp(48px,7vw,104px) clamp(20px,5vw,64px);border-bottom:1px solid rgba(241,239,233,.14)">
+    <div style="max-width:1180px;margin:0 auto;display:grid;grid-template-columns:.85fr 1.15fr;gap:clamp(28px,5vw,72px);align-items:start">
+      <div>
+        <h2 style="font-size:clamp(34px,4.2vw,54px);font-weight:400;margin:0 0 14px;letter-spacing:-.02em">Не просто<br>стрижка</h2>
+        <div style="width:64px;height:2px;background:#4ea89c"></div>
+      </div>
+      <div>
+        <p style="font-size:17px;line-height:1.78;text-align:justify;hyphens:auto;color:rgba(241,239,233,.82);margin:0 0 32px;max-width:62ch">«Культура» — барбершоп в центре Пензы, на улице Кулакова. Сюда приходят за аккуратной работой и спокойной атмосферой, а не за суетой. Мастера делают классические и современные мужские стрижки, оформляют и стригут бороду, бреют опасной бритвой, знают, что такое камуфляж седины.</p>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:rgba(241,239,233,.16);border:1px solid rgba(241,239,233,.16)">
+          <div style="background:#0e0e0d;padding:22px 20px">
+            <div style="font-family:var(--font-heading);font-size:32px;line-height:1;color:#f1efe9;font-feature-settings:'tnum'">5.0</div>
+            <div style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:rgba(241,239,233,.55);margin-top:8px">рейтинг</div>
+          </div>
+          <div style="background:#0e0e0d;padding:22px 20px">
+            <div style="font-family:var(--font-heading);font-size:32px;line-height:1;color:#f1efe9;font-feature-settings:'tnum'">99</div>
+            <div style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:rgba(241,239,233,.55);margin-top:8px">оценок</div>
+          </div>
+          <div style="background:#0e0e0d;padding:22px 20px">
+            <div style="font-family:var(--font-heading);font-size:32px;line-height:1;color:#f1efe9;font-feature-settings:'tnum'">77</div>
+            <div style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:rgba(241,239,233,.55);margin-top:8px">отзывов, 100% положительные</div>
+          </div>
+          <div style="background:#0e0e0d;padding:22px 20px">
+            <div style="font-family:var(--font-heading);font-size:22px;line-height:1.2;color:#f1efe9">ул. Кулакова,<br>14А</div>
+            <div style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:rgba(241,239,233,.55);margin-top:8px">адрес</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="services" style="padding:clamp(48px,7vw,104px) clamp(20px,5vw,64px);border-bottom:1px solid rgba(241,239,233,.14)">
+    <div style="max-width:1180px;margin:0 auto">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;gap:24px;flex-wrap:wrap;margin-bottom:36px">
+        <h2 style="font-size:clamp(34px,4.2vw,54px);font-weight:400;margin:0;letter-spacing:-.02em">Прайс</h2>
+        <div style="font-size:14px;color:rgba(241,239,233,.55);max-width:38ch">Актуальные цены и полный список услуг — в онлайн-записи.</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1.25fr .75fr;gap:clamp(28px,5vw,64px);align-items:start">
+        <div>
+          <div style="display:flex;align-items:baseline;gap:14px;padding:18px 0;border-top:1px solid rgba(241,239,233,.16)">
+            <span style="font-family:var(--font-heading);font-size:22px">Мужская стрижка</span>
+            <span style="flex:1;height:1px;background:rgba(241,239,233,.18);transform:translateY(-4px)"></span>
+            <span style="font-size:17px;color:#f1efe9;font-feature-settings:'tnum'">от 1 200 ₽</span>
+          </div>
+          <div style="display:flex;align-items:baseline;gap:14px;padding:18px 0;border-top:1px solid rgba(241,239,233,.16)">
+            <span style="font-family:var(--font-heading);font-size:22px">Стрижка + борода</span>
+            <span style="flex:1;height:1px;background:rgba(241,239,233,.18);transform:translateY(-4px)"></span>
+            <span style="font-size:17px;color:#f1efe9;font-feature-settings:'tnum'">от 1 700 ₽</span>
+          </div>
+          <div style="display:flex;align-items:baseline;gap:14px;padding:18px 0;border-top:1px solid rgba(241,239,233,.16)">
+            <span style="font-family:var(--font-heading);font-size:22px">Оформление бороды и усов</span>
+            <span style="flex:1;height:1px;background:rgba(241,239,233,.18);transform:translateY(-4px)"></span>
+            <span style="font-size:17px;color:#f1efe9;font-feature-settings:'tnum'">от 700 ₽</span>
+          </div>
+          <div style="display:flex;align-items:baseline;gap:14px;padding:18px 0;border-top:1px solid rgba(241,239,233,.16)">
+            <span style="font-family:var(--font-heading);font-size:22px">Королевское бритьё</span>
+            <span style="flex:1;height:1px;background:rgba(241,239,233,.18);transform:translateY(-4px)"></span>
+            <span style="font-size:15px;color:rgba(241,239,233,.6);font-feature-settings:'tnum'">уточняйте</span>
+          </div>
+          <div style="display:flex;align-items:baseline;gap:14px;padding:18px 0;border-top:1px solid rgba(241,239,233,.16)">
+            <span style="font-family:var(--font-heading);font-size:22px">Детская стрижка <span style="font-size:14px;color:rgba(241,239,233,.5)">до 10 лет</span></span>
+            <span style="flex:1;height:1px;background:rgba(241,239,233,.18);transform:translateY(-4px)"></span>
+            <span style="font-size:17px;color:#f1efe9;font-feature-settings:'tnum'">1000 ₽</span>
+          </div>
+          <div style="display:flex;align-items:baseline;gap:14px;padding:18px 0;border-top:1px solid rgba(241,239,233,.16);border-bottom:1px solid rgba(241,239,233,.16)">
+            <span style="font-family:var(--font-heading);font-size:22px">Камуфляж седины <span style="font-size:14px;color:rgba(241,239,233,.5)">борода</span></span>
+            <span style="flex:1;height:1px;background:rgba(241,239,233,.18);transform:translateY(-4px)"></span>
+            <span style="font-size:17px;color:#f1efe9;font-feature-settings:'tnum'">500 ₽</span>
+          </div>
+          <div style="padding-top:30px">
+            <a href="https://dikidi.net/ru/profile/kultura_1645652" target="_blank" rel="noopener" style="display:inline-block;font-family:var(--font-heading);font-size:16px;letter-spacing:.06em;color:#4ea89c;border:1px solid #4ea89c;border-radius:var(--radius-md);padding:14px 26px" style-hover="background:rgba(78,168,156,.14);color:#7ecfc2">Смотреть все услуги и записаться</a>
+          </div>
+        </div>
+        <div style="border:6px solid #171716;outline:1px solid rgba(241,239,233,.16);height:clamp(360px,52vw,560px)">
+          <img src="assets/master.webp" alt="Мастер за работой" style="width:100%;height:100%;object-fit:cover;filter:contrast(1.04) saturate(.92)">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div style="height:6px;background:repeating-linear-gradient(45deg,#1f7a72 0 7px,#0e0e0d 7px 14px,#f1efe9 14px 21px,#0e0e0d 21px 28px)"></div>
+
+  <section id="masters" style="padding:clamp(48px,7vw,104px) clamp(20px,5vw,64px);border-bottom:1px solid rgba(241,239,233,.14)">
+    <div style="max-width:1180px;margin:0 auto">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;gap:24px;flex-wrap:wrap;margin-bottom:40px">
+        <h2 style="font-size:clamp(34px,4.2vw,54px);font-weight:400;margin:0;letter-spacing:-.02em">Мастера</h2>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(420px,1fr));grid-template-rows:auto auto auto;column-gap:clamp(24px,4vw,56px);row-gap:22px">
+
+        <div style="display:grid;grid-row:span 3;grid-template-rows:subgrid;row-gap:22px">
+          <div style="display:grid;grid-template-columns:210px 1fr;gap:24px;align-items:start">
+            <div style="position:relative;border:6px solid #171716;outline:1px solid rgba(241,239,233,.16);height:270px;background:#171716;display:flex;align-items:center;justify-content:center">
+              <span style="font-family:var(--font-heading);font-size:44px;color:rgba(241,239,233,.28)">ГД</span>
+              <img src="https://f2.dikidi.net/c18/v17840/1obfvmnge1.jpg" alt="Гуляев Данил" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:contrast(1.04) saturate(.92)">
+            </div>
+            <div>
+              <h3 style="font-size:30px;font-weight:400;margin:0 0 6px;letter-spacing:-.01em">Гуляев Данил</h3>
+              <div style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#4ea89c">Мастер</div>
+              <div style="display:flex;align-items:baseline;gap:10px;margin-top:14px;font-size:13px;color:rgba(241,239,233,.6);font-feature-settings:'tnum'">
+                <span style="color:#c9a24a;letter-spacing:.12em">★★★★★</span>
+                <span style="color:#f1efe9;font-family:var(--font-heading);font-size:16px">5.0</span>
+                <span>8 оценок</span>
+              </div>
+              <p style="font-size:15px;line-height:1.7;color:rgba(241,239,233,.78);margin:16px 0 0;text-wrap:pretty">Качественно. Внимательно. Со знанием дела.</p>
+              <ul style="margin:12px 0 0;padding:0 0 0 18px;font-size:15px;line-height:1.75;color:rgba(241,239,233,.72)">
+                <li>Индивидуальный подход к каждой стрижке</li>
+                <li>Аккуратные чёткие линии и формы</li>
+                <li>Спокойная мужская атмосфера</li>
+              </ul>
+              <p style="font-size:15px;line-height:1.7;color:rgba(241,239,233,.78);margin:12px 0 0">Работаю с проверенными средствами и профессиональными инструментами. Хорошая стрижка — основа уверенного образа. Буду рад помочь.</p>
+            </div>
+          </div>
+          <div>
+            <div style="display:flex;align-items:baseline;gap:12px;padding:14px 0;border-top:1px solid rgba(241,239,233,.16)">
+              <span style="font-family:var(--font-heading);font-size:19px">Стрижка мужская</span>
+              <span style="flex:1;height:1px;background:rgba(241,239,233,.18);transform:translateY(-4px)"></span>
+              <span style="font-size:13px;color:rgba(241,239,233,.5);font-feature-settings:'tnum'">1 ч</span>
+              <span style="font-size:16px;font-feature-settings:'tnum'">1 200 ₽</span>
+            </div>
+            <div style="display:flex;align-items:baseline;gap:12px;padding:14px 0;border-top:1px solid rgba(241,239,233,.16)">
+              <span style="font-family:var(--font-heading);font-size:19px">Оформление бороды и усов</span>
+              <span style="flex:1;height:1px;background:rgba(241,239,233,.18);transform:translateY(-4px)"></span>
+              <span style="font-size:13px;color:rgba(241,239,233,.5);font-feature-settings:'tnum'">30 м</span>
+              <span style="font-size:16px;font-feature-settings:'tnum'">800 ₽</span>
+            </div>
+            <div style="display:flex;align-items:baseline;gap:12px;padding:14px 0;border-top:1px solid rgba(241,239,233,.16)">
+              <span style="font-family:var(--font-heading);font-size:19px">Мужская стрижка + оформление бороды</span>
+              <span style="flex:1;height:1px;background:rgba(241,239,233,.18);transform:translateY(-4px)"></span>
+              <span style="font-size:13px;color:rgba(241,239,233,.5);font-feature-settings:'tnum'">1 ч 15 м</span>
+              <span style="font-size:16px;font-feature-settings:'tnum'">1 700 ₽</span>
+            </div>
+            <div style="display:flex;align-items:baseline;gap:12px;padding:14px 0;border-top:1px solid rgba(241,239,233,.16)">
+              <span style="font-family:var(--font-heading);font-size:19px">Камуфляж седины (борода)</span>
+              <span style="flex:1;height:1px;background:rgba(241,239,233,.18);transform:translateY(-4px)"></span>
+              <span style="font-size:13px;color:rgba(241,239,233,.5);font-feature-settings:'tnum'">30 м</span>
+              <span style="font-size:16px;font-feature-settings:'tnum'">500 ₽</span>
+            </div>
+            <div style="display:flex;align-items:baseline;gap:12px;padding:14px 0;border-top:1px solid rgba(241,239,233,.16);border-bottom:1px solid rgba(241,239,233,.16)">
+              <span style="font-family:var(--font-heading);font-size:19px">Детская стрижка (до 10 лет)</span>
+              <span style="flex:1;height:1px;background:rgba(241,239,233,.18);transform:translateY(-4px)"></span>
+              <span style="font-size:13px;color:rgba(241,239,233,.5);font-feature-settings:'tnum'">1 ч</span>
+              <span style="font-size:16px;font-feature-settings:'tnum'">1 000 ₽</span>
+            </div>
+          </div>
+          <div>
+            <button type="button" onClick="{{ openDanil }}" style="font-family:var(--font-heading);font-size:16px;letter-spacing:.06em;color:#4ea89c;background:transparent;border:1px solid #4ea89c;border-radius:var(--radius-md);padding:14px 26px;cursor:pointer" style-hover="background:rgba(78,168,156,.14);color:#7ecfc2">Записаться к Данилу</button>
+          </div>
+        </div>
+
+        <div style="order:-1;display:grid;grid-row:span 3;grid-template-rows:subgrid;row-gap:22px">
+          <div style="display:grid;grid-template-columns:210px 1fr;gap:24px;align-items:start">
+            <div style="position:relative;border:6px solid #171716;outline:1px solid rgba(241,239,233,.16);height:270px;background:#171716;display:flex;align-items:center;justify-content:center">
+              <span style="font-family:var(--font-heading);font-size:44px;color:rgba(241,239,233,.28)">ТА</span>
+              <img src="https://f2.dikidi.net/c25/v24641/6nur3282nb.jpg" alt="Терёшкин Андрей" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:contrast(1.04) saturate(.92)">
+            </div>
+            <div>
+              <h3 style="font-size:30px;font-weight:400;margin:0 0 6px;letter-spacing:-.01em">Терёшкин Андрей</h3>
+              <div style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#4ea89c">Мастер</div>
+              <div style="display:flex;align-items:baseline;gap:10px;margin-top:14px;font-size:13px;color:rgba(241,239,233,.6);font-feature-settings:'tnum'">
+                <span style="color:#c9a24a;letter-spacing:.12em">★★★★★</span>
+                <span style="color:#f1efe9;font-family:var(--font-heading);font-size:16px">5.0</span>
+                <span>2 оценки</span>
+              </div>
+              <p style="font-size:15px;line-height:1.7;color:rgba(241,239,233,.78);margin:16px 0 0;text-wrap:pretty">Мужские стрижки и работа с бородой.</p>
+              <ul style="margin:12px 0 0;padding:0 0 0 18px;font-size:15px;line-height:1.75;color:rgba(241,239,233,.72)">
+                <li>Классические и современные формы</li>
+                <li>Борода: оформление и камуфляж седины</li>
+                <li>Депиляция воском: нос, уши, брови</li>
+              </ul>
+              <p style="font-size:15px;line-height:1.7;color:rgba(241,239,233,.78);margin:12px 0 0">Сначала разбираемся, что подойдёт именно вам, потом стрижём. Без спешки и лишних разговоров.</p>
+            </div>
+          </div>
+          <div>
+            <div style="display:flex;align-items:baseline;gap:12px;padding:14px 0;border-top:1px solid rgba(241,239,233,.16)">
+              <span style="font-family:var(--font-heading);font-size:19px">Стрижка мужская</span>
+              <span style="flex:1;height:1px;background:rgba(241,239,233,.18);transform:translateY(-4px)"></span>
+              <span style="font-size:13px;color:rgba(241,239,233,.5);font-feature-settings:'tnum'">1 ч</span>
+              <span style="font-size:16px;font-feature-settings:'tnum'">1 400 ₽</span>
+            </div>
+            <div style="display:flex;align-items:baseline;gap:12px;padding:14px 0;border-top:1px solid rgba(241,239,233,.16)">
+              <span style="font-family:var(--font-heading);font-size:19px">Оформление бороды и усов</span>
+              <span style="flex:1;height:1px;background:rgba(241,239,233,.18);transform:translateY(-4px)"></span>
+              <span style="font-size:13px;color:rgba(241,239,233,.5);font-feature-settings:'tnum'">30 м</span>
+              <span style="font-size:16px;font-feature-settings:'tnum'">700 ₽</span>
+            </div>
+            <div style="display:flex;align-items:baseline;gap:12px;padding:14px 0;border-top:1px solid rgba(241,239,233,.16)">
+              <span style="font-family:var(--font-heading);font-size:19px">Мужская стрижка + оформление бороды</span>
+              <span style="flex:1;height:1px;background:rgba(241,239,233,.18);transform:translateY(-4px)"></span>
+              <span style="font-size:13px;color:rgba(241,239,233,.5);font-feature-settings:'tnum'">1 ч 25 м</span>
+              <span style="font-size:16px;font-feature-settings:'tnum'">2 000 ₽</span>
+            </div>
+            <div style="display:flex;align-items:baseline;gap:12px;padding:14px 0;border-top:1px solid rgba(241,239,233,.16)">
+              <span style="font-family:var(--font-heading);font-size:19px">Камуфляж седины (борода)</span>
+              <span style="flex:1;height:1px;background:rgba(241,239,233,.18);transform:translateY(-4px)"></span>
+              <span style="font-size:13px;color:rgba(241,239,233,.5);font-feature-settings:'tnum'">20 м</span>
+              <span style="font-size:16px;font-feature-settings:'tnum'">500 ₽</span>
+            </div>
+            <div style="display:flex;align-items:baseline;gap:12px;padding:14px 0;border-top:1px solid rgba(241,239,233,.16)">
+              <span style="font-family:var(--font-heading);font-size:19px">Депиляция воском (нос, уши, бровь)</span>
+              <span style="flex:1;height:1px;background:rgba(241,239,233,.18);transform:translateY(-4px)"></span>
+              <span style="font-size:13px;color:rgba(241,239,233,.5);font-feature-settings:'tnum'">5 м</span>
+              <span style="font-size:16px;font-feature-settings:'tnum'">200 ₽</span>
+            </div>
+            <div style="display:flex;align-items:baseline;gap:12px;padding:14px 0;border-top:1px solid rgba(241,239,233,.16);border-bottom:1px solid rgba(241,239,233,.16)">
+              <span style="font-family:var(--font-heading);font-size:19px">Стрижка детская</span>
+              <span style="flex:1;height:1px;background:rgba(241,239,233,.18);transform:translateY(-4px)"></span>
+              <span style="font-size:13px;color:rgba(241,239,233,.5);font-feature-settings:'tnum'">1 ч</span>
+              <span style="font-size:16px;font-feature-settings:'tnum'">1 000 ₽</span>
+            </div>
+          </div>
+          <div>
+            <button type="button" onClick="{{ openAndrey }}" style="font-family:var(--font-heading);font-size:16px;letter-spacing:.06em;color:#4ea89c;background:transparent;border:1px solid #4ea89c;border-radius:var(--radius-md);padding:14px 26px;cursor:pointer" style-hover="background:rgba(78,168,156,.14);color:#7ecfc2">Записаться к Андрею</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <sc-if value="{{ booking }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;z-index:60;background:rgba(8,8,7,.86);display:flex;align-items:center;justify-content:center;padding:clamp(12px,3vw,40px)">
+      <div style="width:min(520px,100%);height:min(760px,92vh);display:flex;flex-direction:column;background:#0e0e0d;border:1px solid rgba(241,239,233,.22);border-radius:var(--radius-md);overflow:hidden">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 18px;border-bottom:1px solid rgba(241,239,233,.16)">
+          <span style="font-family:var(--font-heading);font-size:15px;letter-spacing:.12em;text-transform:uppercase;color:rgba(241,239,233,.72)">Онлайн-запись</span>
+          <button type="button" onClick="{{ closeBooking }}" style="font-family:var(--font-heading);font-size:14px;letter-spacing:.08em;color:#f1efe9;background:transparent;border:1px solid rgba(241,239,233,.28);border-radius:var(--radius-md);padding:8px 16px;cursor:pointer" style-hover="border-color:rgba(241,239,233,.6)">Закрыть</button>
+        </div>
+        <iframe src="{{ booking }}" title="Онлайн-запись DIKIDI" style="flex:1;width:100%;border:0;background:#fff"></iframe>
+      </div>
+    </div>
+  </sc-if>
+
+  <section id="gallery" style="padding:clamp(48px,7vw,104px) clamp(20px,5vw,64px);border-bottom:1px solid rgba(241,239,233,.14)">
+    <div style="max-width:1180px;margin:0 auto">
+      <h2 style="font-size:clamp(34px,4.2vw,54px);font-weight:400;margin:0 0 8px;letter-spacing:-.02em">Как у нас</h2>
+      <div style="height:36px"></div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px">
+        <div style="border:6px solid #171716;outline:1px solid rgba(241,239,233,.16);height:340px">
+          <img src="assets/interior-wide.webp" alt="Зал барбершопа" style="width:100%;height:100%;object-fit:cover;filter:contrast(1.04) saturate(.92)">
+        </div>
+        <div style="border:6px solid #171716;outline:1px solid rgba(241,239,233,.16);height:340px">
+          <img src="assets/interior-chairs.webp" alt="Кресла и зеркала" style="width:100%;height:100%;object-fit:cover;filter:contrast(1.04) saturate(.92)">
+        </div>
+        <div style="border:6px solid #171716;outline:1px solid rgba(241,239,233,.16);height:340px">
+          <img src="assets/facade.webp" alt="Вход в барбершоп «Культура»" style="width:100%;height:100%;object-fit:cover;filter:contrast(1.04) saturate(.92)">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="works" style="padding:clamp(48px,7vw,104px) clamp(20px,5vw,64px);border-bottom:1px solid rgba(241,239,233,.14)">
+    <div style="max-width:1180px;margin:0 auto">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;gap:24px;flex-wrap:wrap;margin-bottom:36px">
+        <h2 style="font-size:clamp(34px,4.2vw,54px);font-weight:400;margin:0;letter-spacing:-.02em">Наши работы</h2>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px">
+        <figure style="margin:0">
+          <div style="border:6px solid #171716;outline:1px solid rgba(241,239,233,.16);height:clamp(360px,42vw,520px)">
+            <img src="assets/work-1.webp" alt="Короткая стрижка с чётким контуром" style="width:100%;height:100%;object-fit:cover;filter:contrast(1.04) saturate(.92)">
+          </div>
+          <figcaption style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:rgba(241,239,233,.5);margin-top:12px">Короткая стрижка · контур</figcaption>
+        </figure>
+        <figure style="margin:0">
+          <div style="border:6px solid #171716;outline:1px solid rgba(241,239,233,.16);height:clamp(360px,42vw,520px)">
+            <img src="assets/work-2.webp" alt="Стрижка с оформлением бороды" style="width:100%;height:100%;object-fit:cover;filter:contrast(1.04) saturate(.92)">
+          </div>
+          <figcaption style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:rgba(241,239,233,.5);margin-top:12px">Стрижка · борода</figcaption>
+        </figure>
+        <figure style="margin:0">
+          <div style="border:6px solid #171716;outline:1px solid rgba(241,239,233,.16);height:clamp(360px,42vw,520px)">
+            <img src="assets/work-3.webp" alt="Стрижка с текстурой сверху и плавным переходом" style="width:100%;height:100%;object-fit:cover;filter:contrast(1.04) saturate(.92)">
+          </div>
+          <figcaption style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:rgba(241,239,233,.5);margin-top:12px">Текстура · плавный переход</figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section id="reviews" style="padding:clamp(48px,7vw,104px) clamp(20px,5vw,64px);border-bottom:1px solid rgba(241,239,233,.14);background:#111110">
+    <div style="max-width:1180px;margin:0 auto;display:grid;grid-template-columns:.8fr 1.2fr;gap:clamp(28px,5vw,72px);align-items:center">
+      <div>
+        <h2 style="font-size:clamp(34px,4.2vw,54px);font-weight:400;margin:0 0 26px;letter-spacing:-.02em">Что говорят<br>гости</h2>
+        <div style="font-family:var(--font-heading);font-size:clamp(72px,9vw,120px);line-height:.9;font-weight:300;color:#f1efe9;font-feature-settings:'tnum'">5.0</div>
+        <div style="color:#c9a24a;letter-spacing:.2em;font-size:20px;margin:14px 0 10px">★★★★★</div>
+        <div style="font-size:14px;color:rgba(241,239,233,.6);font-feature-settings:'tnum'">99 оценок · 77 отзывов на Яндекс.Картах</div>
+      </div>
+      <div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px">
+          <div style="border:1px solid rgba(241,239,233,.18);border-radius:var(--radius-md);padding:22px 20px">
+            <div style="font-family:var(--font-heading);font-size:26px;color:#4ea89c;font-feature-settings:'tnum'">100%</div>
+            <div style="font-size:15px;color:rgba(241,239,233,.8);margin-top:6px">хвалят мастеров</div>
+          </div>
+          <div style="border:1px solid rgba(241,239,233,.18);border-radius:var(--radius-md);padding:22px 20px">
+            <div style="font-family:var(--font-heading);font-size:26px;color:#4ea89c;font-feature-settings:'tnum'">100%</div>
+            <div style="font-size:15px;color:rgba(241,239,233,.8);margin-top:6px">нравится атмосфера</div>
+          </div>
+          <div style="border:1px solid rgba(241,239,233,.18);border-radius:var(--radius-md);padding:22px 20px">
+            <div style="font-family:var(--font-heading);font-size:26px;color:#4ea89c;font-feature-settings:'tnum'">100%</div>
+            <div style="font-size:15px;color:rgba(241,239,233,.8);margin-top:6px">довольны стрижкой</div>
+          </div>
+          <div style="border:1px solid rgba(241,239,233,.18);border-radius:var(--radius-md);padding:22px 20px">
+            <div style="font-family:var(--font-heading);font-size:26px;color:#4ea89c;font-feature-settings:'tnum'">100%</div>
+            <div style="font-size:15px;color:rgba(241,239,233,.8);margin-top:6px">отмечают компетентность</div>
+          </div>
+        </div>
+        <div style="margin-top:26px;border:1px solid rgba(241,239,233,.18);border-radius:var(--radius-md);overflow:hidden;background:#0e0e0d">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid rgba(241,239,233,.16);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:rgba(241,239,233,.55)">
+            <span>Отзывы с Яндекс.Карт</span>
+            <span style="color:#4ea89c">обновляются автоматически</span>
+          </div>
+          <iframe src="https://yandex.ru/maps-reviews-widget/171709673488?comments" title="Отзывы о барбершопе «Культура» на Яндекс.Картах" style="width:100%;height:420px;border:0;display:block"></iframe>
+        </div>
+        <div style="padding-top:28px">
+          <a href="https://yandex.ru/maps/org/kultura/171709673488/reviews/" target="_blank" rel="noopener" style="display:inline-block;font-family:var(--font-heading);font-size:16px;letter-spacing:.06em;color:#f1efe9;border:1px solid rgba(241,239,233,.28);border-radius:var(--radius-md);padding:14px 26px" style-hover="border-color:rgba(241,239,233,.6)">Читать отзывы на Яндексе</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="contacts" style="padding:clamp(48px,7vw,104px) clamp(20px,5vw,64px)">
+    <div style="max-width:1180px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:clamp(28px,5vw,72px);align-items:start">
+      <div>
+        <h2 style="font-size:clamp(34px,4.2vw,54px);font-weight:400;margin:0 0 32px;letter-spacing:-.02em">Как нас найти</h2>
+        <div style="display:flex;flex-direction:column;gap:26px">
+          <div>
+            <div style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#4ea89c;margin-bottom:8px">Адрес</div>
+            <div style="font-family:var(--font-heading);font-size:24px">Пенза, ул. Кулакова, 14А</div>
+            <div style="font-size:14px;color:rgba(241,239,233,.6);margin-top:6px">Ориентир — остановка «Улица Кулакова», 200 м</div>
+          </div>
+          <div>
+            <div style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#4ea89c;margin-bottom:8px">Телефон</div>
+            <a href="tel:+79869379863" style="font-family:var(--font-heading);font-size:24px;color:#f1efe9;font-feature-settings:'tnum'" style-hover="color:#7ecfc2">+7 (986) 937-98-63</a>
+          </div>
+          <div>
+            <div style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#4ea89c;margin-bottom:8px">Часы работы</div>
+            <div style="font-family:var(--font-heading);font-size:24px;color:rgba(241,239,233,.6)">уточняйте по телефону</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:14px;flex-wrap:wrap;padding-top:34px">
+          <a href="https://dikidi.net/ru/profile/kultura_1645652" target="_blank" rel="noopener" style="font-family:var(--font-heading);font-size:16px;letter-spacing:.06em;color:#4ea89c;border:1px solid #4ea89c;border-radius:var(--radius-md);padding:14px 26px" style-hover="background:rgba(78,168,156,.14);color:#7ecfc2">Записаться онлайн</a>
+          <a href="https://yandex.ru/maps/org/kultura/171709673488/" target="_blank" rel="noopener" style="font-family:var(--font-heading);font-size:16px;letter-spacing:.06em;color:#f1efe9;border:1px solid rgba(241,239,233,.28);border-radius:var(--radius-md);padding:14px 26px" style-hover="border-color:rgba(241,239,233,.6)">Построить маршрут</a>
+          <a href="tel:+79869379863" style="font-family:var(--font-heading);font-size:16px;letter-spacing:.06em;color:#f1efe9;border:1px solid rgba(241,239,233,.28);border-radius:var(--radius-md);padding:14px 26px" style-hover="border-color:rgba(241,239,233,.6)">Позвонить</a>
+        </div>
+      </div>
+      <div style="border:6px solid #171716;outline:1px solid rgba(241,239,233,.16);height:clamp(340px,44vw,520px)">
+        <img src="assets/facade.webp" alt="Барбершоп «Культура», ул. Кулакова, 14А" style="width:100%;height:100%;object-fit:cover;filter:contrast(1.04) saturate(.92)">
+      </div>
+    </div>
+  </section>
+
+  <div style="height:6px;background:repeating-linear-gradient(45deg,#1f7a72 0 7px,#0e0e0d 7px 14px,#f1efe9 14px 21px,#0e0e0d 21px 28px)"></div>
+
+  <footer style="padding:clamp(34px,4vw,56px) clamp(20px,5vw,64px);display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap">
+    <img src="assets/logo-mark.png" alt="Культура" style="height:36px;width:auto">
+    <div style="font-size:13px;color:rgba(241,239,233,.5);font-feature-settings:'tnum'">© 2026 Барбершоп «Культура» · Пенза, ул. Кулакова, 14А</div>
+  </footer>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { booking: null };
+  renderVals() {
+    const open = (url) => () => this.setState({ booking: url });
+    return {
+      booking: this.state.booking,
+      openDanil: open('https://dikidi.net/ru/record/1645652?st_m=1&sm_m=4005910&source=dikidi'),
+      openAndrey: open('https://dikidi.net/ru/record/1645652?st_m=1&sm_m=3545598&source=dikidi'),
+      closeBooking: () => this.setState({ booking: null })
+    };
+  }
+}
+</script>
+</body>
+</html>

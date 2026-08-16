@@ -1,0 +1,227 @@
+/* region footer */
+.block-footer {
+	background: #16263D;
+	box-shadow: 0px 4px 24px rgba(26, 54, 144, 0.1);
+	padding: 30px 0 24px;
+}
+
+.block-footer .footer {
+	display: flex;
+	flex-direction: column;
+}
+
+.block-footer .footer .footer-top,
+.block-footer .footer .footer-bottom {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	width: 100%;
+	position: relative;
+	gap: 40px;
+}
+
+.block-footer .footer .footer-top .links {
+	margin-top: 30px;
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	grid-row-gap: 20px;
+}
+
+.block-footer .footer .footer-top .links > a {
+	font-weight: normal;
+	font-size: 14px;
+	color: #FFFFFF;
+}
+
+.block-footer .footer .footer-top .links a:hover {
+	text-decoration: underline;
+}
+.block-footer .footer .footer-top .links a.no-show {
+	opacity: 0;
+	pointer-events: none;
+	grid-row: 3;
+	grid-column: 1;
+}
+
+.block-footer .footer .footer-top .links div {
+	font-weight: normal;
+	font-size: 14px;
+	color: #8B96AD;
+	display: flex;
+	justify-content: space-between;
+}
+
+.block-footer .footer .footer-top .title {
+	font-weight: 600;
+	font-size: 16px;
+	text-transform: uppercase;
+	color: #8B96AD;
+}
+
+.block-footer .footer .footer-top .apps-footer a {
+	height: 38px;
+	width: 38px;
+	background-color: rgba(255, 255, 255, 0.1);
+	background-repeat: no-repeat;
+	border-radius: 50px;
+	display: inline-block;
+}
+
+.block-footer .footer .footer-top .apps-footer a:hover {
+	background-color: rgba(255, 255, 255, 0.18);
+}
+
+.block-footer .footer .footer-top .apps-footer .google-play {
+	background-image: url("/assets/images/icon-footer-googleplay.png");
+	background-size: auto 22px;
+	background-position: 11px center;
+	margin-right: 10px;
+}
+
+.block-footer .footer .footer-top .apps-footer .app-store {
+	background-image: url("/assets/images/icon-footer-appstore.png");
+	background-size: auto 21px;
+	margin-right: 10px;
+	background-position: center;
+}
+.block-footer .footer .footer-top .apps-footer .app-gallery {
+	background-image: url("/assets/images/icon-footer-appgallery.png");
+	background-size: auto 22px;
+	background-position: center;
+	margin-right: 10px;
+}
+
+.block-footer .footer .footer-top .apps-footer .rustore {
+	background-image: url("/assets/images/icon-footer-rustore.png");
+	background-size: auto 22px;
+	background-position: center;
+}
+
+.block-footer .footer hr {
+	margin: 35px -30px;
+	opacity: 0.5;
+	border-top: 1px solid #0B1122;
+}
+
+.block-footer .footer .footer-bottom .years {
+	font-weight: normal;
+	font-size: 14px;
+	text-transform: uppercase;
+	color: #8B96AD;
+	line-height: 27px;
+}
+.block-footer .footer .footer-bottom .years .info {
+	font-weight: 400;
+	font-size: 11px;
+	line-height: 15px;
+}
+
+.block-footer .footer .footer-bottom > div {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	grid-row-gap: 30px;
+	align-items: center;
+}
+
+.block-footer .footer .footer-bottom .social {
+	display: flex;
+	justify-content: center;
+	padding-left: 8px;
+	align-items: center;
+}
+
+.block-footer .footer .footer-bottom .social > a {
+	display: inline-block;
+	height: 27px;
+	width: 27px;
+	background-image: url('/assets/images/front-soc-sprite.png');
+	background-repeat: no-repeat;
+	background-size: auto 54px;
+	background-position-y: 0px;
+    margin: 0 14px;
+}
+
+.block-footer .footer .footer-bottom .social > a:hover {
+	background-position-y: -27px;
+}
+
+.block-footer .footer .footer-bottom .social .fb {
+	background-position-x: 0px;
+}
+
+.block-footer .footer .footer-bottom .social .vk {
+	background-position-x: -27px;
+}
+
+.block-footer .footer .footer-bottom .social .ig {
+	background-position-x: -54px;
+}
+
+.block-footer .footer .footer-bottom .social .tg {
+    background-image: url('/assets/images/tg.svg');
+    background-size: contain;
+    background-position: center;
+}
+
+.block-footer .footer .footer-bottom .social .tg:hover {
+    background-image: url('/assets/images/tg-hover.svg');
+    background-size: contain;
+    background-position: center;
+}
+
+
+@media screen and (max-width: 750px) {
+	.block-footer {
+		padding: 30px 0;
+	}
+
+	.block-footer .footer .footer-top,
+	.block-footer .footer .footer-bottom {
+		grid-template-columns: 1fr;
+		gap: 30px;
+	}
+	.block-footer .footer .footer-bottom{
+		grid-template-columns: 1fr auto;
+		gap: 30px;
+	}
+
+	.block-footer .footer .footer-top .links {
+		margin-top: 20px;
+		grid-row-gap: 15px;
+		grid-column-gap: 15px;
+	}
+
+	.block-footer .footer .footer-top .links a {
+		font-size: 12px;
+	}
+
+	.block-footer .footer .footer-top .links div {
+		font-size: 12px;
+	}
+
+	.block-footer .footer .footer-top .title {
+		font-size: 12px;
+	}
+
+	.block-footer .footer hr {
+		margin: 15px 0;
+	}
+
+	.block-footer .footer .footer-bottom .years {
+		font-size: 12px;
+	}
+
+	.block-footer .footer .footer-top .apps-footer a {
+		height: 36px;
+		width: 36px;
+	}
+
+	.block-footer .footer .footer-top .apps-footer .google-play {
+		background-size: auto 18px;
+		background-position: 12px center;
+	}
+
+	.block-footer .footer .footer-top .apps-footer .app-store {
+		background-size: auto 18px;
+	}
+}
+/* endregion */

@@ -1,0 +1,104 @@
+(function($){
+	$.fn.share = function (options) {
+		var $this = this, meta = {};
+		
+		$('meta[property^="og:"]', 'head').each(function(){
+			meta[$(this).attr('property').substr(3)] = $(this).attr('content');
+		});
+		
+		options = $.extend({
+			boxClassName: 'share-social-networks',
+			itemClassName: 'bg-g-dos',
+			popover: {
+				html: true,
+				placement: 'top',
+				trigger: 'focus',
+				template: '<div class="popover" role="tooltip"><div class="arrow"></div><div class="popover-content"></div></div>',
+			},
+			onContent: function(ob) {
+				var $box = $('<div>');
+				
+				$box.addClass(options.boxClassName);
+				
+				for (var i in options.events) {
+					$box.append($('<div class="' + options.itemClassName + ' ' + i + '">').on('click', ob, options.events[i]));
+				}
+				
+				return $box;
+			},
+			events: {
+				fb: function(event) {
+					var ob = {
+							src: 'sp',
+							u: event.data.url,
+							title: event.data.title,
+						};
+					
+					if ('image' in event.data) {
+						ob.picture = event.data.image;
+					}
+					
+					window.open('https://facebook.com/sharer/sharer.php?' + $.param(ob), __('Поделиться на Facebook'), 'height=600,width=800,menubar=no,location=no,resizable=yes,scrollbars=yes,status=yes');
+				},
+				vk: function(event) {
+					window.open('https://vk.com/share.php?' + $.param(event.data), __('ВКонтакте | Поделиться ссылкой'), 'height=600,width=800,menubar=no,location=no,resizable=yes,scrollbars=yes,status=yes');
+				},
+				tw: function(event) {
+					var ob = {
+							status: event.data.title + ' :: ' + event.data.url,
+						};
+					
+					window.open('https://twitter.com/intent/tweet?' + $.param(ob), __('Написать твит'), 'height=600,width=800,menubar=no,location=no,resizable=yes,scrollbars=yes,status=yes');
+				},
+				ok: function(event) {
+					var ob = {
+						'url': event.data.url,
+						'title': event.data.title,
+						'imageUrl': event.data.image,
+					};
+					window.open('https://connect.ok.ru/offer?' + $.param(ob), __('Одноклассники | Поделиться ссылкой'), 'height=600,width=800,menubar=no,location=no,resizable=yes,scrollbars=yes,status=yes');
+				},
+			},
+		}, options);
+		
+		var make = function() {
+			var params = $.extend({}, meta);
+			
+			if ($(this).data('url')) {
+				params.url = $(this).data('url');
+			}
+			
+			if ($(this).data('title')) {
+				params.title = $(this).data('title');
+			}
+			
+			if ($(this).data('image')) {
+				params.image = $(this).data('image');
+			}
+			
+			if (!('url' in params)) {
+				params.url = document.URL;
+			}
+			
+			if (!('title' in params)) {
+				params.title = document.title;
+			}
+			
+			if (options.popover) {
+				if (!$(this).data('trigger')) {
+					$(this).attr('tabindex', 0);
+				}
+				
+				if (!('content' in options.popover)) {
+					options.popover.content = options.onContent(params);
+				}
+				
+				$(this).popover(options.popover);
+			} else {
+				$(this).html(options.onContent(params));
+			}
+		}
+		
+		return this.each(make);
+	};
+})(jQuery);

@@ -1,0 +1,420 @@
+function jsonForm_init($el){
+	if(!$el.data('loader')){
+		var loader = $el.parent();
+		$el.data('loader', loader);
+	}
+	
+	$el.submit(function(){
+		sw.jsonForm($el);
+		return false;
+	});
+}
+
+function sw_change_init($el){
+	var old_value;
+	var run = function(value){
+		var href = $el.data('href');
+		if(!href){
+			sw.alert('Параметр data-href не указан');
+			return;
+		}
+		
+		var loader = $el.data('loader');
+		
+		var name = $el.data('name');
+		if(!name) name = 'value';
+		
+		var data = {};
+		data[name] = value;
+		
+		sw.post({
+			url: href,
+			data: data,
+			loader: loader,
+			error: function(){
+				if($el.is('select')){
+					$el.val(old_value);
+				}
+			}
+		});
+	}
+	
+	if($el.is('select')){
+		old_value = $el.val();
+		$el.change(function(){
+			var value = $el.val();
+			run(value);
+		});
+	}
+	
+	if(
+		$el.is('*[type=text]') ||
+		$el.is('*[type=password]') ||
+		$el.is('*[type=datetime]') ||
+		$el.is('*[type=datetime-local]') ||
+		$el.is('*[type=date]') ||
+		$el.is('*[type=month]') ||
+		$el.is('*[type=time]') ||
+		$el.is('*[type=week]') ||
+		$el.is('*[type=number]') ||
+		$el.is('*[type=email]') ||
+		$el.is('*[type=url]') ||
+		$el.is('*[type=search]') ||
+		$el.is('*[type=tel]') ||
+		$el.is('*[type=color]')
+	){
+		var timeout;
+		$el.on('textchange', function(event, previousText){
+			clearTimeout(timeout);
+			var self = this;
+			timeout = setTimeout(function () {
+				var value = $el.val();
+				run(value);
+			}, 1000);
+		});
+	}
+}
+
+function sw_search_init($el){
+	var $input = $el.find('input');
+	
+	function check(){
+		if($input.val()){
+			$el.addClass('changed');
+		}else{
+			$el.removeClass('changed');
+		}
+	}
+	
+	$el.find('i[class$=remove]').click(function(){
+		$input.val('').trigger('textchange');
+	});
+	
+	$input.on('textchange', check);
+	check();
+}
+
+function sw_switch_init($el){
+	var $box = $el.siblings('.sw-switch');
+	
+	var run = function(){
+		var state = parseInt($el.data('state'));
+		if(state){
+			$el.siblings('.sw-switch').show();
+			$el.html( $el.data('text_hide') );
+		}else{
+			$el.siblings('.sw-switch').hide();
+			$el.html( $el.data('text_show') );
+		}
+	};
+	
+	run();
+	
+	$el.click(function(){
+		var state = parseInt($el.data('state'));
+		if(state) state = 0;
+		else state = 1;
+		$el.data('state', state);
+		run();
+	});
+}
+
+function sw_get_init($el){
+	var loader = $el.data('loader');
+	
+	$el.click(function(){
+		var href = $el.data('href');
+		sw.get({
+			url: href,
+			element: $el,
+			loader: loader
+		});
+	});
+}
+
+function phone_init($el){
+	$el.mask('+7 (999) 999-99-99');
+}
+
+function mask_init($el){
+	$el.mask( $el.attr('data-mask').toString() );
+}
+
+// Обновление для Bootstrap data-toggle="buttons".
+// Добавляет вожожность отключить кнопку при использовании "radio".
+// Для активации - нужно добавить параметр data-empty-enable=1
+function buttons_init($el){
+	if(!$el.data('empty-enable')) return;
+	$el.on('click', '.btn', function(){
+		var $self = $(this);
+		var old_value = $self.find('input:checked').length;
+		setTimeout(function(){
+			var new_value = $self.find('input:checked').length;
+			if(new_value>0 && old_value==new_value){
+				$self.removeClass('active');
+				$self.find('input:checked').prop('checked', false);
+			}
+		}, 0);
+	});
+}
+
+function sw_remove_init($el){
+	$el.click(function(){
+		var text = $el.data('text');
+		if(!text) text = 'Удалить ?';
+		
+		var href = $el.data('href');
+		if(!href){
+			sw.alert('Не указан атрибут data-href');
+			return;
+		}
+		
+		var loader = $el.data('loader');
+		if(loader){
+			loader = $el.closest(loader);
+		}else{
+			loader = $el.closest('li');
+		}
+		
+		sw.confirm({
+			text: text,
+			yes: function(){
+				sw.get({
+					element: $el,
+					loader: loader,
+					url: href,
+					success: function(){
+						$el.closest('li').remove();
+					}
+				});
+			}
+		});
+	});
+}
+
+function click_input_init($el){
+	$el.click(function(){
+		var href = $el.data('href');
+		
+		if(!href) sw.alert("Внимание: параметр data-href не указан");
+		
+		var value = $el.data('value');
+		if(!value) value = $el.html();
+		
+		var name = $el.data('name');
+		if(!name) name = 'value';
+		
+		var loader = $el.data('loader');
+		if(loader) loader = $el.closest(loader);
+		
+		var html = '<input class="form-control" type="text" name="'+name+'" value="'+value+'" />';
+		
+		var $input = $('<input class="form-control" type="text" name="'+name+'" value="'+value+'" />');
+		
+		var sended = false;
+		
+		var change = function(){
+			if(!href) return;
+			if(sended) return;
+			sended = true;
+			
+			var value = $input.val();
+			var data = {};
+			data[name] = value;
+			sw.post({
+				loader: loader,
+				url: href,
+				data: data,
+				error: function(){
+					sended = false;
+					$('.modal').on('hidden.bs.modal', function (e) {
+						$input.focus();
+						$input.select();
+					});
+				}
+			});
+		};
+		
+		$input.focusout(function(){
+			change();
+		}).keyup(function(e) {
+			if(e.keyCode == 13){
+				change();
+			}
+		});
+		
+		var $button = $('<a class="persons_ok"><img src="/assets/images/actions/accept.png" alt="OK"></a>');
+		$button.click(function(){
+			change();
+		});
+		$el.parent().append($button);
+		
+		$el.replaceWith($input);
+
+		$input.focus();
+		$input.select();
+		
+	});
+}
+
+function selectpicker_init($el){
+	// Выравнивание слева/справа выпадающего списка
+	var menu_align = 'left';
+	if($el.is('.dropdown-menu-right')){
+		$el.removeClass('dropdown-menu-right');
+		menu_align = 'right';
+	}
+	
+	$el.selectpicker();
+	
+	// Статичный текст на кнопке
+	if($el.data('button-text')){
+		$el.next().find('button').text( $el.data('button-text') );
+	}
+	
+	// Класс для кнопки
+	if($el.data('button-class')){
+		$el.next().find('button')
+			.removeClass('btn btn-default')
+			.addClass( $el.data('button-class') );
+	}
+	if($el.data('button-addclass')){
+		$el.next().find('button')
+			.addClass( $el.data('button-addclass') );
+	}
+	
+	if(menu_align=='right'){
+		$el.next().find('.dropdown-menu').addClass('dropdown-menu-right');
+	}
+	
+	var timeout = false;
+	
+	var update = function(){
+		if(timeout) clearTimeout(timeout);
+		timeout = setTimeout(function(){
+			$el.selectpicker('refresh');
+			clearTimeout(timeout);
+			timeout = false;
+		}, 100);
+	}
+	
+	// Чтобы нормально работал выбор
+	$el.change(function(){
+		update();
+	});
+	
+	var observer = new MutationObserver(function(mutations) {
+		update();
+	});
+	$el.each(function () {
+		observer.observe(this, {childList:true, subtree:true});
+	})
+}
+
+function datepicker_init($el){
+    
+    var month = ['января','февраля','марта','апреля','мая','июня',
+        'июля','августа','сентября','октября','ноября','декабря'];
+
+    $.datepicker.setDefaults(
+        $.extend($.datepicker.regional["ru"])
+    );
+
+	$el.datepicker({
+		showAnim: '',
+		beforeShow: function(input, inst) {
+			var _class = $(input).data('class');
+			$('#ui-datepicker-div').addClass(_class);
+//            $el.datepicker("setDate",$el.attr('data-date'));
+		},
+		onClose: function(){
+			var _class = $(this).data('class');
+			$('#ui-datepicker-div').removeClass(_class);
+//            $el.val($el.attr('data-dtext')); 
+		},
+//	    onSelect: function(dateText, inst) {
+//            $el.attr("data-date",dateText);
+//            var dateText = $.datepicker.formatDate(
+//            'd MM',
+//            new Date(inst.selectedYear, inst.selectedMonth, inst.selectedDay),
+//            {monthNames: month}
+//            );
+//            inst.input.val(dateText);
+//            inst.input.attr('data-dtext',dateText);
+//        },
+		firstDay: backend.user.first_day
+	});
+	
+
+//    $el.datepicker( "option", "gotoCurrent", true );
+    $el.datepicker("setDate","0");
+//    $el.attr("data-date",$el.val());
+
+//    var dateText = $.datepicker.formatDate(
+//        'd MM',
+//        new Date(),
+//        {monthNames: month}
+//    );
+//    $el.attr('data-dtext',dateText);
+
+//    $el.val(dateText);
+}
+
+$().ready(function(){
+	var init = function($self){
+		var init_toggle = function($el){
+			var toggles_str = $el.data('toggle');
+			var toggles = toggles_str.split(' ');
+			
+			if($el.data('toggle-inited')) return;
+			
+			$.each(toggles, function(t_key, toggle){
+				var func;
+				toggle = toggle.replace(/\-/g, '_');
+				
+				try {
+					eval('func = '+toggle+'_init');
+				}
+				catch(err) {
+					console.log('Error', 'Toggle function "'+toggle+'_init" not found');
+				}
+				
+				if(typeof(func)!=='function') return;
+				
+				func($el);
+			});
+			
+			$el.data('toggle-inited', true);
+		}
+		
+		if($self.is('*[data-toggle]')){
+			init_toggle( $self );
+		}
+		
+		if(!$self.is('input')){
+			$self.find('*[data-toggle]').each(function(){
+				init_toggle( $(this) );
+			});
+		}
+	}
+	
+	init($(document));
+	
+	// Чтобы работало при динамическом добавлении контента
+	var observer = new MutationObserver(function(mutations) {
+		mutations.forEach(function(mutation) {
+			init($(mutation.target));
+		});
+	});
+	observer.observe(document.documentElement || document.body, {childList:true, subtree:true});
+	
+	// Инициализация FancyBox
+	if(typeof $.fn.fancybox == 'function'){
+		$('.fancybox').fancybox({
+			prevEffect: 'none',
+			nextEffect: 'none'
+		});
+	}
+	
+});
+

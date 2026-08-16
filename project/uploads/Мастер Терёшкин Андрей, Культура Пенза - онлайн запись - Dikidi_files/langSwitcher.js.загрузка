@@ -1,0 +1,26 @@
+var langSwitcher = {
+	init: function (el) {
+		$(document).mouseup(function (e) {
+			var $lang = $('.langContent');
+			if ((!$lang.is(e.target) &&
+				$lang.has(e.target).length === 0 ) || $(e.target).hasClass('close'))
+			{
+				$('.langMenu').fadeOut(300);
+				$('.langSwitcher').removeClass('open');
+			}
+		});
+		$('.langSwitcher .lang-btn').on('click', function () {
+			var $langSwitcher = $(this).closest('.langSwitcher')
+			if (!$langSwitcher.hasClass('open')) {
+				$langSwitcher.find('.langMenu').fadeIn(300)
+				$langSwitcher.addClass('open')
+                
+                if($('.up-mobile-banner-block').get(0)) {
+                    $langSwitcher.find('.langMenu').find('.langContent').css('margin-top', '60px');
+                } else {
+                    $langSwitcher.find('.langMenu').find('.langContent').css('margin-top', '0');
+                }
+			}
+		});
+	}
+}

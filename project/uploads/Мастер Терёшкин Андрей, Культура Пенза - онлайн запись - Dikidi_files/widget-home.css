@@ -1,0 +1,88 @@
+.header-pane .navbar-nav > li > a {
+    color: #ffffff;
+    height: 100%;
+    padding: 0;
+}
+.header-pane .navbar-nav > li > .dropdown-menu {
+	background: #FFFFFF;
+	box-shadow: 0px 2px 8px rgba(6, 41, 82, 0.08), 0px 20px 32px rgba(6, 41, 82, 0.24);
+	border-radius: 10px;
+	left: auto;
+	min-width: 215px;
+	width: 215px;
+	padding: 0;
+	right: 0;
+	top: 34px;
+	overflow: hidden;
+}
+.header-pane .navbar-nav > li.dropdown > .dropdown-menu a:hover,
+.header-pane .navbar-nav > li.dropdown > .dropdown-menu a:focus {
+	background-color: #E7F1FF;
+}
+.header-pane .dropdown-menu > li > a {
+	font-weight: 600;
+	font-size: 14px;
+	color: #2F4048;
+	padding-top: 0;
+	padding-bottom: 0;
+	height: 32px;
+}
+
+.header-pane .dropdown-menu .dropdown-submenu.projects > .dropdown-menu a > span.project-name {
+	display: block;
+}
+.header-pane .navbar .dropdown-submenu.projects .dropdown-menu a {
+	height: auto;
+	padding: 10px 30px;
+}
+.header-pane .navbar .dropdown-submenu.projects .dropdown-menu a > span.project-address {
+	color: #878E97;
+}
+
+.header-pane .dropdown-menu .dropdown-submenu.selected > a {
+	font-weight: 700;
+}
+
+.dropdown-submenu .slimScrollDiv .slimScrollBar {
+	z-index: 1100 !important;
+	background: #C7CDD1 !important;
+	opacity: 0.7 !important;
+}
+.dropdown-submenu .dropdown-menu {
+	border: 0 none;
+	border-radius: 0;
+	box-shadow: none;
+	clear: both;
+	display: block;
+	float: none;
+	margin: 0;
+	max-height: none;
+	padding: 0;
+	position: relative;
+	top: 0;
+	width: 100%;
+}
+.navbar .nav .lang .dropdown-menu {
+	background-color: #ffffff !important;
+	min-width: 90px;
+	width: 90px;
+}
+.navbar .nav .lang .flag {
+	background-image: url("/assets/global/images/language-sprite.png?v=1.08");
+	background-repeat: no-repeat;
+	background-size: 18px;
+	display: block;
+	height: 12px;
+	left: 15px;
+	margin-top: -7px;
+	position: absolute;
+	top: 55%;
+	width: 18px;
+}
+.navbar .navbar-nav .ico-circle,
+.navbar .navbar-nav .img-circle,
+.navbar .navbar-nav .img-circle > img {
+	min-height: 30px;
+	min-width: 30px;
+	height: 30px;
+}

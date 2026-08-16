@@ -1,0 +1,658 @@
+@media screen and (max-width: 980px) {
+	.template > .footer {
+		height: 80px;
+		margin-top: -80px;
+		padding: 10px 0;
+	}
+	.template > .footer ul,
+	.template > .footer li {
+		display: block;
+		float: none;
+		margin: 0 !important;
+		text-align: center;
+	}
+	.template > .footer .social,
+	.template > .footer .appstore,
+	.template > .footer .google-play {
+		display: none;
+	}
+	.template > .footer li {
+		line-height: 1.5em;
+	}
+	
+	/* Список акций */
+    .container .filter-active {
+        display: block !important;
+        position: fixed;
+        top: 0;
+        right: 0;
+        left: 0;
+        bottom: 0;
+        background: white;
+        z-index: 100;
+        width: 100%;
+    }
+    
+    
+	.container .filter {
+		display: none;
+	}
+
+    .container .filter .fixed-filter {
+        height: 100%;
+    }
+
+    .container .filter .fixed-filter .form-group {
+        background-color: #F3F6FB;
+        height: 100%;
+    }
+
+    .container .filter .fixed-filter .form-group:not(:first-child) {
+        display: none;
+    }
+
+    .container .filter .fixed-filter .form-group .filter-block{
+        border: none;
+    }
+    
+    .container .filter .fixed-filter .form-group .filter-block:first-child > div {
+        background-color: #FFFFFF;
+        margin: 0;
+        padding: 16px 16px;
+    }
+
+    .container .filter .fixed-filter .form-group .filter-block:first-child > div:first-child img{
+        margin-left: 20px;
+    }
+
+    .container .filter .fixed-filter .form-group .filter-block > div:nth-child(2):not(.catalog-list) {
+        background-color: #FFFFFF;
+        margin: 20px 20px 0 20px;
+        border-radius: 16px 16px 0 0;
+    }
+
+    .container .filter .fixed-filter .form-group .filter-block:first-child > div:not(:first-child):not(:nth-child(2)) {
+        background-color: #FFFFFF;
+        margin: 0 20px;
+    }
+    
+    .container .filter .fixed-filter .form-group .filter-block > div:nth-last-child(2):not(.catalog-list-category-button):not(.exit-filter) {
+        border-radius: 0 0 16px 16px;
+        padding: 8px 16px 16px 16px;
+    }
+
+    .container .filter .fixed-filter .form-group .exit-filter {
+        display: flex;
+        align-items: center;
+        position: relative;
+        background-color: #FFFFFF;
+        margin: 0;
+        padding: 16px 16px;
+        
+        height: 44px;
+    }
+
+    .exit-filter img {
+        position: absolute;
+        left: 0;
+        margin-left: 20px;
+    }
+    .exit-filter {
+        justify-content: center;
+    }
+    
+    .filter-block > .category{
+        display: none;
+    }
+    
+    .filter-block.sub-button {
+        display: block;
+        max-height: 3em;
+        bottom: 4%;
+    }
+    
+    .filter-catalog-categories > .active {
+        display: block;
+        z-index: 100;
+        overflow-y: scroll;
+    }
+
+    .filter-block .filter-clear-block {
+        display: none;
+    }
+
+    .filter-block .category-mob {
+        display: block;
+    }
+    
+    .filter-catalog-categories .catalog-list {
+        height: 80vh;
+        overflow-y: scroll;
+    }
+
+    .filter-catalog-categories .catalog-list .main-category-img-name{
+        display: flex;
+        align-items: center;
+        margin: 0 20px 8px 30px;
+    }
+
+    .filter-catalog-categories .catalog-list .main-category-img-name:not(:first-child){
+        margin-top: 8px;
+    }
+    .filter-catalog-categories .catalog-list .main-category-img-name .img{
+        margin-right: 6px;
+    }
+
+    .filter-catalog-categories .catalog-list .categories-container {
+        border-radius: 12px;
+        background-color: #FFFFFF;
+        margin: 0 20px;
+    }
+    
+
+    .filter-catalog-categories .catalog-list .category {
+        width: 100%;
+        height: 40px;
+        margin-left: 12px;
+    }
+
+    .filter-catalog-categories .catalog-list .category:not(:last-child) {
+        position: relative;
+    }
+
+    .filter-catalog-categories .catalog-list .category:not(:last-child):after {
+        content:"";
+        position:absolute;
+        bottom: 0;
+        left: 50%;
+        width: 96%;
+        height: 1px;
+        margin-left:-50%;
+        background:#DCE5F0
+    }
+
+    .filter-catalog-categories .catalog-list .category label{
+        top: 25%;
+    }
+
+    .cShares .filter {
+        width: 100%;
+    } 
+
+    .container .shares {
+		float: none;
+		width: 100%;
+		margin: 0;
+	}
+	.container.cShares ul.list {
+		margin: 0;
+	}
+	.container .shares .share-item {
+		padding: 0;
+		margin: 0 0 20px 0;
+		width: 100%;
+        /*height: 100%;*/
+		position: relative;
+	}
+    
+    .filter-active .fixed-filter .search > input{
+        display: none;
+    }
+
+    .filter-active .fixed-filter strong {
+        color: #878E97;
+        font-weight: 400;
+        font-size: 13px;
+    }
+
+    .filter-active .fixed-filter .search .be-select-container strong {
+        display: block;
+        margin-bottom: 8px;
+    }
+
+    .filter-active .fixed-filter .search .be-select-container label{
+        display: none;
+    }
+    
+    .filter-block .show {
+        z-index: 2;
+    }
+
+    .filter-block .percent div input {
+        padding-left: 40px;
+    }
+
+    .filter-block .cost .range {
+        flex-direction: column;
+        height: 50px;
+    }
+
+    .filter-block .cost .range div input{
+        padding-left:45px;
+    }
+
+    .filter-block .cost .range div:not(:first-child) {
+         margin-left: 0;
+        margin-top: 8px;
+    }
+
+    .filter-block div .from-symbol {
+        background-color: #EBF0F5;
+        border-radius: 6px;
+        padding: 5px 6px 5px 6px;
+        top: 4px;
+    }
+    
+	.container .shares .share-item .image {
+		height: 360px;
+	}
+	.container .shares .share-item:last-child {
+		margin-bottom: 0;
+	}
+	.shares .share-item .floating .autor,
+	.shares .share-item .actions .btn.btn-sm,
+	.shares .share-item .actions .share-buttons {
+
+	}
+
+	.shares .share-item .floating .background {
+		opacity: 0.7;
+	}
+	
+	/* Просмотр акции */
+	.container.shares-show {
+		padding: 0;
+	}
+	.container.shares-show h1 {
+		padding-left: 15px;
+		padding-right: 15px;
+	}
+	.container.shares-show .media {
+		width: 100%;
+		height: 350px;
+		padding-right: 0;
+	}
+	.container.shares-show .basis {
+		display: none;
+	}
+	.container.shares-show .tab-content,
+	.container.shares-show .nav.nav-tabs {
+		padding-left: 20px;
+		padding-right: 20px;
+	}
+	.container.shares-show .services .new .value {
+		font-size: 18px;
+	}
+	.container.shares-show .services .currency {
+		font-size: 13px;
+	}
+	
+	/* Услуги компании */
+	.template.item .item_services.container {
+		padding: 0;
+	}
+	.template.item .item_services.container > ul {
+		margin: 0;
+	}
+	.template.item .item_services.container .nav.nav-tabs.nav-stacked > li > a {
+		padding: 20px;
+	}
+	.template.item .services-list .item {
+		position: relative;
+		height: 50px;
+		padding: 10px 0;
+	}
+	.template.item .services-list .item > div {
+		background: none;
+		padding: 0;
+	}
+	.template.item .services-list .item:hover,
+	.template.item .services-list .item:hover .bg,
+	.template.item .services-list .item:hover .title .value {
+		background: none;
+		color: #000000;
+	}
+	.template.item .services-list .item .time .bg,
+	.template.item .services-list .item .price .bg {
+		position: absolute;
+		bottom: 5px;
+		left: 20px;
+		color: #808080;
+		font-style: italic;
+		font-size: 90%;
+	}
+	.template.item .services-list .item .time,
+	.template.item .services-list .item .price {
+		width: 0%;
+	}
+	.template.item .services-list .item .title {
+		vertical-align: top;
+	}
+	.template.item .services-list .item .time .bg {
+		
+	}
+	.template.item .services-list .item .price .bg {
+		left: 90px;
+	}
+	.template.item .services-list .item .btns {
+		width: 122px;
+		text-align: right;
+		padding-right: 20px;
+	}
+	.template.item .services-list .item .btns a {
+		color: #56ADFF;
+	    border: 2px solid #3385D1;
+	    border-radius: 20px;
+	}
+	
+	.container.reviews {
+		padding-bottom: 25px;
+		padding-top: 25px;
+	}
+	.container.reviews .creation {
+		margin: 0;
+		padding: 0;
+		background-color: transparent;
+	}
+	.container.reviews .creation .files {
+		padding: 0;
+	}
+	.container.reviews .creation .files .file {
+		width: 75px;
+		height: 75px;
+	}
+	.container.reviews .list {
+		margin: 0;
+	}
+	.container.reviews .list .more {
+		margin-top: 10px;
+	}
+	.container.reviews .items .item {
+		padding: 10px 0;
+	}
+	.container.reviews .items .item .username {
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		display: block;
+		float: left;
+	}
+	.container.reviews .items .item .review {
+		margin-top: 10px;
+	}
+	.container.reviews .items .item .reply {
+		margin-top: 10px;
+	}
+	.container.reviews .creation .form-group:last-child {
+		margin-top: 0;
+		margin-bottom: 15px;
+		font-size: 13px;
+	}
+	.container.reviews .creation form > .form-group:last-child {
+		text-align: center;
+	}
+	.container.reviews .list .item .autor {
+		top: 8px;
+		right: 5px;
+	}
+	
+	/* Мои записи */
+	.recording-list .clarification,
+	.recording-list .not-filled .fixed > p:last-child {
+		display: none;
+	}
+
+    .shares-name-block button {
+        display: block;
+    }
+}
+
+@media screen and (max-width: 991px) {
+	/* Подвал */
+	footer .col-md-3,
+	footer .col-md-4,
+	footer .col-md-5
+	{
+		padding-bottom: 10px;
+	}
+}
+
+@media screen and (max-width: 640px) {
+	.shares .share-item {
+		width: 100%;
+		margin: 0 0 20px 0;
+	}
+	.shares .share-item .image {
+		height: 300px;
+	}
+	.shares-show .media {
+		height: 280px;
+	}
+	
+	/* Список акций */
+	.container .shares .share-item .image {
+		height: 300px;
+	}
+	
+	/* Услуги компании */
+	.services-list .item .title .value {
+		max-width: 320px;
+	}
+	
+	/* Просмотр акции */
+	.container.shares-show .media {
+		height: 300px;
+	}
+}
+@media screen and (min-width: 351px) and (max-width: 480px) {
+	html {
+		-webkit-text-size-adjust: none;
+	}
+	.template > .header .authorization > a {
+		padding-right: 0;
+	}
+	.template > .footer {
+		font-size: 90%;
+	}
+	
+	.shares .share-item {
+		margin: 0 0 15px 0;
+	}
+	.shares .share-item .image {
+		height: 210px;
+	}
+	
+	.shares-show .media {
+		height: 210px;
+	}
+	
+	/* Форма авторизации на избранном и мои записи */
+	.favorites-list .container, .recording-list {
+		padding-top: 30px;
+		padding-bottom: 30px;
+	}
+	.login-block h3 {
+		margin-top: 0;
+		font-size: 175%;
+		line-height: 1.3em;
+		margin-bottom: 20px;
+	}
+	.login-block form {
+		width: 100%;
+	}
+	.login-block .mobile-number .country-list {
+		z-index: 9999;
+	}
+	
+	/* Избранное */
+	.favorites-list .favorites {
+		
+	}
+	.favorites-list .favorites h2 {
+		margin: 0;
+	}
+	.favorites-list .favorites .favorite:last-child {
+		border-bottom: 0;
+	}
+	.favorites-list .favorites .favorite .ico {
+		margin-right: 15px;
+	}
+	.favorites-list .favorites .favorite .info {
+		float: none;
+	}
+	.favorites-list .favorites .favorite .company-name {
+		margin-bottom: 5px;
+		max-width: 210px;
+	}
+	.favorites-list .favorites .favorite .adres,
+	.favorites-list .favorites .favorite .company {
+		display: none;
+	}
+	.favorites-list .favorites .favorite .actions {
+		width: auto;
+		margin-top: 10px;
+	}
+	.favorites-list .favorites .favorite .actions > a {
+		width: 102px;
+		line-height: 32px;
+		border-bottom: 0;
+		margin-right: 15px;
+		display: block;
+	}
+	.favorites-list .favorites .favorite .actions .sw-btn {
+		font-size: 11px;
+		padding: 5px 15px;
+		margin: 0;
+		float: right;
+	}
+
+	/* Отзывы о компании */
+	.template.item .profile_reviews.container {
+		padding-top: 15px;
+		padding-bottom: 15px;
+	}
+	.template.item .profile_reviews.container .form_review {
+		margin: 0;
+		padding: 15px;
+	}
+	.template.item .profile_reviews.container .form_review textarea {
+		width: 100%;
+	}
+	
+	/* Услуги компании */
+	.template.item .services-list .item .title .bg {
+		max-width: 230px;
+	}
+	.template.item .services-list .item .time .bg {
+		display: block;
+	}
+	.services-list .item .title .value {
+		max-width: 200px;
+	}
+	
+	/* Список акций */
+	.container .shares .share-item .image {
+		height: 240px;
+	}
+	
+	/* Просмотр акции */
+	.container.shares-show .media {
+		height: 220px;
+	}
+}
+@media screen and (max-width: 370px) {
+
+	.header-second .slogan h1 {
+		font-size: 160%;
+	}
+	
+	.services-list .item .title .bg {
+		max-width: 186px;
+	}
+	
+	.container .text-block h1 {
+		font-size: 20px;
+	}
+	
+	/* Модальные окна */
+	.modal .modal-body {
+		padding: 30px 15px 15px 15px;
+	}
+	.modal .border {
+		padding: 10px;
+	}
+	.modal .close {
+		top: 7px;
+		right: 7px;
+	}
+	.modal.widget .modal-body {
+		padding: 20px;
+	}
+	.modal.widget .btns .sw-btn {
+		padding: 4px 18px;
+		line-height: 16px;
+		font-weight: normal;
+	}
+	.modal.widget.authorization .btns .registration {
+		margin: 0;
+		line-height: 26px;
+	}
+	.modal.registration .phone .mobile-number {
+		width: 170px;
+	}
+	.modal.registration .phone button {
+		margin: 0;
+		width: 80px;
+		border-radius: 5px;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		padding: 0 5px;
+	}
+	.modal.confirm .text, .modal.modal-alert .text {
+		font-size: 22px;
+	}
+	.modal.modal-alert .modal-body, .modal.confirm .modal-body {
+		padding: 20px;
+	}
+	
+	/* Акции */
+	.container .shares .share-item {
+		margin: 0 0 15px 0;
+	}
+	.container .shares .share-item .image {
+		height: 170px;
+	}
+	
+	/* Просмотр акции */
+	.container.shares-show .media {
+		height: 180px;
+	}
+	.container.shares-show .services .abatement {
+		display: none;
+	}
+	
+	/* Избранное */
+	.favorites-list .favorites .favorite .company {
+		display: none;
+	}
+	.favorites-list .favorites .favorite .actions {
+		width: auto;
+		margin-top: 10px;
+	}
+	.favorites-list .favorites .favorite .actions > a {
+		width: 68px;
+		line-height: 28px;
+		border-bottom: 0;
+		margin-right: 16px;
+	}
+	
+	/* Отзывы */
+	.container.reviews .items .item .username {
+		max-width: 100px;
+	}
+	
+	/* Услуги компании */
+	.services-list .item .title .value {
+		max-width: 160px;
+	}
+}

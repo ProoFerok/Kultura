@@ -1,0 +1,146 @@
+.review a.want-same, .review a.repeat-visit, .footer a.repeat-visit {
+    display: inline-flex;
+    width: fit-content;
+    height: 30px;
+    padding: 6px 12px;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    border-radius: 8px;
+    background: rgba(0, 122, 255, 0.10);
+    color: #007AFF;
+    font-feature-settings: 'liga' off, 'clig' off;
+    font-family: "Open Sans", sans-serif;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 16.236px;
+}
+
+.review a.want-same:focus, .review a.repeat-visit:focus, .footer a.repeat-visit:focus {
+    text-decoration: none;
+}
+
+.review a.repeat-visit, .footer a.repeat-visit {
+    background-image: url(/assets/images/reviews/repeat.svg);
+    background-repeat: no-repeat;
+    background-position-y: center;
+    background-position-x: 10px;
+    padding-left: 30px;
+}
+
+.confirmDialog .modal-dialog {
+    color: #272727;
+    font-family: "Open Sans", sans-serif;
+    font-style: normal;
+    line-height: normal;
+}
+
+.confirmDialog .modal-dialog h5 {
+    margin: 0 0 2px 0;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.confirmDialog .modal-dialog .description {
+    margin: 0;
+    color: #878E97;
+    font-size: 12px;
+    font-weight: 400;
+}
+
+.confirmDialog .modal-dialog .modal-body {
+    background-color: #F3F6FA;
+    margin: 0;
+    padding: 20px 30px 20px 30px;
+}
+
+.confirmDialog .modal-dialog .modal-body .content {
+    margin: 0;
+    padding: 0;
+    border-radius: 12px;
+    background-color: #fff;
+}
+
+.confirmDialog .modal-dialog .modal-body .content .service {
+    padding: 12px 0 14px 0;
+    margin: 0 16px 0 16px;
+    border-bottom: 1px #E7EEF6 solid;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.confirmDialog .modal-dialog .modal-body .content .service .old {
+    padding-right: 8px;
+    color: #8A99A0;
+    font-feature-settings: 'liga' off, 'clig' off;
+    font-size: 12px;
+    font-weight: 400;
+}
+
+.confirmDialog .modal-dialog .modal-body .content .service .old.changed {
+    text-decoration-line: line-through;
+}
+
+.confirmDialog .modal-dialog .modal-body .content .service .new {
+    padding-right: 8px;
+    color: #272727;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    letter-spacing: -0.28px;
+}
+
+.confirmDialog .modal-dialog .modal-body .service:last-child {
+    border: none;
+}
+
+.confirmDialog .modal-dialog .modal-footer {
+    text-align: center;
+}
+
+.confirmDialog .modal-dialog .modal-footer .btn {
+    padding: 8px 20px;
+    border-radius: 8px;
+}
+
+.recordDialog .modal-dialog {
+    width: 740px;
+    height: 670px;
+    margin: 50px auto;
+}
+
+.recordDialog .modal-dialog #logo {
+    width: 100%;
+    height: 100%;
+    border-radius: 12px;
+    background-color: #fff;
+    color: #d6d6d6;
+    font-size: 42px;
+    line-height: 42px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.recordDialog .modal-dialog #record {
+    width: 100%;
+    height: 100%;
+    border-radius: 12px;
+    background-color: #fff;
+}
+
+@media (max-width: 740px) {
+    .recordDialog .modal-dialog {
+        width: 100%;
+        height: 100%;
+    }
+}
+
+@media (max-width: 500px) {
+    .confirmDialog,
+    .confirmDialog .modal-dialog
+    {
+        width: 100%;
+    }
+}

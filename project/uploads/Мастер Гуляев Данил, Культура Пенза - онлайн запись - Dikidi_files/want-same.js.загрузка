@@ -1,0 +1,125 @@
+let wantSame = {
+
+    isRecordFrameLoading: false,
+
+    init: function () {
+        const confirmMismatches = function (mismatches, abbr, callback) {
+            $(".confirmDialog .continue").on("click", function () {
+                $('.confirmDialog').modal('hide');
+                callback();
+            });
+
+            let modalBody = '';
+            mismatches.forEach((mismatch) => {
+                const recordHours = Math.floor(mismatch.record_time / 60);
+                const recordMinutes = mismatch.record_time % 60;
+                const recordTime = (recordHours ? intToStrType(recordHours, 'hour') : '') +
+                    (recordMinutes ? ' ' + intToStrType(recordMinutes, 'minute') : '');
+                const hours = Math.floor(mismatch.time / 60);
+                const minutes = mismatch.time % 60;
+                const time = (hours ? intToStrType(hours, 'hour') : '') +
+                    (minutes ? ' ' + intToStrType(minutes, 'minute') : '');
+
+                modalBody += '<p class="service">' + mismatch.name + '<br/>' +
+                    '<span class="old' + (mismatch.record_time !== mismatch.time ? ' changed' : '') + '">' +
+                    recordTime + '</span>' +
+                    '<span class="old' + (mismatch.record_cost !== mismatch.cost ? ' changed' : '') + '">' +
+                    (mismatch.record_cost === 0 ? __('бесплатно') : mismatch.record_cost + ' ' + abbr) + '</span>' +
+                    '<span class="new">' + time + '</span>' +
+                    '<span class="new">' + (mismatch.cost === 0 ? __('бесплатно') : mismatch.cost + ' ' + abbr) + '</span>' +
+                    '</p>';
+            });
+            $('.confirmDialog .modal-body .content').html(modalBody);
+        };
+
+        const loadRecord = function (companyId, masterId, serviceId) {
+            if (wantSame.isRecordFrameLoading) return;
+            wantSame.isRecordFrameLoading = true;
+
+            $('.recordDialog').not(':first').remove();
+            $('.recordDialog').appendTo('body').modal();
+
+            const recordFrame = $('.recordDialog #record');
+            recordFrame.unbind("load");
+            recordFrame.on("load", function () {
+                $('.recordDialog #logo').hide();
+                recordFrame.show();
+                wantSame.isRecordFrameLoading = false;
+            });
+
+            const src = recordFrame.data('src');
+            const s = serviceId.toString().replaceAll(',', '.');
+            recordFrame.hide();
+            $('.recordDialog #logo').show();
+            recordFrame.attr('src', src + companyId + '?p=4.pi-po-sm-ss-sd&o=1&rl=0_0&source=dikidi&mode=frontend&m=' + masterId + '&s=' + s);
+        }
+
+        let wantSameButtons = $('.review a.want-same, .review a.repeat-visit, .footer a.repeat-visit');
+        wantSameButtons.unbind('click');
+
+        function handleWantSameButtonClick($el) {
+            let recordId = $el.data('record-id');
+            let companyId = $el.data('company-id');
+            if (!companyId) {
+                companyId = frontend.company.id;
+            }
+            let abbr = $el.data('abbr');
+
+            sw.ajax({
+                url: sw.fixDomain(window.location.origin + '/api/record/check_price/'),
+                data: {
+                    company: companyId,
+                    id: recordId
+                },
+                success: function (response) {
+
+                    const data = response.data;
+                    const master = data.employee;
+
+                    let serviceIds = [];
+                    let mismatches = [];
+                    data.services.forEach((service) => {
+                        if (serviceIds.indexOf(service.id) < 0) {
+                            serviceIds.push(service.id);
+                            if (service.cost !== service.record_cost || service.time !== service.record_time) {
+                                mismatches.push(service);
+                            }
+                        }
+                    });
+
+                    if (mismatches.length) {
+                        // Some services have been changed ask to continue
+                        $('.confirmDialog').not(':first').remove();
+                        $('.confirmDialog').appendTo('body').modal();
+                        
+                        confirmMismatches(mismatches, abbr, function () {
+                            loadRecord(companyId, master.id, serviceIds);
+                        });
+                        
+                    } else {
+                        loadRecord(companyId, master.id, serviceIds);
+                    }
+                },
+                error: function () {
+                }
+            });
+        }
+
+        var $island = $('[data-react-island="CompanyProfilePage"]');
+        if ($island) {
+            $island.on('click', '[data-action="want-same"]', function (e) {
+                e.preventDefault();
+                handleWantSameButtonClick($(this));
+            });
+        }
+
+        wantSameButtons.on('click', function(e) {
+            e.preventDefault();
+            handleWantSameButtonClick($(e.currentTarget));
+        });
+    }
+}
+
+$().ready(function() {
+    wantSame.init();
+});

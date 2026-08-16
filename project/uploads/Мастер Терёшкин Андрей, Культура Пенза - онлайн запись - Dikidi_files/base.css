@@ -1,0 +1,390 @@
+a {
+	cursor: pointer;
+}
+button {
+	outline: none;
+}
+.input-phone input[type=tel],
+.input-phone input[type=tel]:focus,
+.input-phone input[type=tel]:active {
+	box-shadow: none;
+	outline: none;
+	border-color: #cccccc;
+}
+.input-phone .input-group-btn .btn:hover,
+.input-phone .input-group-btn .btn:focus,
+.input-phone .input-group-btn .btn:active {
+	border-color: #cccccc;
+	outline: none;
+}
+.input-phone .dropdown-menu a {
+	cursor: pointer;
+	line-height: 24px;
+}
+.input-phone .flag {
+	display: inline-block;
+	margin-bottom: -3px;
+	margin-right: 3px;
+}
+.input-phone .caret {
+	margin-top: -2px;
+}
+.input-phone .dropdown-menu .code {
+	color: #999999;
+	margin-left: 5px;
+}
+.input-phone .dropdown-menu {
+	max-height: 220px;
+	overflow-y: auto;
+}
+.input-phone .dropdown-menu .flag {
+	margin-bottom: -4px;
+	margin-right: 5px;
+}
+.input-phone .input-group-btn .btn {
+	border-right-width: 0;
+}
+.form-group.has-error .input-group {
+	border: 1px solid #a94442;
+	border-radius: 5px;
+}
+.form-group.has-error .input-group:focus {
+	border-color: #843534;
+}
+.form-group.has-error .input-group input {
+	border-right: 0;
+	border-top: 0;
+	border-bottom: 0;
+	border-left: 1px solid #a94442;
+}
+.form-group.has-error .input-group button {
+	border: 0;
+}
+.form-group.has-error .input-group .btn-default.active,
+.form-group.has-error .input-group .btn-default:active,
+.form-group.has-error .input-group .btn-default:hover,
+.form-group.has-error .input-group .btn-default:focus,
+.form-group.has-error .input-group .open > .dropdown-toggle.btn-default {
+	background-color: transparent;
+}
+
+.input-group .form-input-tel {
+	width: 100%;
+	display: table-cell;
+}
+
+/* region modal */
+.modal .modal-body {
+	padding: 20px 30px 30px;
+}
+.modal .modal-body h3 {
+	color: #0C1016;
+	font-size: 25px;
+	margin: 0 0 20px;
+}
+.modal .form-group.btns {
+	margin-top: 10px;
+	margin-bottom: 0;
+	text-align: right;
+}
+.modal .form-group.btns > .btn {
+	margin-left: 10px;
+}
+.modal-open .modal {
+	overflow-y: scroll;
+	padding-right: 0 !important;
+}
+.modal .close {
+	display: block;
+	font-size: 30px;
+	height: 25px;
+	line-height: 25px;
+	margin: 0 !important;
+	position: absolute;
+	right: 10px;
+	top: 10px;
+	width: 25px;
+	z-index: 3;
+}
+.modal.sw-dialog .modal-dialog {
+	max-width: 460px;
+}
+@media screen and (max-width: 768px) {
+	.modal .modal-dialog {
+		margin: 10px auto;
+	}
+	.modal .modal-content {
+		margin-right: 10px;
+		margin-left: 10px;
+	}
+}
+/* endregion */
+
+/* region Radio */
+.form-inline > .radio {
+	margin-right: 15px;
+}
+.form-inline > .radio:last-child {
+	margin-right: 0;
+}
+.radio input[type="radio"] {
+	display: none;
+}
+.radio input[type="radio"] + .radio-label {
+	padding-left: 0;
+}
+.radio input[type="radio"] + .radio-label:before {
+	content: "";
+	background: #f4f4f4;
+	border-radius: 100%;
+	border: 1px solid #d4d8db;
+	display: inline-block;
+	width: 16px;
+	height: 16px;
+	position: relative;
+	margin-right: 10px;
+	vertical-align: middle;
+	cursor: pointer;
+	margin-top: -2px;
+	transition: all 0ms ease;
+}
+.radio input[type="radio"]:checked + .radio-label:before {
+	background-color: #3197ee;
+	box-shadow: inset 0 0 0 3px #f4f4f4;
+}
+.radio input[type="radio"]:focus + .radio-label:before {
+	outline: none;
+}
+.radio input[type="radio"]:disabled + .radio-label:before {
+	box-shadow: inset 0 0 0 4px #f4f4f4;
+	background: #d4d8db;
+}
+.radio input[type="radio"] + .radio-label:empty:before {
+	margin-right: 0;
+}
+/* endregion */
+
+.modal.auth .btn.btn-dikidi,
+.modal-open .verification.mobile .btn.btn-dikidi {
+	border-radius: 5px;
+	text-transform: unset;
+	width: 100%;
+	line-height: 44px;
+	height: 46px;
+	font-weight: unset;
+	border-width: 1px;
+	margin: 0;
+	padding: 0 15px;
+}
+.modal.auth .help-block {
+	margin-bottom: 20px;
+}
+.modal.auth .footer {
+	margin-top: 25px;
+}
+
+.modal.auth .registration .email {
+	margin: 0;
+	max-height: 0;
+	opacity: 0;
+	pointer-events: none;
+}
+
+.modal.auth #captcha h3 {
+	display: none;
+}
+.modal.auth #captcha .form-group:last-child {
+	margin-top: 25px;
+}
+.captcha img.captcha-refresh {
+	padding: 0;
+}
+.captcha button.captcha-refresh {
+	padding: 14px 10px;
+}
+
+/* region Webview info window */
+.info-window {
+	background-color: #F3F6FA;
+	width: 100vw;
+	height: 100vh;
+}
+
+.info-window > .header {
+	width: 100%;
+	height: 60px;
+	border-bottom: 1px solid #E7EFF9;
+	background-color: #FFF;
+
+	display: flex;
+	flex-direction: row;
+	gap: 0px;
+	align-items: center;
+	justify-content: center;
+
+	color: #272727;
+	font-family: Open Sans;
+	font-size: 18px;
+	font-style: normal;
+	font-weight: 600;
+}
+
+.info-window > .content {
+	background-color: #F3F6FA;
+	padding: 20px;
+}
+
+.info-window.dark {
+	background-color: #000;
+}
+
+.info-window.dark > .header {
+	border-bottom: 1px solid #2B2B2E;
+	background-color: #1C1C1E;
+	color: #FFF;
+}
+
+.info-window.dark > .content {
+	background-color: #000;
+	padding: 20px;
+}
+/* endregion */
+
+/* region header */
+nav.header .navbar-nav > li > a {
+	color: #ffffff;
+	font-size: 13px;
+}
+
+nav.header .navbar-nav li.events > a > i {
+	background-image: url("/assets/images/ico_events.png");
+	background-repeat: no-repeat;
+	background-position: center center;
+	display: inline-block;
+	position: relative;
+	height: 18px;
+	width: 18px;
+}
+
+nav.header .navbar-nav li.events.fresh > a > i:before {
+	background-color: #f44545;
+	border: 1px solid #ffffff;
+	content: "";
+	border-radius: 50%;
+	height: 10px;
+	width: 10px;
+	display: block;
+	float: right;
+	margin-right: -3px;
+	margin-top: -2px;
+}
+
+nav.header .navbar-nav li.user .icon {
+	background-image: url(/assets/images/avatar-80.png);
+	background-repeat: no-repeat;
+	background-size: contain;
+	width: 28px;
+	height: 28px;
+	float: left;
+	margin-right: 10px;
+}
+
+@media screen and (min-width: 768px) {
+	nav.header .navbar-nav li.events > a {
+		line-height: 1em;
+	}
+
+	nav.header .navbar-nav li.user > a {
+		padding-top: 11px;
+		padding-bottom: 11px;
+		line-height: 28px;
+	}
+}
+
+.login .form-group input[type="checkbox"],
+.registration .form-group input[type="checkbox"] {
+    height: unset;
+    appearance: auto;
+    -webkit-appearance: auto;
+    -moz-appearance: auto;
+}
+.registration .form-group input[type="checkbox"]#age {
+    margin-right: 10px;
+}
+.login .form-group.agreement,
+.registration .form-group.agreement,
+.registration .form-group.age {
+    display: flex;
+    align-items: start;
+    justify-content: start;
+}
+.login .form-group.agreement label,
+.registration .form-group.agreement label {
+    display: flex;
+    align-items: start;
+    justify-content: start;
+}
+.login .form-group.agreement input[type="checkbox"] + label::before,
+.registration .form-group.agreement input[type="checkbox"] + label::before {
+    width: 22px;
+    margin-right: 0;
+}
+.login .form-group.agreement label div,
+.registration .form-group.agreement label div {
+    width: 100%;
+    padding-left: 10px;
+    line-height: 19px;
+}
+
+body .link-mobile-banner-block {
+    display: none;
+}
+
+body > a .up-mobile-banner-block {
+    position: sticky;
+    top: 0;
+    left: 0;
+    z-index: 999;
+    background: linear-gradient(to right, #4137F6, #3C33F6, #388BFF);
+    color: #FFFFFF;
+    height: 62px;
+    width: 100%;
+    
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+}
+body > a .up-mobile-banner-block .mobile-banner-icon {
+    display: flex;
+    align-items: center;
+}
+body > a .up-mobile-banner-block .mobile-banner-icon img {
+    width: 36px;
+    height: 36px;
+    margin-right: 10px;
+}
+body > a .up-mobile-banner-block .mobile-banner-icon p {
+    font-weight: 600;
+    font-size: 14px;
+}
+body > a .up-mobile-banner-block button {
+    text-transform: uppercase;
+    
+    font-weight: 700;
+    font-size: 14px;
+    
+    color: #0363FF;
+    background-color: #FFFFFF;
+    border: none;
+    border-radius: 50px;
+    padding: 4px 16px;
+}
+
+@media screen and (max-width: 768px) and (hover: none) and (pointer: coarse) {
+    body:has(.link-mobile-banner-block) { padding-bottom: 62px; }
+    body .link-mobile-banner-block { display: block; }
+}
+
+
+/* endregion */

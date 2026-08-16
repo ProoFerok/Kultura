@@ -1,0 +1,563 @@
+/* region Модалка с списком и оставлением отзыва */
+
+.leave-feedback .scroll-block,
+.list-unrated .scroll-block {
+    --new-elements-min-height-modal-scroll-block: auto;
+    --new-elements-max-height-modal-scroll-block: auto;
+}
+.leave-feedback .company-title-info,
+.list-unrated .company-title-info {
+    display: flex;
+    justify-content: left;
+    text-align: left;
+    gap: 10px;
+    align-items: center;
+}
+.leave-feedback .company-title-info .company-icon-title,
+.list-unrated .company-title-info .company-icon-title {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+}
+.leave-feedback .company-title-info .company-name-title,
+.list-unrated .company-title-info .company-name-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #272727;
+    text-align: left;
+    align-items: center;
+}
+.leave-feedback .modal-dialog > .modal-content > .modal-body .footer.there-no-review {
+    justify-content: center;
+}
+.leave-feedback .two-line-text,
+.list-unrated .two-line-text {
+    width: auto;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    text-overflow: ellipsis;
+}
+.leave-feedback .company-title-info.title,
+.unratedleave-feedback .company-title-info.title {
+    max-width: 90%;
+}
+.leave-feedback .company-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 8px;
+}
+.leave-feedback .employee-icon,
+.list-unrated .employee-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50px;
+}
+.leave-feedback .control-description,
+.list-unrated .control-description {
+    color: var(--new-elements-color-gray-beta);
+    font-size: 12px;
+    font-weight: 400;
+    min-width: 105px;
+}
+.leave-feedback .info-employee-item,
+.list-unrated .info-employee-item {
+    display: flex;
+    justify-content: center;
+    text-align: left;
+    gap: 10px;
+}
+.leave-feedback .company-name {
+    font-weight: 700;
+    font-size: 16px;
+    color: #272727;
+    margin-bottom: 5px;
+}
+.leave-feedback .info-company {
+    margin-top: 15px;
+    text-align: -webkit-center;
+}
+.leave-feedback .company-block-item {
+    margin-bottom: 15px;
+}
+.list-unrated .info-employee-list {
+    display: flex;
+    justify-content: space-between;
+    text-align: left;
+    gap: 10px;
+}
+.leave-feedback .rating,
+.list-unrated .rating {
+    display: block;
+    position: relative;
+    width: 200px;
+    margin: 0 auto;
+}
+.leave-feedback .rating-stars,
+.list-unrated .rating-stars {
+    position: relative;
+    width: 200px;
+    height: 32px;
+    background: url('/assets/images/mobile/star-gray.svg') repeat-x scroll left center rgba(0, 0, 0, 0);
+    background-size: 40px auto;
+    cursor: pointer;
+    overflow: hidden;
+}
+.leave-feedback .rating-stars-value,
+.list-unrated .rating-stars-value {
+    position: absolute;
+    z-index: 0;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    background: url('/assets/images/mobile/star-orange.svg') repeat-x scroll left center rgba(0, 0, 0, 0);
+    background-size: 40px auto;
+}
+.leave-feedback .rating-block,
+.list-unrated .rating-block {
+    background: #F3F6FA;
+    margin-top: 20px;
+}
+.list-unrated .do-not-rate-block {
+    margin-top: 10px;
+}
+.leave-feedback .message-rating {
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 20px;
+    letter-spacing: -0.016em;
+    text-align: center;
+    color: #878E97;
+    margin-top: 10px;
+}
+.leave-feedback .new-elements-textarea label {
+    white-space: normal;
+    background-color: transparent;
+}
+.leave-feedback .caption {
+    padding: 10px 0 15px 15px;
+}
+.leave-feedback .new-elements-textarea > textarea.focus {
+    padding: 10px;
+}
+.leave-feedback .leave-review-message-block {
+    margin-bottom: 24px;
+}
+.leave-feedback .leave-review-message {
+    display: flex;
+    gap: 15px;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 18px;
+    letter-spacing: -0.0062em;
+    text-align: left;
+    font-family: "Open Sans", serif;
+    color: #3C3C43;
+}
+.leave-feedback .feedback-textarea {
+    font-size: var(--new-elements-font-size-control);
+    font-weight: var(--new-elements-font-weight-control);
+    color: var(--new-elements-color-black-alpha);
+    line-height: var(--new-elements-line-height-controls);
+    padding: var(--new-elements-padding-control);
+    border: var(--new-elements-border-control);
+    border-radius: var(--new-elements-border-radius-control);
+    min-height: 160px;
+    width: var(--new-elements-width-control);
+    outline: none;
+}
+.leave-feedback .feedback-textarea::placeholder {
+    color: #878E97;
+    font-family: "Open Sans", serif;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 20px;
+    text-align: left;
+
+}
+.leave-feedback .feedback-textarea:focus::placeholder {
+    color: transparent;
+}
+.leave-feedback .feedback-textarea:not(:placeholder-shown)::placeholder {
+    color: transparent;
+}
+.leave-feedback .feedback-advice {
+    margin-top: 12px;
+    display: flex;
+    gap: 8px;
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    color: #1C1C1E;
+}
+.leave-feedback .nr-photos {
+    display: flex;
+    gap: 20px;
+}
+.leave-feedback .nr-photos .nr-list.photo-list {
+    margin-bottom: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+.leave-feedback .files {
+    border: none;
+    border-radius: 0;
+    padding: 0;
+}
+.leave-feedback .nr-photos .nr-add-photo {
+    width: 96px;
+    height: 96px;
+    min-width: 96px;
+    border-radius: 8px;
+    border-width: 1px;
+    border-color: #C7C7CC;
+    cursor: pointer;
+    border-style: dashed;
+    background-image: url("/assets/images/photo-badge-plus.svg");
+    background-color: transparent;
+    background-repeat: no-repeat;
+    /*background-size: cover;*/
+    background-position: center center;
+}
+.leave-feedback .nr-item.pr-photo {
+    float: none;
+    margin: 0;
+    width: 96px;
+    height: 96px;
+}
+.leave-feedback-confirm.confirm {
+    background-color: rgba(0, 0, 0, 0.5);
+}
+.leave-feedback-confirm .modal-body h3 {
+    display: flex;
+}
+.leave-feedback .anonymous {
+    display: flex;
+    align-items: center;
+    height: 44px;
+}
+.leave-feedback .anonymous label {
+    display: block;
+    font-size: 14px;
+    font-weight: normal;
+    padding-left: 10px;
+    cursor: pointer;
+    margin-bottom: 0;
+    color: #000;
+}
+.leave-feedback input.be-checkbox + label:before {
+    top: initial;
+    width: 20px;
+    height: 20px;
+    margin-left: -28px;
+    background-size: 16px;
+}
+.leave-feedback .agreement {
+    margin-top: -5px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--new-elements-color-gray-beta);
+}
+/* endregion */
+
+/* region Модалка "Не оценивать этот визит?" */
+
+.new-elements-modal.leave-feedback-confirm > .modal-dialog {
+    width: 326px;
+    margin-left: calc((360px / 2)* -1);
+    left: 50%;
+    top: 30%
+}
+.new-elements-modal.leave-feedback-confirm > .modal-dialog > .modal-content > .modal-body {
+    box-shadow: unset;
+}
+.new-elements-modal.leave-feedback-confirm > .modal-dialog > .modal-content > .modal-body .form-group.text {
+    padding: 0 20px;
+    text-align: left;
+}
+.new-elements-modal.leave-feedback-confirm > .modal-dialog > .modal-content > .modal-body .btn {
+    text-transform: unset;
+}
+
+/* endregion */
+
+/* region Костыли для кастомных кнопок */
+
+.blue.feedback-button {
+    border: none;
+}
+.blue.button-feedback-outline:hover {
+    background-color: inherit;
+    color: inherit;
+    cursor: pointer;
+}
+
+/* endregion */
+
+/* region Модалка "Отзыв успешно отправлен!" */
+
+.final-feedback .header {
+    font-weight: 700;
+    color: #272727;
+}
+.final-feedback .scroll-block {
+    --new-elements-gap-modal-scroll-block: 20px;
+    --new-elements-min-height-modal-scroll-block: auto;
+    --new-elements-max-height-modal-scroll-block: auto;
+}
+.final-feedback .actions-block {
+    display: flex;
+    gap: 15px;
+}
+.final-feedback .action-link-block {
+    color: inherit;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border: 1px;
+}
+.final-feedback .action-link-block:hover {
+    background-color: #f3f1f1;
+}
+.final-feedback .logo {
+    width: 28px;
+    height: 28px;
+    margin-bottom: 10px;
+}
+.final-feedback .complaint-block {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+.final-feedback .modal-content > .modal-body .footer.reviews-finale-footer {
+    justify-content: end;
+}
+.final-feedback .chevron {
+    transform: rotate(270deg);
+}
+
+/* endregion */
+
+/* region Модалка жалобы */
+
+.company-complaint {
+    background-color: rgba(0, 0, 0, 0.5);
+}
+.company-complaint .company-logo-complaint {
+    width: 64px;
+    height: 64px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+.company-complaint .company-name-complaint {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+.company-complaint .company-address-complaint {
+    font-size: 12px;
+    font-weight: 400;
+    color: #878E97;
+}
+
+/* endregion */
+
+/* region Адаптивность */
+
+@media screen and (max-width: 980px) {
+    .modal.sw-dialog.leave-feedback .modal-dialog {
+            margin-left: calc((var(--new-elements-width-modal-dialog) / 2)* -1);
+            left: 50%;
+            display: grid;
+            width: 100%;
+    }
+}
+@media screen and (max-width: 576px) {
+    .new-elements-modal.leave-feedback > .modal-dialog {
+        width: auto;
+    }
+    .new-elements-modal.company-complaint > .modal-dialog {
+        width: auto;
+        display: grid;
+    }
+    .new-elements-modal.final-feedback > .modal-dialog {
+        width: auto;
+        display: grid;
+    }
+    .company-complaint .modal-content {
+        width: 100%;
+    }
+    .company-complaint .footer, .final-feedback .footer {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+    }
+    .new-elements-modal.company-complaint > .modal-dialog > .modal-content > .modal-body .scroll-block,
+    .new-elements-modal.final-feedback > .modal-dialog > .modal-content > .modal-body .scroll-block {
+        margin-bottom: 100px;
+    }
+    .final-feedback .modal-content {
+        width: 100%;
+    }
+    .final-feedback .modal-dialog > .modal-content > .modal-body .scroll-block {
+        max-height: 100%;
+        height: auto;
+    }
+    .final-feedback .action-link-block:hover {
+        background-color: var(--new-elements-background-color-content-block);
+    }
+    .final-feedback .action-link-block:active {
+        background-color: #f3f1f1;
+    }
+    .leave-feedback .modal-content {
+        width: 100%;
+    }
+    .new-elements-modal.leave-feedback .modal-dialog > .modal-content > .modal-body .scroll-block {
+        max-height: 100%;
+        height: auto;
+    }
+    .leave-feedback .there-no-review {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+    }
+    .leave-feedback .nr-photos {
+        gap: 15px;
+    }
+    .leave-feedback .nr-photos .nr-list.photo-list {
+        gap: 15px;
+    }
+    .leave-feedback .nr-photos .nr-add-photo {
+        width: 86px;
+        height: 86px;
+        min-width: 86px;
+    }
+    .leave-feedback .nr-item.pr-photo {
+        width: 86px;
+        height: 86px;
+    }
+    .new-elements-modal.leave-feedback > .modal-dialog > .modal-content > .modal-body .footer.there-review {
+        position: sticky;
+        bottom: 0;
+    }
+    .leave-feedback .control-description,
+    .list-unrated .control-description {
+        min-width: 50px;
+    }
+    .new-elements-modal.leave-feedback-confirm > .modal-dialog {
+        width: var(--new-elements-width-modal-dialog);
+        margin-left: calc((var(--new-elements-width-modal-dialog) / 2)* -1);
+        left: 50%;
+    }
+}
+@media screen and (max-width: 576px) and (min-height: 1070px) {
+    .new-elements-modal.leave-feedback > .modal-dialog > .modal-content > .modal-body .footer.there-review {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+    }
+}
+
+/* Блок Флоктори */
+.floctory-block {
+    width: 100%;
+    min-height: 136px;
+    border: none;
+    border-radius: 10px;
+
+    background-image: url("/assets/images/feedback/backgound-bright.png");
+    background-repeat:no-repeat;
+    background-position:center;
+    background-size: 100% auto;
+
+    display: flex;
+    justify-content: space-between;
+}
+
+.floctory-block:hover {
+    cursor: pointer;
+}
+
+.floctory-block .floctory-title {
+    display: flex;
+    flex-direction: column;
+    margin: 16px 0 0 16px;
+}
+
+.floctory-block .floctory-title span {
+    font-weight: 500;
+    font-size: 17px;
+}
+
+.floctory-block .floctory-title span > span {
+    color: #5856D6;
+}
+
+.floctory-block .floctory-title button {
+    width: 111px;
+    height: 34px;
+    box-shadow: 0 0 30px 0 #DBD0FF;
+    background: #F6F2FF;
+    color: #5856D6;
+
+    border: none;
+    border-radius: 50px;
+
+    font-weight: 500;
+    font-size: 15px;
+
+    margin-top: 22px;
+}
+
+.floctory-block img {
+    width: 107px;
+    height: 117px;
+    object-fit: contain;
+
+    margin: 10px 15px 0 0;
+}
+
+@media screen and (max-width: 401px) {
+    .floctory-block .floctory-title span {
+        font-size: 15px;
+    }
+
+    .floctory-block img {
+        width: 97px;
+        height: 107px;
+        
+        margin-top: 15px;
+    }
+}
+
+@media screen and (max-width: 370px) {
+    .floctory-block .floctory-title {
+        margin-top: 26px;
+    }
+
+    .floctory-block .floctory-title button {
+        margin-top: 12px;
+    }
+
+    .floctory-block img {
+        width: 80px;
+        height: 90px;
+
+        margin: 25px 5px 0 0;
+    }
+}
+
+@media screen and (max-width: 340px) {
+    .floctory-block .floctory-title span {
+        font-size: 13px;
+    }
+}
+/* Блок флоктории (конец) */
+
+/* endregion */

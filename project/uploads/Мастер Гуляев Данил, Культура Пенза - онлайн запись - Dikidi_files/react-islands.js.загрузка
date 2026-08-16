@@ -1,0 +1,89 @@
+(function () {
+    function copyAttributes(source, target) {
+        for (var i = 0; i < source.attributes.length; i++) {
+            var attr = source.attributes[i];
+            target.setAttribute(attr.name, attr.value);
+        }
+    }
+
+    function loadScriptsSequentially(scripts, onDone) {
+        if (!scripts.length) {
+            if (onDone) onDone();
+            return;
+        }
+
+        var source = scripts[0];
+        var rest = scripts.slice(1);
+        var el = document.createElement("script");
+
+        el.onload = el.onerror = function () {
+            loadScriptsSequentially(rest, onDone);
+        };
+        copyAttributes(source, el);
+        document.body.appendChild(el);
+    }
+
+    window.injectIslandAssets = function (container) {
+        var containerId = container.getAttribute("id");
+        var template = document.querySelector(
+            'template[data-island-assets-for="' + containerId + '"]',
+        );
+        if (!template) return;
+
+        var content = template.content;
+
+        content
+            .querySelectorAll('link[rel="stylesheet"]')
+            .forEach(function (link) {
+                var href = link.getAttribute("href");
+                if (
+                    href &&
+                    !document.head.querySelector('link[href="' + href + '"]')
+                ) {
+                    document.head.appendChild(link.cloneNode(false));
+                }
+            });
+
+        var srcScripts = Array.from(content.querySelectorAll("script[src]"));
+        var inlineScripts = Array.from(
+            content.querySelectorAll("script:not([src])"),
+        );
+
+        template.remove();
+
+        if (!srcScripts.length) {
+            inlineScripts.forEach(function (source) {
+                var el = document.createElement("script");
+                copyAttributes(source, el);
+                el.textContent = source.textContent;
+                document.body.appendChild(el);
+            });
+            return;
+        }
+
+        var hydrator = srcScripts[srcScripts.length - 1];
+        var others = srcScripts.slice(0, -1);
+
+        var toLoad = others.filter(function (source) {
+            return !document.querySelector(
+                'script[src="' + source.getAttribute("src") + '"]',
+            );
+        });
+        toLoad.push(hydrator);
+
+        inlineScripts.forEach(function (source) {
+            var el = document.createElement("script");
+            copyAttributes(source, el);
+            el.textContent = source.textContent;
+            document.body.appendChild(el);
+        });
+
+        loadScriptsSequentially(toLoad, function () {
+            if (window.__REACT_HYDRATOR__ && window.__REACT_HYDRATOR__.render) {
+                window.__REACT_HYDRATOR__.render(
+                    window.document.getElementById(containerId),
+                );
+            }
+        });
+    };
+})();

@@ -1,0 +1,218 @@
+
+.langSwitcher {
+	position: relative;
+	cursor: pointer;
+	width: min-content;
+	z-index: 1049;
+}
+.langSwitcher .lang-btn {
+	display: flex;
+	align-items: center;
+	padding-right: 10px;
+	color: white;
+	height: 20px;
+}
+
+.langSwitcher.arrow .lang-btn:before {
+	content: '';
+	background-image: url(/assets/images/promo/arrowW.svg);
+	position: absolute;
+	background-repeat: no-repeat;
+	width: 10px;
+	height: 6px;
+	right: -6px;
+	top: 8px;
+}
+
+.langSwitcher.arrow.open .lang-btn:before {
+	transform: rotate(180deg);
+}
+
+
+.langSwitcher .langContent {
+	box-shadow: 0 10px 20px rgb(41 41 42 / 7%);
+	border-radius: 6px;
+	/*left: -10px;*/
+	/*top: -15px;*/
+	height: fit-content;
+	position: absolute;
+	width: auto;
+	padding: 10px;
+	/*display: none;*/
+	background: #FFFFFF;
+	z-index: 9999;
+}
+.langSwitcher .langMenu {
+	display: none;
+}
+/*.langSwitcher .langContentFooter#langContentFooterNav{*/
+/*	left: -10px;*/
+/*	top: -15px;*/
+/*}*/
+.langSwitcher .langContent{
+	left: -10px;
+	bottom: 20px;
+}
+.langSwitcher.left .langContent{
+	right: -10px;
+	left: auto;
+	bottom: 20px;
+}
+
+.langSwitcher.top .langContent{
+	bottom: auto;
+	top: 20px;
+}
+
+
+
+
+.langSwitcher .langItem:first-child {
+	margin-top: 0;
+}
+.langSwitcher .langItem {
+	margin-top: 13px;
+	white-space: nowrap;
+	font-weight: 400;
+	font-size: 14px;
+	line-height: 19px;
+	color: #000000;
+}
+.langSwitcher .langItem .img-flag{
+	margin-right: 6px
+}
+.langSwitcher .langItem:first-child {
+	margin-top: 0;
+}
+
+.langSwitcher .langItem a {
+	display: flex;
+	cursor: pointer;
+	align-items: center;
+}
+
+.langSwitcher .langContent .langItem a{
+	color: black;
+}
+.langSwitcher .img-flag {
+	width: 20px;
+	height: 12px;
+	background-image: url(/assets/global/images/language-sprite.png?v=1.08);
+	background-repeat: no-repeat;
+	background-size: 18px;
+	position: relative;
+}
+.langSwitcher .lang-name {
+	margin-left: 6px;
+	line-height: 20px;
+	white-space: nowrap;
+}
+
+.langSwitcher .img-flag.ru {
+	background-position: 0 0;
+}
+
+.langSwitcher .img-flag.en {
+	background-position: 0 -12px;
+}
+
+.langSwitcher .img-flag.de {
+	background-position: 0 -36px;
+}
+
+.langSwitcher .img-flag.fr {
+	background-position: 0 -24px;
+}
+
+.langSwitcher .img-flag.es {
+	background-position: 0 -48px;
+}
+
+.langSwitcher .img-flag.ka {
+	background-position: 0 -60px;
+}
+
+.langSwitcher .img-flag.uk {
+	background-position: 0 -72px;
+}
+
+.langSwitcher .img-flag.pt {
+	background-position: 0 -84px;
+}
+
+.langSwitcher .img-flag.tr {
+	background-position: 0 -96px;
+}
+
+.langSwitcher .img-flag.hi {
+	background-position: 0 -108px;
+}
+.langSwitcher .img-flag.pt-br {
+	background-position: 0 -120px;
+}
+.langSwitcher .img-flag.es-419 {
+	background-position: 0 -144px;
+}
+.langSwitcher .img-flag.pl {
+	background-position: 0 -156px;
+}
+.langSwitcher .img-flag.kk {
+	background-position: 0 -168px;
+}
+
+.langSwitcher .langContent .close {
+	display: none;
+}
+
+.langSwitcher .fade {
+	position: fixed;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	opacity: 1;
+	background: rgba(0,0,0,0);
+	display: none;
+}
+.langSwitcher.open .fade {
+	display: block;
+}
+
+
+@media screen and (max-width: 750px) {
+	.langSwitcher .langMenu .langContent .close {
+		display: block;
+		font-size: 28px;
+		position: absolute;
+		right: 20px;
+		top: 10px;
+	}
+	.langSwitcher .langMenu .langContent {
+		position: fixed;
+		bottom: 0;
+		top: auto;
+		left: 0;
+		right: 0;
+		border-radius: 6px 6px 0 0;
+		padding: 25px 20px 20px 20px;
+		max-height: 100vh;
+		overflow: scroll;
+	}
+	.langSwitcher.top .langMenu .langContent {
+		top: 0;
+		bottom: auto;
+		border-radius: 0 0 6px 6px;
+	}
+	.langSwitcher .langMenu {
+		position: fixed;
+		left: 0;
+		right: 0;
+		top: 0;
+		bottom: 0;
+		opacity: 1;
+		background: rgba(0,0,0,0.55);
+	}
+	.langSwitcher .lang-name  {
+		display: none;
+	}
+}

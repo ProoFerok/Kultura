@@ -1,0 +1,907 @@
+;
+/**
+ * Env
+ */
+(function(w) {
+	w.dikidi = w.dikidi || {};
+	
+	var eventAddMethod = w.addEventListener ? 'addEventListener' : 'attachEvent';
+	var clickEvent = eventAddMethod == 'attachEvent' ? 'onclick' : 'click';
+	var eventRemoveMethod = w.removeEventListener ? 'removeEventListener' : 'detachEvent';
+	var messageEvent = eventAddMethod == 'attachEvent' ? 'onmessage' : 'message';
+	
+	var isDikidi = /dikidi/.test(w.document.domain);
+	var dikidiDomain = w.dikidi.domain||(isDikidi?w.document.domain:'dikidi.net');
+	var dikidiLocation = w.dikidi.location||w.location||w.document.location;
+	var protocol = w.dikidi.protocol||(isDikidi ? dikidiLocation.protocol.replace(':', '') : 'https');
+	
+	w.dikidi.env = function() {
+		return {
+			eventAddMethod: eventAddMethod,
+			eventRemoveMethod: eventRemoveMethod,
+			clickEvent: clickEvent,
+			messageEvent: messageEvent,
+			
+			isDikidi: isDikidi,
+			dikidiDomain: dikidiDomain,
+			dikidiLocation: dikidiLocation,
+			protocol: protocol
+		}
+	}
+})(window);
+
+/**
+ * Utils
+ */
+(function(w) {
+	w.dikidi = w.dikidi || {};
+	
+	w.dikidi.utils = {};
+	
+	w.dikidi.utils.extend = function (obj) {
+		for (var i = 1; i < arguments.length; i++) {
+			var src = arguments[i];
+			for (var key in src)
+				if (src.hasOwnProperty(key))
+					obj[key] = src[key];
+		}
+		return obj;
+	};
+	
+	w.dikidi.utils.getWindowHeight = function () {
+		var zoomLevel = w.document.documentElement.clientWidth / w.innerWidth;
+		return Math.max(w.innerHeight * zoomLevel, w.innerHeight, w.document.documentElement.clientHeight, 0);
+	};
+	
+	w.dikidi.utils.getCoords = function (elem) {
+		var box = elem.getBoundingClientRect();
+		
+		var body = document.body;
+		var docEl = document.documentElement;
+		
+		var scrollTop = window.pageYOffset || docEl.scrollTop || body.scrollTop;
+		var scrollLeft = window.pageXOffset || docEl.scrollLeft || body.scrollLeft;
+		
+		var clientTop = docEl.clientTop || body.clientTop || 0;
+		var clientLeft = docEl.clientLeft || body.clientLeft || 0;
+		
+		var top = box.top + scrollTop - clientTop;
+		var left = box.left + scrollLeft - clientLeft;
+		
+		return {top: top, left: left};
+	}
+})(window);
+
+/**
+ * Ready
+ */
+(function(w) {
+	w.dikidi = w.dikidi || {};
+	
+	// Define a local copy of $
+	var $ = function (callback) {
+			readyBound = false;
+			$.isReady = false;
+			if (typeof callback == 'function') {
+				DOMReadyCallback = callback;
+			}
+			bindReady();
+		},
+		// Use the correct document accordingly with window argument (sandbox)
+		document = w.document,
+		readyBound = false,
+		DOMReadyCallback = function () {},
+		// The ready event handler
+		DOMContentLoaded;
+	// Is the DOM ready to be used? Set to true once it occurs.
+	$.isReady = false;
+	// Handle when the DOM is ready
+	var DOMReady = function () {
+		// Make sure that the DOM is not already loaded
+		if (!$.isReady) {
+			// Make sure body exists, at least, in case IE gets a little overzealous (ticket #5443).
+			if (!document.body) {
+				setTimeout(DOMReady, 13);
+				return;
+			}
+			// Remember that the DOM is ready
+			$.isReady = true;
+			// If there are functions bound, to execute
+			DOMReadyCallback();
+			// Execute all of them
+		}
+	}; // /ready()
+	var bindReady = function () {
+		if (readyBound) {
+			return;
+		}
+		readyBound = true;
+		// Catch cases where $ is called after the
+		// browser event has already occurred.
+		if (document.readyState === "complete") {
+			DOMReady();
+		}
+		// Mozilla, Opera and webkit nightlies currently support this event
+		if (document.addEventListener) {
+			// Use the handy event callback
+			document.addEventListener("DOMContentLoaded", DOMContentLoaded, false);
+			// A fallback to window.onload, that will always work
+			w.addEventListener("load", DOMContentLoaded, false);
+			// If IE event model is used
+		} else if (document.attachEvent) {
+			// ensure firing before onload,
+			// maybe late but safe also for iframes
+			document.attachEvent("onreadystatechange", DOMContentLoaded);
+			// A fallback to window.onload, that will always work
+			w.attachEvent("onload", DOMContentLoaded);
+			// If IE and not a frame
+			// continually check to see if the document is ready
+			var toplevel = false;
+			try {
+				toplevel = w.frameElement == null;
+			} catch (e) {}
+			if (document.documentElement.doScroll && toplevel) {
+				doScrollCheck();
+			}
+		}
+	}; // /bindReady()
+	// The DOM ready check for Internet Explorer
+	var doScrollCheck = function () {
+		if ($.isReady) {
+			return;
+		}
+		try {
+			// If IE is used, use the trick by Diego Perini
+			// http://javascript.nwbox.com/IEContentLoaded/
+			document.documentElement.doScroll("left");
+		} catch (error) {
+			setTimeout(doScrollCheck, 1);
+			return;
+		}
+		// and execute any waiting functions
+		DOMReady();
+	}; // /doScrollCheck()
+	// Cleanup functions for the document ready method
+	if (document.addEventListener) {
+		DOMContentLoaded = function () {
+			document.removeEventListener("DOMContentLoaded", DOMContentLoaded, false);
+			DOMReady();
+		};
+	} else if (document.attachEvent) {
+		DOMContentLoaded = function () {
+			// Make sure body exists, at least, in case IE gets a little overzealous (ticket #5443).
+			if (document.readyState === "complete") {
+				document.detachEvent("onreadystatechange", DOMContentLoaded);
+				DOMReady();
+			}
+		};
+	} // /if()
+	// Expose $ to the global object
+	w.dikidi._ready = $;
+	
+	// Few callback for Ready
+	var cbList = [],
+		cbDefault = function() { cbList.forEach(function (cb) { cb(); }); };
+	$(cbDefault);
+	w.dikidi.ready = function(cb) {
+		if (typeof cb == 'function') {
+			if($.isReady)
+				cb();
+			else
+				cbList.push(cb);
+		}
+	}
+})(window);
+
+/**
+ * normalizeClickEvent
+ */
+(function(w) {
+	w.dikidi = w.dikidi || {};
+	
+	w.dikidi.normalizeClickEvent = function(e) {
+		e = e || window.event;
+		if ( !e.which && e.button !== undefined ) {
+			e.which = ( e.button & 1 ? 1 : ( e.button & 2 ? 3 : ( e.button & 4 ? 2 : 0 ) ) );
+		}
+		return e;
+	}
+})(window);
+
+/**
+ * JSONP
+ */
+(function(w) {
+	w.dikidi = w.dikidi || {};
+	
+	w.dikidi.jsonp = jsonp;
+	w.dikidi.jsonpcb = {};
+	
+	var DEFAULT_TIMEOUT = 30000;
+	var SCRIPT_PREFIX = 'dikidi-jsonp-';
+	var CALLBACK_PREFIX = '_';
+	
+	/**
+	 * JSONP запрос на указанный url и ответом который будет передан handler в качестве параметра вызова
+	 * @param url строка get-запроса
+	 * @param handler функция обработчик ответа
+	 * @param timeout время ожидания ответа (def:30s)
+	 */
+	function jsonp(url, handler, timeout) {
+		var newId = Math.random().toString().replace(/\./g, '');
+		var cbName = CALLBACK_PREFIX + newId;
+		var headId = w.document.getElementsByTagName('head')[0];
+		var script = w.document.createElement('script');
+		
+		var callback = function (data) {
+			jsonpcb(newId, data);
+		};
+		callback.id = newId;
+		callback.handler = handler;
+		callback.timer = setTimeout(function() {
+			jsonpcb(newId, {'error':1, message:'request timeout'});
+		}, timeout || DEFAULT_TIMEOUT);
+		
+		w.dikidi.jsonpcb[cbName] = callback;
+		
+		script.id = SCRIPT_PREFIX + newId;
+		script.type = 'text/javascript';
+		script.src = url + (url.indexOf('?')>-1?'&':'?') + 'callback=dikidi.jsonpcb.' + cbName;
+		
+		headId.appendChild(script);
+	}
+	
+	/**
+	 * Общий обработчик JSONP запросов, не должен вызываться напрямую клиентским кодом
+	 * @param reqId Идентификатор запроса
+	 * @param data Данные ответа
+	 * @private
+	 */
+	function jsonpcb(reqId, data) {
+		var cbName = CALLBACK_PREFIX + reqId;
+		var callback = w.dikidi.jsonpcb[cbName];
+		if(!callback) return;
+		var script = w.document.getElementById(SCRIPT_PREFIX + reqId);
+		if(!script) return;
+		
+		clearTimeout(callback.timer);
+		delete w.dikidi.jsonpcb[cbName];
+		script.parentNode.removeChild(script);
+		
+		if(typeof callback.handler == 'function') callback.handler(data);
+	}
+})(window);
+
+/**
+ * ModalIFrame
+ */
+(function(w) {
+	w.dikidi = w.dikidi || {};
+	
+	var DEFAULT_WIDTH = 740;
+	var DEFAULT_HEIGHT = 605;
+	var DEFAULT_MARGIN = 50;
+	var DEFAULT_CLOSE_TIMEOUT = 300;
+	var DEFAULT_REMOVE_TIMEOUT = 10000;
+	var DEFAULT_SHOW_IFRAME_TIMEOUT = 20000;
+	
+	var env = w.dikidi.env();
+	
+	var prefix = 'dikidi-' + Math.random().toString().replace(/\./g, '');
+	var styleInit = false;
+	var css = '' +
+		'.'+prefix+'-modal {' +
+		'  display: block;' +
+		'  position: fixed;' +
+		'  top: 0;' +
+		'  left: 0;' +
+		'  width: 100%;' +
+		'  height: 100%;' +
+		'  background: rgba(0, 0, 0, 0.6);' +
+		'  overflow-x: hidden;' +
+		'  overflow-y: scroll;' +
+		'  user-select: none;' +
+		'  z-index: 9999; }' +
+		'.'+prefix+'-modal .'+prefix+'-dialog {' +
+		'  display: block;' +
+		'  position: relative;' +
+		'  border-radius: 12px;' +
+		'  float: none;' +
+		'  margin: '+DEFAULT_MARGIN+'px auto;' +
+		'  width: '+DEFAULT_WIDTH+'px;' +
+		'  height: '+DEFAULT_HEIGHT+'px;' +
+		'  background: rgba(255, 255, 255, 1.0); }' +
+		'.'+prefix+'-modal .'+prefix+'-dialog iframe{' +
+		'  border-radius: 12px;' +
+		'  overflow: hidden; }' +
+		'.'+prefix+'-modal .'+prefix+'-close {' +
+		'  display: block;' +
+		'  position: absolute;' +
+		'  right: -32px;' +
+		'  top: -32px;' +
+		'  width: 32px;' +
+		'  height: 32px;' +
+		'  font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;' +
+		'  font-size: 32px;' +
+		'  line-height: 32px;' +
+		'  text-align: center;' +
+		'  font-weight: 100;' +
+		'  color: #FFF;' +
+		'  text-shadow: 0 1px 0 #000;' +
+		'  cursor: pointer; }' +
+		'.'+prefix+'-modal .'+prefix+'-logo {' +
+		'  position: absolute;' +
+		'  top: 280px;' +
+		'  left: 0;' +
+		'  width: 100%;' +
+		'  height: 42px;' +
+		'  line-height: 42px;' +
+		'  text-align: center;' +
+		'  font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;' +
+		'  font-size: 42px;' +
+		'  color: #d6d6d6; }' +
+		'.'+prefix+'-modal iframe {' +
+		'  position: relative;' +
+		'  box-sizing: content-box;' +
+		'  width: 100%;' +
+		'  height: 100%;' +
+		'  border: none; }' +
+		'';
+	
+	w.dikidi.modalIframe = function(url, options) {
+		options = options || {};
+		
+		if(!styleInit) {
+			styleInit = true;
+			var headId = w.document.getElementsByTagName('head')[0];
+			var style = w.document.createElement('style');
+			style.innerText = css;
+			headId.appendChild(style);
+		}
+		
+		var modalId = Math.random().toString().replace(/\./g, '');
+		var modalUrl = url + (url.indexOf('?')>-1?'&':'?') + 'modalId=' + modalId;
+		
+		var modal = w.document.createElement('div');
+		modal.id = prefix+'-modal-'+modalId;
+		modal.className = prefix+'-modal';
+		modal.style.display = 'none';
+		modal.innerHTML =
+			'<div class="'+prefix+'-dialog">'
+			+   '<div class="'+prefix+'-close">×</div>'
+			+   '<div class="'+prefix+'-logo"><b>DIKIDI</b> Online</div>'
+			+   '<iframe src="'+modalUrl+'" scrolling="no" frameborder="0" style="opacity:0;"></iframe>'
+			+ '</div>';
+		
+		getEl().body.appendChild(modal);
+		
+		var iframeReady = false;
+		var visible = false;
+		var normalWidth = 0;
+		var currentWidth = 0;
+		var showIframeTimer;
+		var removeTimer;
+		var closeTimer;
+		
+		/**
+		 * @returns {{body:Element, modal:Element, dialog:Element, close:Element, iframe:Element}}
+		 */
+		function getEl() {
+			var res = {body:null, modal: null, dialog: null, close: null, iframe: null};
+			res.body = w.document.body;
+			res.modal = w.document.getElementById(prefix+'-modal-'+modalId);
+			if(!res.modal) return res;
+			res.dialog = res.modal.firstChild;
+			res.close = res.dialog.querySelector('.'+prefix+'-close');
+			res.iframe = res.dialog.querySelector('iframe');
+			return res;
+		}
+		
+		function showIframe() {
+			clearTimeout(showIframeTimer);
+			var iframe = getEl().iframe;
+			if(iframe) iframe.style.opacity = 1;
+		}
+		showIframeTimer = setTimeout(showIframe, DEFAULT_SHOW_IFRAME_TIMEOUT);
+		
+		function show() {
+			if(visible) return;
+			
+			var el = getEl();
+			
+			normalWidth = el.body.clientWidth;
+			el.body.style.overflow = 'hidden';
+			currentWidth = el.body.clientWidth;
+			
+			if(currentWidth - normalWidth > 0) {
+				var paddingRight = (currentWidth - normalWidth) + (parseInt(el.body.style.paddingRight)||0);
+				el.body.style.paddingRight = paddingRight == 0 ? '' : paddingRight + 'px';
+			}
+			
+			el.modal.style.display = '';
+			
+			visible = true;
+			
+			if(options.cbShow && typeof options.cbShow === "function")
+				options.cbShow();
+		}
+		
+		function hide () {
+			if(!visible) return;
+			
+			var el = getEl();
+			
+			el.modal.style.display = 'none';
+			
+			if(currentWidth - normalWidth > 0) {
+				var paddingRight = (parseInt(el.body.style.paddingRight)||0) - (currentWidth - normalWidth);
+				el.body.style.paddingRight = paddingRight == 0 ? '' : paddingRight + 'px';
+			}
+			
+			normalWidth = 0;
+			el.body.style.overflow = '';
+			currentWidth = 0;
+			
+			visible = false;
+			
+			if(options.cbHide && typeof options.cbHide === "function")
+				options.cbHide();
+		}
+		
+		// установка таймер закрытия окна, а без готовности сразу удаление 
+		function beforeClose() {
+			if(!iframeReady) return remove();
+			closeTimer = setTimeout(close, DEFAULT_CLOSE_TIMEOUT);
+			getEl().iframe.contentWindow.postMessage(JSON.stringify({
+				modalId:modalId,
+				action:'beforeClose'
+			}), '*');
+		}
+		
+		// отмена таймера закрытия окна
+		function preventClose() {
+			clearTimeout(closeTimer);
+		}
+		
+		// закрытие окна
+		function close() {
+			preventClose();
+			hide();
+			beforeRemove();
+		}
+		
+		// установка таймеа удаления окна
+		function beforeRemove() {
+			removeTimer = setTimeout(remove, DEFAULT_REMOVE_TIMEOUT);
+			getEl().iframe.contentWindow.postMessage(JSON.stringify({
+				modalId:modalId,
+				action:'beforeRemove'
+			}), '*');
+		}
+		
+		// отмена таймера удаления окна
+		function preventRemove() {
+			clearTimeout(removeTimer);
+		}
+		
+		// удаляет элемент со страницы
+		function remove() {
+			clearTimeout(removeTimer);
+			hide();
+			result({action:'close'});
+			w[env.eventRemoveMethod](env.messageEvent, listener, false);
+			getEl().modal.parentNode.removeChild(modal);
+		}
+		
+		// изменяем размер окна
+		function setSize(width, height) {
+			if(!visible) return;
+			var dialog = getEl().dialog;
+			dialog.style.width = Math.max(width, DEFAULT_WIDTH) + 'px';
+			dialog.style.height = Math.max(height, DEFAULT_HEIGHT) + 'px';
+		}
+		
+		// изменение позиции прокрутки
+		function setScrollTop(top) {
+			var modal = getEl().modal;
+			var scrollTop = modal && modal.scrollTop || 0;
+			if(scrollTop != top)
+				modal.scrollTo(0, top);
+		}
+		
+		// уведомление о позиции скрола
+		function scroll() {
+			var el = getEl();
+			el.iframe.contentWindow.postMessage(JSON.stringify({
+				modalId:modalId,
+				action:'scroll',
+				scrollTop:el.modal.scrollTop,
+				windowHeight: w.dikidi.utils.getWindowHeight(),
+				offset:DEFAULT_MARGIN
+			}), '*');
+		}
+		
+		// уведомлеие о готовности
+		function ready() {
+			iframeReady = true;
+			showIframe();
+			scroll();
+		}
+		
+		// возврат результата работы окна
+		function result(data) {
+			if(options.cbResult && typeof options.cbResult === "function")
+				options.cbResult(data);
+		}
+		
+		// обработчик событий окна
+		function listener(e) {
+			var data = JSON.parse(e.data);
+			if(data.modalId != modalId) return;
+			switch (data.action) {
+				case 'ready': ready(); break;
+				case 'show': show(); break;
+				case 'hide': hide(); break;
+				case 'setSize': setSize(data.width, data.height); break;
+				case 'setScrollTop': setScrollTop(data.top); break;
+				case 'preventClose': preventClose(); break;
+				case 'close': close(); break;
+				case 'preventRemove': preventRemove(); break;
+				case 'remove': remove(); break;
+				case 'result': result(data.data); break; // {action:'save'|'close'|'remove', }
+			}
+		}
+		
+		// установка обработчика событий окна
+		w[env.eventAddMethod](env.messageEvent, listener, false);
+		
+		if(!options.backdrop || options.backdrop === '1') {
+			// обработчик задника
+			getEl().modal[env.eventAddMethod](env.clickEvent, function(e) {
+				if(w.dikidi.normalizeClickEvent(e).which != 1) return false;
+				var dialog = getEl().dialog;
+				if(!dialog) return false;
+				var el = e.target;
+				do {
+					if (el == dialog) return false;
+				}
+				while(el = el.parentElement);
+				beforeClose();
+			});
+		}
+		
+		// обработчик крестика
+		getEl().close[env.eventAddMethod](env.clickEvent, function (e) {
+			if(w.dikidi.normalizeClickEvent(e).which != 1) return false;
+			beforeClose();
+		});
+		
+		// события скрола
+		getEl().modal[env.eventAddMethod]('scroll', function() {
+			scroll();
+		}, false);
+		
+		if(!options || !options.hidden || options.hidden === '0') {
+			show();
+		}
+	};
+})(window);
+
+/**
+ * OpenModal
+ */
+(function(w) {
+	w.dikidi = w.dikidi || {};
+	
+	var env = w.dikidi.env();
+	var openLock = false;
+	
+	w.dikidi.openModal = function openModal(url, options) {
+		var start = options && options.start ? options.start : '3';
+		var mode = options && options.mode ? options.mode : 'frontend';
+		var domain = options && options.domain ? options.domain : env.dikidiDomain;
+		var source = options && options.source ? options.source : undefined;
+		url = withSource(url, source);
+		switch (start) {
+			case '0' :
+				window.location = withBackurl(url);
+				break;
+			case '1' :
+				w.dikidi.modalIframe(withMode(url, mode), options);
+				break;
+			case '2' :
+				if(w.document.body.clientWidth < 740)
+					window.location = withBackurl(url);
+				else
+					w.dikidi.modalIframe(withMode(url, mode), options);
+				break;
+			case '3' :
+			default  :
+				openLock = true;
+				w.dikidi.jsonp(env.protocol+'://'+domain+'/widget/record/identify', function(data) {
+					openLock = false;
+					if(!data.error && data.error != 0) {
+						if(w.document.body.clientWidth < 740)
+							w.location = withBackurl(url);
+						else
+							w.dikidi.modalIframe(withMode(url, mode), options);
+					}
+					else {
+						if(data.mobile == 1)
+							w.location = withBackurl(url);
+						else
+							w.dikidi.modalIframe(withMode(url, mode), options);
+					}
+				});
+		}
+	};
+	
+	function withMode(url, mode) {
+		return url + (url.indexOf('?')>-1?'&':'?') + 'mode=' + mode;
+	}
+	
+	function withBackurl(url) {
+		return url + (url.indexOf('?')>-1?'&':'?') + 'backurl=' + w.location.href;
+	}
+	
+	function withSource(url, source) {
+		return url + (url.indexOf('?')>-1?'&':'?') + 'source=' + (source||'widget');
+	}
+})(window);
+
+/**
+ * LinkRecord and AutoOpen
+ */
+(function(w) {
+	w.dikidi = w.dikidi || {};
+	
+	var env = w.dikidi.env();
+	var commonInsertNodeTimer = 0;
+	
+	function createUrl(params) {
+		var url = env.protocol+'://'+(params.domain||env.dikidiDomain)+'/record/';
+		switch (params.action) {
+			case 'url':
+				url += '?' + params.search;
+				break;
+			case 'company_master' :
+				url += params.companyId + '?st_m=1&sm_m=' + params.masterId;
+				break;
+			case 'company_service' :
+				url += params.companyId + '?st_m=2&ss_s=' + params.serviceId;
+				break;
+			case 'company_master_service' :
+				url += params.companyId + '?st_m=1&sm_m=' + params.masterId + '&ss_s=' + params.serviceId;
+				break;
+			case 'company_service_category' :
+				url += params.companyId + '?st_m=2&ss_c=' + params.categoryId;
+				break;
+			case 'widget' :
+				url += 'w' + params.widgetId;
+				break;
+			case 'group' :
+				url += 'g' + params.groupId;
+				break;
+			default/* 'company' */ :
+				url += params.companyId;
+				break;
+		}
+		return url;
+	}
+	
+	function getUrlParams(location) {
+		var companyId;
+		var s;
+		
+		if(location.hash || location.search) {
+			var paramStr = location.hash || location.search;
+			if(s = paramStr.match(/^[?#]widget=/)) {
+				return {
+					action:'url',
+					search:paramStr.replace(/^(\?|#)/, '')
+				};
+			}
+		}
+		
+		if (location.pathname) {
+			var m = location.pathname.match(/\/profile\/[a-z_\-\d]+_(\d+)\/$/);
+			if (m && m[1]) 
+				companyId = m[1];
+		}
+		
+		if(location.hash) {
+			if(s = location.hash.match(/^#create-record-by-widget-(\d+)$/))
+				return {
+					action:'widget',
+					widgetId:s[1]
+				};
+			else if(s = location.hash.match(/^#create-record-select-company-(\d+)$/))
+				return {
+					action:'group',
+					groupId:s[1]
+				};
+			else if (!!companyId) {
+				if(location.hash.match(/^#create-record$/))
+					return {
+						action:'company',
+						companyId:companyId
+					};
+				else if(s = location.hash.match(/^#create-record-master-(\d+)$/))
+					return {
+						action:'company_master',
+						companyId:companyId,
+						masterId:s[1]
+					};
+				else if(s = location.hash.match(/^#create-record-service-(\d+)$/))
+					return {
+						action:'company_service',
+						companyId:companyId,
+						serviceId:s[1]
+					};
+				else if(s = location.hash.match(/^#create-record-master-service-(\d+)-(\d+)$/))
+					return {
+						action:'company_master_service',
+						companyId:companyId,
+						masterId:s[1],
+						serviceId:s[2]
+					};
+				else if(s = location.hash.match(/^#create-record-to-service-by-category-(\d+)$/))
+					return {
+						action:'company_service_category',
+						companyId:companyId,
+						categoryId:s[1]
+					};
+			}
+			
+		}
+		
+		if(location.search) {
+			var param = {};
+			
+			location.search
+				.replace(/^\?/, '')
+				.split('&')
+				.map(function(v){
+					var a = v.split('=');
+					param[a[0]] = a[1] ? a[1] : '';
+				});
+			
+			if(param.action == 'create-record-by-widget')
+				return {
+					action:'widget',
+					widgetId:param.widget
+				};
+			else if(param.action == 'create-record-select-company')
+				return {
+					action:'group',
+					groupId:param.group
+				};
+			else if (!!companyId) {
+				if(param.action == 'create-record')
+					return {
+						action:'company',
+						companyId:companyId
+					};
+				else if(param.action == 'create-record-master')
+					return {
+						action:'company_master',
+						companyId:companyId,
+						masterId:param.master
+					};
+				else if(param.action == 'create-record-service')
+					return {
+						action:'company_service',
+						companyId:companyId,
+						serviceId:param.service
+					};
+				else if(param.action == 'create-record-master-service')
+					return {
+						action:'company_master_service',
+						companyId:companyId,
+						masterId:param.master,
+						serviceId:param.service
+					};
+				else if(param.action == 'create-record-to-service-by-category')
+					return {
+						action:'company_service_category',
+						companyId:companyId,
+						categoryId:param.category
+					};
+			}
+		}
+		return null;
+	}
+	
+	function cbClickLinkRecord(e) {
+		if(w.dikidi.normalizeClickEvent(e).which != 1) return false;
+		
+		var el;
+		
+		el = e.target;
+		do {
+			if(el.hasAttribute('data-record')) break;
+			el = el.parentElement;
+		}
+		while (el);
+		if(!el) {
+			el = e.target;
+			do {
+				if(el.tagName == 'A') break;
+				el = el.parentElement;
+			}
+			while (el);
+		}
+		
+		if(!el || el.hasAttribute('disabled')) return false;
+		
+		var options = {
+			home: env.isDikidi ? '1' : '0',
+			start: '3', // 0 - смена адреса 1 - в окне 2 - по ширине 3 - через запрос
+			mode: env.isDikidi ? 'frontend' : 'website',
+			backdrop: '1'
+		};
+		
+		if(el.hasAttribute('data-record-options')) {
+			var obj = {};
+			el.getAttribute('data-record-options')
+				.split('&')
+				.map(function(v) {
+					var a = v.split('=');
+					obj[a[0]] = a[1] ? a[1] : '';
+				});
+			w.dikidi.utils.extend(options, obj);
+		}
+		
+		if(options.home === '1') {
+			if(!el.dataset.record) return false;
+			e.preventDefault();
+			w.dikidi.openModal(el.dataset.record, options);
+			return false;
+		}
+		else {
+			if (!/dikidi/.test(el.hostname)) return false;
+			
+			var urlParams = getUrlParams(el);
+			
+			if(!!urlParams) {
+				e.preventDefault();
+				urlParams.domain = el.hostname;
+				options.domain = el.hostname;
+				w.dikidi.openModal(createUrl(urlParams), options);
+				return false;
+			}
+		}
+	}
+	
+	function autoOpen(location) {
+		if(!env.isDikidi) return;
+		var urlParams = getUrlParams(location);
+		if(!urlParams) return;
+		w.dikidi.openModal(createUrl(urlParams), {
+			home: '1',
+			start: '3',
+			mode: 'frontend',
+			backdrop: '1'
+		});
+	}
+	
+	w.dikidi.ready(function() {
+		w.document[env.eventAddMethod](env.clickEvent, cbClickLinkRecord);
+		autoOpen(env.dikidiLocation);
+	});
+})(window);
+
+/**
+ * CustomButton
+ */
+(function(w) {
+	w.dikidi = w.dikidi || {};
+	
+	var isDikidi = /dikidi/.test(w.document.domain);
+	
+	if(isDikidi) return;
+	
+	w.dikidi.ready(function() {
+		//console.log('CustomButton start');
+	});
+})(window);

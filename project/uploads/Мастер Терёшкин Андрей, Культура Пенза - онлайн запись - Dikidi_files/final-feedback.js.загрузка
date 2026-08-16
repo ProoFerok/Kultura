@@ -1,0 +1,51 @@
+const finalFeedback = {
+    init: function (el) {   
+        this.cacheElements(el);
+        this.bindEvents();
+
+        $('#floctory').on('click', function() {
+            ym(window.METRIKA_ID,'reachGoal','Js-flocktoryotzyv');
+            window.open('https://dkd.su/5OWHkq', '_blank')
+        })
+    },
+    cacheElements: function(el) {
+        this.$el = $(el);
+        this.$modal = this.$el.closest('.modal');
+        this.$actionShare = this.$el.find('.action-share');
+    },
+    bindEvents: function() {
+        this.$modal.on('hidden.bs.modal', this.refreshPageAfterHideModal.bind(this));
+        this.$actionShare.on('click', this.openingSharing.bind(this));
+    },
+    refreshPageAfterHideModal: function () {
+        if (review?.listUnrated?.action === 'createFromModalWithList') {
+            localStorage.setItem('anchor', 'reviews-block');
+            location.reload();
+        }
+    },
+    openingSharing: function () {
+        const companyId = this.$actionShare.data('company-id');
+        const masterId = this.$actionShare.data('master-id');
+        const referralEnabled = this.$actionShare.data('referral-enabled');
+        
+        if(referralEnabled) {
+            window.open('/user/referrals/company_referrals_offers_list?company=' + companyId, '_blank');
+            return;
+        }
+        
+        let url = window.location.origin + '/' + companyId;
+        if (masterId !== 0) {
+            url += '?p=1.pi-mi&o=11&m=' + masterId;
+        }
+        share('', '', url);
+    },
+    initTipLinkButton: function (element) {
+        const href = $(element).data('href');
+        $(element).on('click', () => this.switchingToTips(href));
+    },
+    switchingToTips: function (href) {
+        if (href) {
+            window.open(href, '_blank');
+        }
+    }
+}

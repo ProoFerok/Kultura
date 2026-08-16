@@ -1,0 +1,330 @@
+$(document).ready(function(){
+	$('body > .template').append($('.navbar .widget-services-menu'));
+	
+	$('.navbar-right > li').on('show.bs.dropdown', function () {
+		if (widget.isServicesOpen) {
+			widget.servicesClose();
+		}
+	});
+	
+	$(document).click(function(event) {
+		if (widget.isServicesOpen && $(event.target).closest('.widget-services-menu .box').length == 0) {
+			widget.servicesClose();
+		}
+	});
+
+	var $dropdown = $('.dropdown-submenu > .dropdown-menu');
+	if ($dropdown.length != 0) {
+		$dropdown.slimscroll({
+			position: 'right',
+			distance: 0,
+			allowPageScroll: true,
+		});
+	}
+	
+	$('.dropdown > .dropdown-menu').click(function(e) {
+		e.stopPropagation();
+	});
+	
+	$('.dropdown-submenu').on('click', function() {
+		if ($(this).hasClass('selected')) {
+			$(this).removeClass('selected');
+		} else {
+			$(this).addClass('selected');
+		}
+	});
+	
+	var slideNumber = Math.floor($('.categories.swiper .swiper-slide.selected').css('order') / 4);
+	
+	if (typeof Swiper !== 'undefined') {
+		new Swiper(".categories.swiper", {
+			slidesPerView: 'auto',
+			spaceBetween: 12,
+			initialSlide: slideNumber,
+			centeredSlides: false,
+			slidesPerColumn: 2,
+		});
+		
+		new Swiper(".tabs-menu.mobile.swiper", {
+			slidesPerView: 'auto',
+			initialSlide: 0,
+			centeredSlides: false,
+		});
+	}
+});
+
+var sms = {
+	formats: {
+		'11': ['77', '7'],
+		'12': ['995', '996', '998', '380', '375', '90']
+	},
+	countries: {
+		'7': {'code': '7', 'value': 'Россия', 'flag': 'RU', 'limit': 11},
+		'77': {'code': '77', 'value': 'Казахстан', 'flag': 'KZ', 'limit': 11},
+		'90': {'code': '90', 'value': 'Турция', 'flag': 'TR', 'limit': 12},
+		'375': {'code': '375', 'value': 'Беларусь', 'flag': 'BY', 'limit': 12},
+		'380': {'code': '380', 'value': 'Украина', 'flag': 'UA', 'limit': 12},
+		'995': {'code': '995', 'value': 'Грузия', 'flag': 'GE', 'limit': 12},
+		'996': {'code': '996', 'value': 'Киргизия', 'flag': 'KG', 'limit': 12},
+		'998': {'code': '998', 'value': 'Узбекистан', 'flag': 'UZ', 'limit': 12},
+	},
+	input: function(name, value, attr) {
+		if (value.length != 0) {
+			var country = sms.getCountry(value);
+			
+			if (!country) {
+				value = '';
+				country = sms.defaultCountry();
+			} else {
+				value = value.replace(new RegExp('^[0-9]{' + country.code.length + '}([0-9]+)$'), '$1');
+			}
+		} else {
+			var country = sms.defaultCountry(),
+				value = '';
+		}
+		
+		var h = '<div class="mobile-number form-control f16 global-no-select">'+
+					'<table>'+
+						'<tr>'+
+							'<td class="flag-dropdown">'+
+								'<div class="selected-flag" data-code="'+country['code']+'" data-key="'+country['flag']+'" data-limit="'+(country['limit'] - country['code'].length)+'">'+
+									'<div class="flag '+country['flag']+'">'+
+										'<div class="down-arrow"></div>'+
+									'</div>'+
+								'</div>'+
+							'</td>'+
+							'<td class="code"><nobr>+'+country['code']+'</nobr></td>'+
+							'<td>'+
+								'<input type="text" id="'+name+'-mobile" value="'+value+'"'+(attr ? attr : '')+' />'+
+								'<input type="hidden" name="'+name+'" value="'+country['code']+''+value+'" />'+
+							'</td>'+
+						'</tr>'+
+					'</table>'+
+					'<ul class="country-list hide">';
+		
+		for (var i in sms.countries) {
+			h+= '<li class="country" data-key="'+sms.countries[i]['flag']+'" data-code="'+sms.countries[i]['code']+'" data-limit="'+(sms.countries[i]['limit'] - sms.countries[i]['code'].length)+'">'+
+					'<div class="flag '+sms.countries[i]['flag']+'"></div>'+
+					'<span class="country-name">'+__(sms.countries[i]['value'])+'</span>'+
+					'<span class="dial-code">+'+sms.countries[i]['code']+'</span>'+
+				'</li>';
+		}
+		
+		h+= '</ul></div>';
+		
+		return h;
+	},
+	filter: function(number) {
+		return number.replace(/\D/g, '');
+	},
+	defaultCountry: function() {
+		var country = $('body').data('country');
+		
+		for (var i in sms.countries) {
+			if (country == sms.countries[i]['flag']) {
+				return sms.countries[i];
+			}
+		}
+		
+		return sms.countries['7'];
+	},
+	getCountry: function(number) {
+		var strlen = number.length;
+		
+		if (sms.formats[strlen] !== undefined) {
+			for (var i in sms.formats[strlen]) {
+				var thisRegex = new RegExp('^' + sms.formats[strlen][i] + '.*$');
+				
+				if (thisRegex.test(number)) {
+					var country = sms.countries[sms.formats[strlen][i]];
+					
+					if (country.limit == strlen) {
+						return country;
+					}
+				}
+			}
+		}
+		
+		return false
+	}
+}
+
+var auth = {
+	verifyDomain: function(url) {
+		return sw.fixDomain(url);
+	},
+	login: function() {
+		auth.modal({
+			id: 'authorization',
+			html: '<h3>' + __('Авторизация') + '</h3><form method="post" action="' + auth.verifyDomain('https://auth.dikidi.ru/user/auth/') + '" onsubmit="return false;"><div class="form-group"><label>' + __('Мобильный номер') + '</label>'+sms.input('login', '', 'tabindex="1" required')+'</div><div class="form-group"><label>' + __('Пароль') + '</label><a id="link-recovery" class="right">' + __('Забыли пароль?') + '</a><input type="password" class="form-control" name="password" tabindex="2" required></div><div class="form-group btns"><button type="submit" tabindex="3" class="sw-btn">' + __('Войти') + '</button><a id="link-registration" class="registration">' + __('Зарегистрироваться') + '</a></div></form>',
+            onSuccess: function() {
+                window.location.reload();
+                
+                return true;
+			},
+            show: function(el) {
+				var $input = $('.mobile-number input[type="hidden"]', el),
+					closeAuth = function() {
+						el.closest('.modal').modal('hide');
+					};
+				
+				$('#link-recovery', el).on('click', function() {
+                    closeAuth();
+					auth.recovery($input.val());
+				});
+				
+				$('#link-registration', el).on('click', function() {
+                    closeAuth();
+                    auth.registration($input.val());
+				});
+			}
+		});
+	},
+	registration: function(value) {
+		auth.modal({
+			id: 'registration',
+			html: '<h3>' + __('Регистрация на DIKIDI') + '</h3><form method="post" action="' + auth.verifyDomain('https://auth.dikidi.ru/user/create/') + '" onsubmit="return false;"><div class="form-group phone"><label>' + __('Телефон') + '</label><br /><div class="clearfix">'+sms.input('login', value, 'title="' + __('Для подтверждения по СМС. Данные не доступны третьим лицам') + '" required')+'<button class="send-key sw-btn white" type="button">' + __('Подтвердить') + '</button></div><p class="hint sms-code-reply">' + __('Номер телефона необходим для использования электронных услуг портала, а также восстановления пароля в случае необходимости.') + '</p></div><div id="phone-key" class="form-group box-key" style="display: none"><label>' + __('Код подтверждения из смс') + '</label><input type="text" class="form-control" name="key" autocomplete="off"></div><div class="form-group"><label>' + __('Ваше имя') + '</label><input type="text" class="form-control" name="name" required></div><div class="form-group"><label>' + __('Пароль') + '</label><input type="password" class="form-control" name="password" required></div><div class="form-group"><div class="checkbox"><input class="custom-checkbox" id="agreement" name="agreement" type="checkbox"><label for="agreement">' + __('Я принимаю условия <a>Пользовательского соглашения</a> и даю свое согласие на обработку персональных данных.', {'<a>': '<a href="' + sw.verifyDomain('https://dikidi.ru/pages/terms_of_use/') + '" target="_blank">'}) + '</label></div></div><div class="form-group btns"><button type="submit" class="sw-btn">' + __('Зарегистрироваться') + '</button></div></form>',
+            onSuccess: function() {
+                window.location.reload();
+
+                return true;
+            },
+			show: function(el) {
+				$('.send-key', el).on('click', function() {
+                    auth.smsCheck({
+                        type: 'registration',
+                        number: $('input[name="login"]:first', el).val(),
+                    }, el);
+				});
+			}
+		});
+	},
+	recovery: function(value) {
+		auth.modal({
+			id: 'recovery',
+			html: '<h3>' + __('Восстановление пароля') + '</h3><form method="post" action="' + auth.verifyDomain('https://auth.dikidi.ru/user/recovery/') + '" onsubmit="return false;"><div class="box-number"><div class="form-group"><label>' + __('Мобильный номер') + '</label>'+sms.input('login', value, 'tabindex="1" required')+'<p class="hint sms-code-reply">' + __('Вам будет выслана смс с подтверждающим кодом') + '.</p></div><div class="form-group text-right btns"><button id="sms-check" type="button" class="sw-btn">' + __('Продолжить') + '</button></div></div><div class="box-key" style="display: none"><div class="form-group"><label>' + __('Код подтверждения из смс') + '</label><input type="text" class="form-control" name="key" autocomplete="off" required><p class="hint sms-code-reply">' + __('Вам будет выслана смс с подтверждающим кодом') + '.</p></div><div class="form-group text-right btns"><button type="submit" class="sw-btn">' + __('Выслать новый пароль') + '</button></div></div></form>',
+			show: function(el) {
+				$('#sms-check', el).on('click', function() {
+					var $input = $('#login-mobile', el);
+					
+					if ($input.val().length != $input.attr('maxlength')) {
+                        $input.select();
+                        
+                        return false;
+					}
+					
+                    auth.smsCheck({
+                    	type: 'recovery',
+						number: $('input[name="login"]:first', el).val(),
+                    }, el);
+				});
+			},
+            onSuccess: function(ob, el) {
+                el.closest('.modal').modal('hide');
+            }
+		});
+	},
+	smsCheck: function(ob, modal) {
+		var $replyBox = $('.sms-code-reply', modal);
+		
+        sw.ajaxAuth({
+            url: sw.verifyDomain('https://auth.dikidi.ru/check/phone/'),
+            data: {
+                type: ob.type,
+                number: ob.number,
+            },
+            loader: modal,
+            success: function() {
+                auth.showKeyBlock();
+                
+                $replyBox.html(__('Сообщение с кодом успешно отправлено'));
+            },
+            error: function(jqXHR) {
+            	var error = jqXHR.responseJSON.error;
+            	
+                modal.removeLoader();
+                
+                $replyBox.html(error.message);
+                
+                if (in_array(error.code, ['SMS_LIMIT', 'SMS_TIME_BLOCK'])) {
+                    auth.showKeyBlock();
+				}
+                
+                return true;
+            }
+        }, 'post');
+	},
+	close: function(id) {
+		$('#auth-' + id).modal('hide');
+	},
+	showKeyBlock: function() {
+		$('.modal .box-number').hide();
+		$('.modal .box-key').show();
+		
+		setTimeout(function() {
+			$('.modal .box-key input[name="key"]').focus();
+		}, 10);
+	},
+	modal: function(ob) {
+		var $modal = $('<div id="auth-' + ob.id + '" class="modal widget"><div class="modal-dialog"><div class="modal-content"><div class="modal-body"><button class="bootbox-close-button" type="button" data-dismiss="modal" aria-hidden="true"></button><div class="fixed">' + ob.html + '</div></div></div></div></div>'),
+            $modalBody = $('.modal-body', $modal);
+		
+        $('form', $modal).on('submit', function() {
+        	var obForm = {
+                url: $(this).attr('action'),
+                data: $(this).serialize(),
+                loader: $modalBody,
+            };
+
+            if ('onSuccess' in ob) {
+                obForm.success = function(obj) {
+                    return ob.onSuccess(obj, $modalBody);
+				};
+            }
+
+            if ('onError' in ob) {
+                obForm.error = ob.onError;
+            }
+			
+            sw.ajaxAuth(obForm, $(this).attr('method'));
+        });
+
+        $modal.addClass(ob.id);
+        
+        $('body').append($modal);
+        
+        if ('show' in ob) {
+            $modal.on('shown.bs.modal', function(e) {
+                ob.show($modalBody);
+			});
+		}
+        
+        $modal.on('hidden.bs.modal', function() {
+            $modal.remove();
+        });
+        
+        $modal.modal();
+	},
+}
+
+var widget = {};
+
+widget.isServicesOpen = false;
+
+widget.services = function(e) {
+	if ($('.widget-services-menu').hasClass('hide')) {
+		$('.widget-services-menu').removeClass('hide');
+		$(e).parent().addClass('open');
+		setTimeout(function() {
+			widget.isServicesOpen = true;	
+		}, 100);
+	} else {
+		widget.servicesClose();
+	}
+}
+
+widget.servicesClose = function() {
+	$('.widget-services-menu').addClass('hide');
+	$('.navbar .services.open').removeClass('open');
+	widget.isServicesOpen = false;
+}

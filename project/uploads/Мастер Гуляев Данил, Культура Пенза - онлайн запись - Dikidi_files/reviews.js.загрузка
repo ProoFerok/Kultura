@@ -1,0 +1,39 @@
+$().ready(function() {
+    /**
+     * Event listeners для ReactIsland блока CompanyProfilePage.
+     */
+
+    var $island = $('[data-react-island="CompanyProfilePage"]');
+    if (!$island.length) return;
+
+    const actions = {
+        'new-review': profile.new_review,
+        'edit-review': profile.update_review,
+        'remove-review': profile.remove_review,
+        'throw-out-warning': function () {
+            sw.alert(__('Оставить отзыв можно только после визита'), 'new-elements-modal alert');
+        },
+        'auth': function () {
+            sw.auth.modal();
+        },
+        'report': function (e) {
+            var $btn = $(e.currentTarget);
+            var url = $btn.data('href');
+
+            sw.ajax({
+                url: sw.fixDomain(window.location.origin + url),
+                loader: 'body',
+            }, 'get');
+        },
+    }
+
+    const actionsSelectors = Object.keys(actions).map(action => `[data-action="${action}"]`).join(', ');
+
+    $island.on('click', actionsSelectors, function (e) {
+        e.stopPropagation();
+        const action = $(this).data('action');
+        if (actions[action]) {
+            actions[action](e);
+        }
+    });
+})
