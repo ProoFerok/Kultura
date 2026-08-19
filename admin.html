@@ -9,7 +9,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Lora:wght@400;500&family=Prata&display=swap">
 <style>
   :root{
-    --bg:#0e0e0d; --bg-alt:#141413; --mat:#1c1c1a; --line:rgba(241,239,233,.14);
+    --bg:#0e0e0d; --bg-alt:#141413; --line:rgba(241,239,233,.14);
     --text:#f1efe9; --muted:rgba(241,239,233,.6); --accent:#4ea89c; --gold:#c9a24a; --radius:4px;
     --font-display:"Prata",serif; --font-heading:"Cormorant Garamond",serif; --font-body:"Lora",serif;
   }
@@ -17,6 +17,7 @@
   body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font-body);
     -webkit-font-smoothing:antialiased;min-height:100vh;}
   a{color:var(--accent);text-decoration:none;}
+  code{background:rgba(241,239,233,.08);padding:1px 5px;border-radius:3px;font-size:.9em;}
   .wrap{max-width:1080px;margin:0 auto;padding:clamp(20px,4vw,48px);}
   header.bar{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
     padding-bottom:20px;border-bottom:1px solid var(--line);margin-bottom:28px;}
@@ -28,12 +29,11 @@
   .btn:hover{background:rgba(78,168,156,.14);color:#7ecfc2;}
   .btn.ghost{border-color:var(--line);color:var(--text);}
   .btn.ghost:hover{border-color:rgba(241,239,233,.5);background:transparent;}
-  input[type=password],input[type=text]{font:inherit;font-size:15px;color:var(--text);background:var(--bg-alt);
-    border:1px solid var(--line);border-radius:var(--radius);padding:10px 14px;min-width:220px;}
+  input[type=text]{font:inherit;font-size:15px;color:var(--text);background:var(--bg-alt);
+    border:1px solid var(--line);border-radius:var(--radius);padding:10px 14px;width:100%;}
   input:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
   .tnum{font-feature-settings:'tnum';}
 
-  /* карточки метрик */
   .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-bottom:28px;}
   .card{border:1px solid var(--line);border-radius:var(--radius);padding:20px;background:var(--bg-alt);}
   .card .label{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);}
@@ -43,14 +43,12 @@
   section.block{border:1px solid var(--line);border-radius:var(--radius);padding:22px;margin-bottom:22px;background:var(--bg-alt);}
   section.block h2{font-family:var(--font-heading);font-weight:600;font-size:20px;margin:0 0 16px;}
 
-  /* горизонтальные полосы (по мастерам / типам) */
   .bars{display:flex;flex-direction:column;gap:12px;}
   .bar{display:grid;grid-template-columns:180px 1fr auto;gap:12px;align-items:center;font-size:14px;}
-  .bar .track{height:10px;background:rgba(241,239,233,.08);border-radius:999px;overflow:hidden;}
-  .bar .fill{height:100%;background:linear-gradient(90deg,#2d8c7f,#1e7fa8);border-radius:999px;}
+  .bar .track{height:10px;background:rgba(241,239,233,.10);border-radius:999px;overflow:hidden;}
+  .bar .fill{height:100%;background:linear-gradient(90deg,#4ea89c,#1e7fa8);border-radius:999px;}
   .bar .n{font-family:var(--font-heading);font-size:16px;min-width:40px;text-align:right;}
 
-  /* дневной график */
   .days{display:flex;align-items:flex-end;gap:6px;height:150px;}
   .day{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end;}
   .day .col{width:100%;background:var(--accent);border-radius:3px 3px 0 0;min-height:2px;opacity:.85;}
@@ -67,8 +65,9 @@
   .note{font-size:13px;color:var(--muted);line-height:1.6;}
   .hidden{display:none;}
   #msg{font-size:14px;color:var(--gold);min-height:20px;}
-  .center{max-width:440px;margin:8vh auto 0;text-align:center;}
-  .center h1{margin-bottom:8px;}
+  .center{max-width:520px;margin:8vh auto 0;}
+  .center h1{margin-bottom:8px;text-align:center;}
+  .center .sub{text-align:center;}
   .center form{margin-top:22px;display:flex;flex-direction:column;gap:12px;align-items:stretch;}
 </style>
 </head>
@@ -77,15 +76,16 @@
 <!-- Экран входа -->
 <div id="login" class="wrap center">
   <h1>Админка «Культура»</h1>
-  <div class="sub">Записи и клики с сайта. Введите ключ доступа.</div>
+  <div class="sub">Записи и клики с сайта. Вставьте ссылку на опубликованный CSV таблицы ответов.</div>
   <form id="loginForm">
-    <input type="password" id="key" placeholder="Секретный ключ" autocomplete="off" required>
-    <button type="submit" class="btn">Войти</button>
+    <input type="text" id="csv" placeholder="https://docs.google.com/spreadsheets/d/e/…/pub?output=csv" autocomplete="off" required>
+    <button type="submit" class="btn">Показать</button>
     <div id="loginMsg" class="note"></div>
   </form>
   <p class="note" style="margin-top:24px">
-    Ключ — тот же, что в <code>SECRET</code> вашего Apps Script.
-    Настройка: <code>analytics/README.md</code>.
+    Как получить ссылку: в таблице ответов <b>Файл → Поделиться → Опубликовать в интернете →
+    вкладка ответов → формат CSV</b>. Подробно — в <code>analytics/README.md</code>.
+    Ссылка сохранится только в этом браузере.
   </p>
 </div>
 
@@ -99,7 +99,7 @@
     <div class="row">
       <span id="msg"></span>
       <button id="refresh" class="btn">Обновить</button>
-      <button id="logout" class="btn ghost">Выйти</button>
+      <button id="logout" class="btn ghost">Сменить ссылку</button>
     </div>
   </header>
 
@@ -130,107 +130,128 @@
     </div>
   </section>
 
-  <p class="note">Подтверждённые записи смотрите в DIKIDI по источнику <code>website_kultura</code>. Эта страница показывает интерес с сайта.</p>
+  <p class="note">Подтверждённые записи смотрите в DIKIDI по источнику <code>website_kultura</code>. Эта страница показывает интерес с сайта. Опубликованный CSV обновляется с задержкой в несколько минут.</p>
 </div>
 
 <script src="js/config.js"></script>
 <script>
 (function(){
-  var URL_ = window.KULTURA_TRACK_URL || "";
   var login = document.getElementById('login');
   var dash = document.getElementById('dash');
   var loginForm = document.getElementById('loginForm');
-  var keyInput = document.getElementById('key');
+  var csvInput = document.getElementById('csv');
   var loginMsg = document.getElementById('loginMsg');
   var msg = document.getElementById('msg');
 
-  var TYPE_LABEL = { booking_open: 'Открыли форму мастера', profile_click: 'Клик на профиль' };
+  var TYPE_LABEL = { booking_open:'Открыли форму мастера', profile_click:'Клик на профиль' };
   var WHERE_LABEL = { header:'шапка', top:'герой', services:'прайс', contacts:'контакты', footer:'подвал' };
 
-  function jsonp(key){
-    return new Promise(function(resolve, reject){
-      if(!URL_){ reject(new Error('no-url')); return; }
-      var cb = 'kadm_' + Math.random().toString(36).slice(2);
-      var s = document.createElement('script');
-      var to = setTimeout(function(){ done(); reject(new Error('timeout')); }, 15000);
-      function done(){ clearTimeout(to); try{ delete window[cb]; }catch(e){ window[cb]=undefined; } s.remove(); }
-      window[cb] = function(data){ done(); resolve(data); };
-      s.onerror = function(){ done(); reject(new Error('network')); };
-      s.src = URL_ + (URL_.indexOf('?')>-1?'&':'?') + 'key=' + encodeURIComponent(key) + '&callback=' + cb;
-      document.body.appendChild(s);
-    });
+  // --- CSV парсер (учитывает кавычки, запятые, переводы строк) ---
+  function parseCSV(text){
+    var rows = [], row = [], cur = '', i = 0, q = false, c;
+    while(i < text.length){
+      c = text[i];
+      if(q){
+        if(c === '"'){ if(text[i+1] === '"'){ cur += '"'; i++; } else q = false; }
+        else cur += c;
+      } else {
+        if(c === '"') q = true;
+        else if(c === ','){ row.push(cur); cur = ''; }
+        else if(c === '\n'){ row.push(cur); rows.push(row); row = []; cur = ''; }
+        else if(c === '\r'){ /* пропускаем */ }
+        else cur += c;
+      }
+      i++;
+    }
+    if(cur.length || row.length){ row.push(cur); rows.push(row); }
+    return rows;
   }
 
-  function esc(v){ return String(v==null?'':v).replace(/[<>&]/g, function(c){ return {'<':'&lt;','>':'&gt;','&':'&amp;'}[c]; }); }
+  function esc(v){ return String(v==null?'':v).replace(/[<>&]/g,function(c){return {'<':'&lt;','>':'&gt;','&':'&amp;'}[c];}); }
   function fmt(ts){
-    var d = new Date(ts);
+    var d = new Date(ts); if(isNaN(d)) return '';
     var p = function(n){ return (n<10?'0':'')+n; };
     return p(d.getDate())+'.'+p(d.getMonth()+1)+' '+p(d.getHours())+':'+p(d.getMinutes());
   }
+  function dayKey(d){ return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2); }
 
-  function render(data){
-    document.getElementById('mTotal').textContent = data.total || 0;
-    document.getElementById('mOpen').textContent = (data.byType && data.byType.booking_open) || 0;
-    document.getElementById('mProfile').textContent = (data.byType && data.byType.profile_click) || 0;
-
-    // последние 14 дат
-    var days = [];
-    var today = new Date();
-    for(var i=13;i>=0;i--){
-      var d = new Date(today); d.setDate(today.getDate()-i);
-      var key = d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2);
-      days.push({ key:key, label:('0'+d.getDate()).slice(-2)+'.'+('0'+(d.getMonth()+1)).slice(-2), n:(data.byDay&&data.byDay[key])||0 });
+  // Колонки CSV: 0=Отметка времени(Google), 1=type, 2=master, 3=where, 4=page, 5=ts(мс)
+  function toEvents(rows){
+    var out = [];
+    for(var r = 1; r < rows.length; r++){ // пропускаем заголовок
+      var row = rows[r];
+      if(!row || (row.length === 1 && row[0] === '')) continue;
+      var type = (row[1]||'').trim();
+      if(!type) continue;
+      var ms = parseInt(row[5], 10);
+      if(!ms){ var gd = new Date(row[0]); ms = isNaN(gd) ? Date.now() : gd.getTime(); }
+      out.push({ ts:ms, type:type, master:(row[2]||'').trim(), where:(row[3]||'').trim(), page:(row[4]||'').trim() });
     }
-    var last7 = days.slice(-7).reduce(function(a,b){ return a+b.n; }, 0);
-    document.getElementById('m7').textContent = last7;
+    out.sort(function(a,b){ return a.ts - b.ts; });
+    return out;
+  }
 
-    // мастера
-    var bm = data.byMaster || {};
-    var keys = Object.keys(bm).sort(function(a,b){ return bm[b]-bm[a]; });
-    var maxM = keys.reduce(function(m,k){ return Math.max(m,bm[k]); }, 1);
-    var mHtml = keys.length ? keys.map(function(k){
-      var pct = Math.round(bm[k]/maxM*100);
-      return '<div class="bar"><span>'+esc(k)+'</span><span class="track"><span class="fill" style="width:'+pct+'%"></span></span><span class="n tnum">'+bm[k]+'</span></div>';
+  function render(events){
+    var total = events.length, byType = {}, byMaster = {}, byDay = {};
+    events.forEach(function(e){
+      byType[e.type] = (byType[e.type]||0)+1;
+      if(e.master) byMaster[e.master] = (byMaster[e.master]||0)+1;
+      var k = dayKey(new Date(e.ts));
+      byDay[k] = (byDay[k]||0)+1;
+    });
+
+    document.getElementById('mTotal').textContent = total;
+    document.getElementById('mOpen').textContent = byType.booking_open || 0;
+    document.getElementById('mProfile').textContent = byType.profile_click || 0;
+
+    var days = [], today = new Date();
+    for(var i = 13; i >= 0; i--){
+      var d = new Date(today); d.setDate(today.getDate()-i);
+      var k = dayKey(d);
+      days.push({ label:('0'+d.getDate()).slice(-2)+'.'+('0'+(d.getMonth()+1)).slice(-2), n: byDay[k]||0 });
+    }
+    document.getElementById('m7').textContent = days.slice(-7).reduce(function(a,b){return a+b.n;},0);
+
+    var keys = Object.keys(byMaster).sort(function(a,b){return byMaster[b]-byMaster[a];});
+    var maxM = keys.reduce(function(m,k){return Math.max(m,byMaster[k]);},1);
+    document.getElementById('masters').innerHTML = keys.length ? keys.map(function(k){
+      var pct = Math.round(byMaster[k]/maxM*100);
+      return '<div class="bar"><span>'+esc(k)+'</span><span class="track"><span class="fill" style="width:'+pct+'%"></span></span><span class="n tnum">'+byMaster[k]+'</span></div>';
     }).join('') : '<div class="muted">Пока нет открытий формы мастера.</div>';
-    document.getElementById('masters').innerHTML = mHtml;
 
-    // дни
-    var maxD = days.reduce(function(m,d){ return Math.max(m,d.n); }, 1);
+    var maxD = days.reduce(function(m,d){return Math.max(m,d.n);},1);
     document.getElementById('days').innerHTML = days.map(function(d){
       var h = Math.round(d.n/maxD*120);
       return '<div class="day"><span class="cnt tnum">'+(d.n||'')+'</span><span class="col" style="height:'+h+'px"></span><span class="cap">'+d.label+'</span></div>';
     }).join('');
 
-    // последние события
-    var rec = data.recent || [];
-    document.getElementById('recent').innerHTML = rec.length ? rec.map(function(r){
-      var type = TYPE_LABEL[r.type] || r.type;
-      var isOpen = r.type==='booking_open';
-      var detail = isOpen ? esc(r.master||'') : (WHERE_LABEL[r.where]||esc(r.where||''));
-      var page = r.page ? esc(r.page) : '';
-      return '<tr><td class="tnum muted">'+fmt(r.ts)+'</td><td><span class="tag '+(isOpen?'open':'')+'">'+esc(type)+'</span></td><td>'+detail+'</td><td class="muted">'+page+'</td></tr>';
+    var rec = events.slice(-40).reverse();
+    document.getElementById('recent').innerHTML = rec.length ? rec.map(function(e){
+      var isOpen = e.type === 'booking_open';
+      var detail = isOpen ? esc(e.master) : (WHERE_LABEL[e.where] || esc(e.where));
+      return '<tr><td class="tnum muted">'+fmt(e.ts)+'</td><td><span class="tag '+(isOpen?'open':'')+'">'+esc(TYPE_LABEL[e.type]||e.type)+'</span></td><td>'+detail+'</td><td class="muted">'+esc(e.page)+'</td></tr>';
     }).join('') : '<tr><td colspan="4" class="muted">Событий пока нет.</td></tr>';
   }
 
-  function load(key){
+  function load(url){
+    if(!url){ showLogin('Не задана ссылка на CSV.'); return; }
     msg.textContent = 'Загрузка…';
-    jsonp(key).then(function(data){
-      if(!data || data.ok===false){
-        if(data && data.error==='forbidden'){ throw new Error('forbidden'); }
-        throw new Error('bad');
-      }
-      localStorage.setItem('kultura_admin_key', key);
+    fetch(url, { cache:'no-store' }).then(function(r){
+      if(!r.ok) throw new Error('http '+r.status);
+      return r.text();
+    }).then(function(text){
+      if(/^\s*</.test(text)) throw new Error('html'); // пришла страница, а не CSV
+      var events = toEvents(parseCSV(text));
+      localStorage.setItem('kultura_csv_url', url);
       login.classList.add('hidden');
       dash.classList.remove('hidden');
       msg.textContent = 'Обновлено ' + fmt(Date.now());
-      render(data);
+      render(events);
     }).catch(function(err){
-      if(err.message==='no-url'){
-        showLogin('Не задан адрес бэкенда: впишите KULTURA_TRACK_URL в js/config.js (см. analytics/README.md).');
-      } else if(err.message==='forbidden'){
-        showLogin('Неверный ключ доступа.');
+      if(err.message === 'html'){
+        showLogin('Ссылка ведёт не на CSV. Нужен вариант «Опубликовать в интернете → CSV» (…/pub?output=csv).');
       } else {
-        showLogin('Не удалось получить данные (проверьте, что Apps Script развёрнут как «Веб-приложение / Доступ: Все»).');
+        showLogin('Не удалось загрузить CSV. Проверьте, что таблица опубликована в интернете и ссылка верна.');
       }
     });
   }
@@ -244,21 +265,21 @@
 
   loginForm.addEventListener('submit', function(e){
     e.preventDefault();
-    var k = keyInput.value.trim();
-    if(k) load(k);
+    var u = csvInput.value.trim();
+    if(u) load(u);
   });
   document.getElementById('refresh').addEventListener('click', function(){
-    load(localStorage.getItem('kultura_admin_key')||'');
+    load(localStorage.getItem('kultura_csv_url') || (window.KULTURA_CSV_URL||''));
   });
   document.getElementById('logout').addEventListener('click', function(){
-    localStorage.removeItem('kultura_admin_key');
-    keyInput.value = '';
+    localStorage.removeItem('kultura_csv_url');
+    csvInput.value = '';
     showLogin('');
   });
 
-  // автологин, если ключ уже сохранён
-  var saved = localStorage.getItem('kultura_admin_key');
-  if(saved){ keyInput.value = saved; load(saved); }
+  // автозагрузка: сохранённая ссылка или заданная в config.js
+  var saved = localStorage.getItem('kultura_csv_url') || (window.KULTURA_CSV_URL || '');
+  if(saved){ csvInput.value = saved; load(saved); }
 })();
 </script>
 </body>

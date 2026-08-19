@@ -1,38 +1,30 @@
-// Лёгкий трекинг «намерения записаться» с сайта.
-// Отправляет событие на ваш Google Apps Script (js/config.js -> KULTURA_TRACK_URL).
-// Никаких куки и персональных данных: только тип события, мастер/место, время,
-// текущая страница и реферер. Если URL не задан — тихо ничего не делает.
+// Лёгкий трекинг «намерения записаться» с сайта — отправка в Google-Форму.
+// Ответы формы Google складывает в связанную таблицу (её вы и смотрите).
+// Никаких куки, скриптов и OAuth: форма принимает ответы анонимно.
+// Пока js/config.js -> KULTURA_FORM.action пустой, функция ничего не делает.
 (function () {
   function track(payload) {
-    var url = window.KULTURA_TRACK_URL;
-    if (!url) return; // не настроено — выходим, не мешая сайту
-    var body = JSON.stringify({
-      type: payload.type || "",
-      master: payload.master || "",
-      where: payload.where || "",
-      page: location.pathname,
-      ref: document.referrer || "",
-      ts: Date.now()
-    });
+    var cfg = window.KULTURA_FORM;
+    if (!cfg || !cfg.action) return; // не настроено — не мешаем сайту
+    var f = cfg.fields || {};
+    var fd = new FormData();
+    if (f.type)   fd.append(f.type, payload.type || "");
+    if (f.master) fd.append(f.master, payload.master || "");
+    if (f.where)  fd.append(f.where, payload.where || "");
+    if (f.page)   fd.append(f.page, location.pathname);
+    if (f.ts)     fd.append(f.ts, String(Date.now()));
     try {
       if (navigator.sendBeacon) {
-        // sendBeacon переживает переход/закрытие вкладки; text/plain — без CORS-preflight
-        navigator.sendBeacon(url, new Blob([body], { type: "text/plain" }));
+        navigator.sendBeacon(cfg.action, fd); // переживает переход/закрытие вкладки
       } else {
-        fetch(url, {
-          method: "POST",
-          mode: "no-cors",
-          headers: { "Content-Type": "text/plain" },
-          body: body,
-          keepalive: true
-        });
+        fetch(cfg.action, { method: "POST", mode: "no-cors", body: fd, keepalive: true });
       }
     } catch (e) {
-      /* аналитика не должна ломать сайт — молча игнорируем */
+      /* аналитика не должна ломать сайт */
     }
   }
 
-  // Экспортируем для main.js (открытие формы записи к мастеру)
+  // Экспорт для main.js (открытие формы записи к мастеру)
   window.kulturaTrack = track;
 
   // Клики «Записаться» на профиль DIKIDI (шапка, герой, прайс, контакты)
