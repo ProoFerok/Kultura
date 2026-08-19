@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Культура — админка записей</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Lora:wght@400;500&family=Prata&display=swap">
+<style>
+  :root{
+    --bg:#0e0e0d; --bg-alt:#141413; --mat:#1c1c1a; --line:rgba(241,239,233,.14);
+    --text:#f1efe9; --muted:rgba(241,239,233,.6); --accent:#4ea89c; --gold:#c9a24a; --radius:4px;
+    --font-display:"Prata",serif; --font-heading:"Cormorant Garamond",serif; --font-body:"Lora",serif;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font-body);
+    -webkit-font-smoothing:antialiased;min-height:100vh;}
+  a{color:var(--accent);text-decoration:none;}
+  .wrap{max-width:1080px;margin:0 auto;padding:clamp(20px,4vw,48px);}
+  header.bar{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
+    padding-bottom:20px;border-bottom:1px solid var(--line);margin-bottom:28px;}
+  h1{font-family:var(--font-display);font-weight:400;font-size:clamp(24px,3vw,34px);margin:0;letter-spacing:-.01em;}
+  .sub{font-size:13px;color:var(--muted);margin-top:6px;}
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+  .btn{font-family:var(--font-heading);font-size:15px;letter-spacing:.04em;padding:9px 18px;border-radius:var(--radius);
+    border:1px solid var(--accent);color:var(--accent);background:transparent;cursor:pointer;transition:.15s;}
+  .btn:hover{background:rgba(78,168,156,.14);color:#7ecfc2;}
+  .btn.ghost{border-color:var(--line);color:var(--text);}
+  .btn.ghost:hover{border-color:rgba(241,239,233,.5);background:transparent;}
+  input[type=password],input[type=text]{font:inherit;font-size:15px;color:var(--text);background:var(--bg-alt);
+    border:1px solid var(--line);border-radius:var(--radius);padding:10px 14px;min-width:220px;}
+  input:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+  .tnum{font-feature-settings:'tnum';}
+
+  /* карточки метрик */
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-bottom:28px;}
+  .card{border:1px solid var(--line);border-radius:var(--radius);padding:20px;background:var(--bg-alt);}
+  .card .label{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);}
+  .card .value{font-family:var(--font-display);font-size:40px;line-height:1;margin-top:10px;}
+  .card.accent .value{color:var(--accent);}
+
+  section.block{border:1px solid var(--line);border-radius:var(--radius);padding:22px;margin-bottom:22px;background:var(--bg-alt);}
+  section.block h2{font-family:var(--font-heading);font-weight:600;font-size:20px;margin:0 0 16px;}
+
+  /* горизонтальные полосы (по мастерам / типам) */
+  .bars{display:flex;flex-direction:column;gap:12px;}
+  .bar{display:grid;grid-template-columns:180px 1fr auto;gap:12px;align-items:center;font-size:14px;}
+  .bar .track{height:10px;background:rgba(241,239,233,.08);border-radius:999px;overflow:hidden;}
+  .bar .fill{height:100%;background:linear-gradient(90deg,#2d8c7f,#1e7fa8);border-radius:999px;}
+  .bar .n{font-family:var(--font-heading);font-size:16px;min-width:40px;text-align:right;}
+
+  /* дневной график */
+  .days{display:flex;align-items:flex-end;gap:6px;height:150px;}
+  .day{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end;}
+  .day .col{width:100%;background:var(--accent);border-radius:3px 3px 0 0;min-height:2px;opacity:.85;}
+  .day .cap{font-size:10px;color:var(--muted);white-space:nowrap;}
+  .day .cnt{font-size:11px;color:var(--text);font-feature-settings:'tnum';}
+
+  table{width:100%;border-collapse:collapse;font-size:14px;}
+  th{text-align:left;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);
+    padding:8px 10px;border-bottom:1px solid var(--line);font-weight:400;}
+  td{padding:9px 10px;border-bottom:1px solid rgba(241,239,233,.08);}
+  .tag{display:inline-block;font-size:12px;padding:2px 9px;border-radius:999px;border:1px solid var(--line);}
+  .tag.open{color:var(--accent);border-color:rgba(78,168,156,.5);}
+  .muted{color:var(--muted);}
+  .note{font-size:13px;color:var(--muted);line-height:1.6;}
+  .hidden{display:none;}
+  #msg{font-size:14px;color:var(--gold);min-height:20px;}
+  .center{max-width:440px;margin:8vh auto 0;text-align:center;}
+  .center h1{margin-bottom:8px;}
+  .center form{margin-top:22px;display:flex;flex-direction:column;gap:12px;align-items:stretch;}
+</style>
+</head>
+<body>
+
+<!-- Экран входа -->
+<div id="login" class="wrap center">
+  <h1>Админка «Культура»</h1>
+  <div class="sub">Записи и клики с сайта. Введите ключ доступа.</div>
+  <form id="loginForm">
+    <input type="password" id="key" placeholder="Секретный ключ" autocomplete="off" required>
+    <button type="submit" class="btn">Войти</button>
+    <div id="loginMsg" class="note"></div>
+  </form>
+  <p class="note" style="margin-top:24px">
+    Ключ — тот же, что в <code>SECRET</code> вашего Apps Script.
+    Настройка: <code>analytics/README.md</code>.
+  </p>
+</div>
+
+<!-- Дашборд -->
+<div id="dash" class="wrap hidden">
+  <header class="bar">
+    <div>
+      <h1>Записи с сайта</h1>
+      <div class="sub">Намерение записаться: открытия формы мастера и клики «Записаться». Не равно подтверждённым записям в DIKIDI.</div>
+    </div>
+    <div class="row">
+      <span id="msg"></span>
+      <button id="refresh" class="btn">Обновить</button>
+      <button id="logout" class="btn ghost">Выйти</button>
+    </div>
+  </header>
+
+  <div class="cards">
+    <div class="card accent"><div class="label">Всего событий</div><div class="value tnum" id="mTotal">—</div></div>
+    <div class="card"><div class="label">Открыли форму мастера</div><div class="value tnum" id="mOpen">—</div></div>
+    <div class="card"><div class="label">Клик на профиль</div><div class="value tnum" id="mProfile">—</div></div>
+    <div class="card"><div class="label">За последние 7 дней</div><div class="value tnum" id="m7">—</div></div>
+  </div>
+
+  <section class="block">
+    <h2>По мастерам</h2>
+    <div class="bars" id="masters"></div>
+  </section>
+
+  <section class="block">
+    <h2>По дням (14 дней)</h2>
+    <div class="days" id="days"></div>
+  </section>
+
+  <section class="block">
+    <h2>Последние события</h2>
+    <div style="overflow-x:auto">
+      <table>
+        <thead><tr><th>Когда</th><th>Событие</th><th>Мастер / место</th><th>Страница</th></tr></thead>
+        <tbody id="recent"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <p class="note">Подтверждённые записи смотрите в DIKIDI по источнику <code>website_kultura</code>. Эта страница показывает интерес с сайта.</p>
+</div>
+
+<script src="js/config.js"></script>
+<script>
+(function(){
+  var URL_ = window.KULTURA_TRACK_URL || "";
+  var login = document.getElementById('login');
+  var dash = document.getElementById('dash');
+  var loginForm = document.getElementById('loginForm');
+  var keyInput = document.getElementById('key');
+  var loginMsg = document.getElementById('loginMsg');
+  var msg = document.getElementById('msg');
+
+  var TYPE_LABEL = { booking_open: 'Открыли форму мастера', profile_click: 'Клик на профиль' };
+  var WHERE_LABEL = { header:'шапка', top:'герой', services:'прайс', contacts:'контакты', footer:'подвал' };
+
+  function jsonp(key){
+    return new Promise(function(resolve, reject){
+      if(!URL_){ reject(new Error('no-url')); return; }
+      var cb = 'kadm_' + Math.random().toString(36).slice(2);
+      var s = document.createElement('script');
+      var to = setTimeout(function(){ done(); reject(new Error('timeout')); }, 15000);
+      function done(){ clearTimeout(to); try{ delete window[cb]; }catch(e){ window[cb]=undefined; } s.remove(); }
+      window[cb] = function(data){ done(); resolve(data); };
+      s.onerror = function(){ done(); reject(new Error('network')); };
+      s.src = URL_ + (URL_.indexOf('?')>-1?'&':'?') + 'key=' + encodeURIComponent(key) + '&callback=' + cb;
+      document.body.appendChild(s);
+    });
+  }
+
+  function esc(v){ return String(v==null?'':v).replace(/[<>&]/g, function(c){ return {'<':'&lt;','>':'&gt;','&':'&amp;'}[c]; }); }
+  function fmt(ts){
+    var d = new Date(ts);
+    var p = function(n){ return (n<10?'0':'')+n; };
+    return p(d.getDate())+'.'+p(d.getMonth()+1)+' '+p(d.getHours())+':'+p(d.getMinutes());
+  }
+
+  function render(data){
+    document.getElementById('mTotal').textContent = data.total || 0;
+    document.getElementById('mOpen').textContent = (data.byType && data.byType.booking_open) || 0;
+    document.getElementById('mProfile').textContent = (data.byType && data.byType.profile_click) || 0;
+
+    // последние 14 дат
+    var days = [];
+    var today = new Date();
+    for(var i=13;i>=0;i--){
+      var d = new Date(today); d.setDate(today.getDate()-i);
+      var key = d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2);
+      days.push({ key:key, label:('0'+d.getDate()).slice(-2)+'.'+('0'+(d.getMonth()+1)).slice(-2), n:(data.byDay&&data.byDay[key])||0 });
+    }
+    var last7 = days.slice(-7).reduce(function(a,b){ return a+b.n; }, 0);
+    document.getElementById('m7').textContent = last7;
+
+    // мастера
+    var bm = data.byMaster || {};
+    var keys = Object.keys(bm).sort(function(a,b){ return bm[b]-bm[a]; });
+    var maxM = keys.reduce(function(m,k){ return Math.max(m,bm[k]); }, 1);
+    var mHtml = keys.length ? keys.map(function(k){
+      var pct = Math.round(bm[k]/maxM*100);
+      return '<div class="bar"><span>'+esc(k)+'</span><span class="track"><span class="fill" style="width:'+pct+'%"></span></span><span class="n tnum">'+bm[k]+'</span></div>';
+    }).join('') : '<div class="muted">Пока нет открытий формы мастера.</div>';
+    document.getElementById('masters').innerHTML = mHtml;
+
+    // дни
+    var maxD = days.reduce(function(m,d){ return Math.max(m,d.n); }, 1);
+    document.getElementById('days').innerHTML = days.map(function(d){
+      var h = Math.round(d.n/maxD*120);
+      return '<div class="day"><span class="cnt tnum">'+(d.n||'')+'</span><span class="col" style="height:'+h+'px"></span><span class="cap">'+d.label+'</span></div>';
+    }).join('');
+
+    // последние события
+    var rec = data.recent || [];
+    document.getElementById('recent').innerHTML = rec.length ? rec.map(function(r){
+      var type = TYPE_LABEL[r.type] || r.type;
+      var isOpen = r.type==='booking_open';
+      var detail = isOpen ? esc(r.master||'') : (WHERE_LABEL[r.where]||esc(r.where||''));
+      var page = r.page ? esc(r.page) : '';
+      return '<tr><td class="tnum muted">'+fmt(r.ts)+'</td><td><span class="tag '+(isOpen?'open':'')+'">'+esc(type)+'</span></td><td>'+detail+'</td><td class="muted">'+page+'</td></tr>';
+    }).join('') : '<tr><td colspan="4" class="muted">Событий пока нет.</td></tr>';
+  }
+
+  function load(key){
+    msg.textContent = 'Загрузка…';
+    jsonp(key).then(function(data){
+      if(!data || data.ok===false){
+        if(data && data.error==='forbidden'){ throw new Error('forbidden'); }
+        throw new Error('bad');
+      }
+      localStorage.setItem('kultura_admin_key', key);
+      login.classList.add('hidden');
+      dash.classList.remove('hidden');
+      msg.textContent = 'Обновлено ' + fmt(Date.now());
+      render(data);
+    }).catch(function(err){
+      if(err.message==='no-url'){
+        showLogin('Не задан адрес бэкенда: впишите KULTURA_TRACK_URL в js/config.js (см. analytics/README.md).');
+      } else if(err.message==='forbidden'){
+        showLogin('Неверный ключ доступа.');
+      } else {
+        showLogin('Не удалось получить данные (проверьте, что Apps Script развёрнут как «Веб-приложение / Доступ: Все»).');
+      }
+    });
+  }
+
+  function showLogin(text){
+    dash.classList.add('hidden');
+    login.classList.remove('hidden');
+    loginMsg.textContent = text || '';
+    msg.textContent = '';
+  }
+
+  loginForm.addEventListener('submit', function(e){
+    e.preventDefault();
+    var k = keyInput.value.trim();
+    if(k) load(k);
+  });
+  document.getElementById('refresh').addEventListener('click', function(){
+    load(localStorage.getItem('kultura_admin_key')||'');
+  });
+  document.getElementById('logout').addEventListener('click', function(){
+    localStorage.removeItem('kultura_admin_key');
+    keyInput.value = '';
+    showLogin('');
+  });
+
+  // автологин, если ключ уже сохранён
+  var saved = localStorage.getItem('kultura_admin_key');
+  if(saved){ keyInput.value = saved; load(saved); }
+})();
+</script>
+</body>
+</html>

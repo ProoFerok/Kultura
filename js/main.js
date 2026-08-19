@@ -19,8 +19,18 @@
     if (lastFocused) lastFocused.focus();
   }
 
+  function masterFromUrl(url) {
+    if (url.indexOf('4005910') > -1) return 'Гуляев Данил';
+    if (url.indexOf('3545598') > -1) return 'Терёшкин Андрей';
+    return 'unknown';
+  }
+
   document.querySelectorAll('[data-booking-url]').forEach((el) => {
-    el.addEventListener('click', () => openBooking(el.dataset.bookingUrl));
+    el.addEventListener('click', () => {
+      const url = el.dataset.bookingUrl;
+      openBooking(url);
+      if (window.kulturaTrack) window.kulturaTrack({ type: 'booking_open', master: masterFromUrl(url) });
+    });
   });
 
   closeBtn.addEventListener('click', closeBooking);
