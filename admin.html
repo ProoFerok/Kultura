@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<!-- Админка выводит в DOM данные из CSV, который наполняется публичной
+     Google-Формой, то есть частично контролируется посторонними. script-src
+     без 'unsafe-inline' (поэтому скрипт вынесен в js/admin.js) превращает
+     любую будущую ошибку экранирования из XSS в заблокированный запрос.
+     connect-src разрешает забирать CSV только у Google: сама ссылка ведёт
+     на docs.google.com, но опубликованная таблица отдаётся редиректом на
+     googleusercontent.com, а CSP проверяет и адрес после редиректа. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src https://docs.google.com https://*.googleusercontent.com; form-action 'none'; base-uri 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<title>Культура — админка записей</title>
+<link rel="stylesheet" href="css/fonts.css">
+<style>
+  :root{
+    --bg:#0e0e0d; --bg-alt:#141413; --line:rgba(241,239,233,.14);
+    --text:#f1efe9; --muted:rgba(241,239,233,.6); --accent:#4ea89c; --gold:#c9a24a; --radius:4px;
+    --font-display:"Prata",serif; --font-heading:"Cormorant Garamond",serif; --font-body:"Lora",serif;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font-body);
+    -webkit-font-smoothing:antialiased;min-height:100vh;}
+  a{color:var(--accent);text-decoration:none;}
+  code{background:rgba(241,239,233,.08);padding:1px 5px;border-radius:3px;font-size:.9em;}
+  .wrap{max-width:1080px;margin:0 auto;padding:clamp(20px,4vw,48px);}
+  header.bar{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
+    padding-bottom:20px;border-bottom:1px solid var(--line);margin-bottom:28px;}
+  h1{font-family:var(--font-display);font-weight:400;font-size:clamp(24px,3vw,34px);margin:0;letter-spacing:-.01em;}
+  .sub{font-size:13px;color:var(--muted);margin-top:6px;}
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+  .btn{font-family:var(--font-heading);font-size:15px;letter-spacing:.04em;padding:9px 18px;border-radius:var(--radius);
+    border:1px solid var(--accent);color:var(--accent);background:transparent;cursor:pointer;transition:.15s;}
+  .btn:hover{background:rgba(78,168,156,.14);color:#7ecfc2;}
+  .btn.ghost{border-color:var(--line);color:var(--text);}
+  .btn.ghost:hover{border-color:rgba(241,239,233,.5);background:transparent;}
+  input[type=text]{font:inherit;font-size:15px;color:var(--text);background:var(--bg-alt);
+    border:1px solid var(--line);border-radius:var(--radius);padding:10px 14px;width:100%;}
+  input:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+  .tnum{font-feature-settings:'tnum';}
+
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-bottom:28px;}
+  .card{border:1px solid var(--line);border-radius:var(--radius);padding:20px;background:var(--bg-alt);}
+  .card .label{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);}
+  .card .value{font-family:var(--font-display);font-size:40px;line-height:1;margin-top:10px;}
+  .card.accent .value{color:var(--accent);}
+
+  section.block{border:1px solid var(--line);border-radius:var(--radius);padding:22px;margin-bottom:22px;background:var(--bg-alt);}
+  section.block h2{font-family:var(--font-heading);font-weight:600;font-size:20px;margin:0 0 16px;}
+
+  .bars{display:flex;flex-direction:column;gap:12px;}
+  .bar{display:grid;grid-template-columns:180px 1fr auto;gap:12px;align-items:center;font-size:14px;}
+  .bar .track{height:10px;background:rgba(241,239,233,.10);border-radius:999px;overflow:hidden;}
+  .bar .fill{height:100%;background:linear-gradient(90deg,#4ea89c,#1e7fa8);border-radius:999px;}
+  .bar .n{font-family:var(--font-heading);font-size:16px;min-width:40px;text-align:right;}
+
+  .days{display:flex;align-items:flex-end;gap:6px;height:150px;}
+  .day{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end;}
+  .day .col{width:100%;background:var(--accent);border-radius:3px 3px 0 0;min-height:2px;opacity:.85;}
+  .day .cap{font-size:10px;color:var(--muted);white-space:nowrap;}
+  .day .cnt{font-size:11px;color:var(--text);font-feature-settings:'tnum';}
+
+  table{width:100%;border-collapse:collapse;font-size:14px;}
+  th{text-align:left;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);
+    padding:8px 10px;border-bottom:1px solid var(--line);font-weight:400;}
+  td{padding:9px 10px;border-bottom:1px solid rgba(241,239,233,.08);}
+  .tag{display:inline-block;font-size:12px;padding:2px 9px;border-radius:999px;border:1px solid var(--line);}
+  .tag.open{color:var(--accent);border-color:rgba(78,168,156,.5);}
+  .muted{color:var(--muted);}
+  .note{font-size:13px;color:var(--muted);line-height:1.6;}
+  .hidden{display:none;}
+  #msg{font-size:14px;color:var(--gold);min-height:20px;}
+  .center{max-width:520px;margin:8vh auto 0;}
+  .center h1{margin-bottom:8px;text-align:center;}
+  .center .sub{text-align:center;}
+  .center form{margin-top:22px;display:flex;flex-direction:column;gap:12px;align-items:stretch;}
+</style>
+</head>
+<body>
+
+<!-- Экран входа -->
+<div id="login" class="wrap center">
+  <h1>Админка «Культура»</h1>
+  <div class="sub">Записи и клики с сайта. Вставьте ссылку на опубликованный CSV таблицы ответов.</div>
+  <form id="loginForm">
+    <input type="text" id="csv" placeholder="https://docs.google.com/spreadsheets/d/e/…/pub?output=csv" autocomplete="off" required>
+    <button type="submit" class="btn">Показать</button>
+    <div id="loginMsg" class="note"></div>
+  </form>
+  <p class="note" style="margin-top:24px">
+    Как получить ссылку: в таблице ответов <b>Файл → Поделиться → Опубликовать в интернете →
+    вкладка ответов → формат CSV</b>. Подробно — в <code>analytics/README.md</code>.
+    Ссылка сохранится только в этом браузере.
+  </p>
+</div>
+
+<!-- Дашборд -->
+<div id="dash" class="wrap hidden">
+  <header class="bar">
+    <div>
+      <h1>Записи с сайта</h1>
+      <div class="sub">Намерение записаться: открытия формы мастера и клики «Записаться». Не равно подтверждённым записям в DIKIDI.</div>
+    </div>
+    <div class="row">
+      <span id="msg"></span>
+      <button id="refresh" class="btn">Обновить</button>
+      <button id="logout" class="btn ghost">Сменить ссылку</button>
+    </div>
+  </header>
+
+  <div class="cards">
+    <div class="card accent"><div class="label">Всего событий</div><div class="value tnum" id="mTotal">—</div></div>
+    <div class="card"><div class="label">Открыли форму мастера</div><div class="value tnum" id="mOpen">—</div></div>
+    <div class="card"><div class="label">Клик на профиль</div><div class="value tnum" id="mProfile">—</div></div>
+    <div class="card"><div class="label">За последние 7 дней</div><div class="value tnum" id="m7">—</div></div>
+  </div>
+
+  <section class="block">
+    <h2>По мастерам</h2>
+    <div class="bars" id="masters"></div>
+  </section>
+
+  <section class="block">
+    <h2>По дням (14 дней)</h2>
+    <div class="days" id="days"></div>
+  </section>
+
+  <section class="block">
+    <h2>Последние события</h2>
+    <div style="overflow-x:auto">
+      <table>
+        <thead><tr><th>Когда</th><th>Событие</th><th>Мастер / место</th><th>Страница</th></tr></thead>
+        <tbody id="recent"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <p class="note">Подтверждённые записи смотрите в DIKIDI по источнику <code>website_kultura</code>. Эта страница показывает интерес с сайта. Опубликованный CSV обновляется с задержкой в несколько минут.</p>
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/admin.js"></script>
+</body>
+</html>
