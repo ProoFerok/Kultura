@@ -353,7 +353,7 @@ h1, h2, h3, h4 {
   background: rgba(var(--text-rgb), .18);
   transform: translateY(-4px);
 }
-.price-row__value { font-size: 17px; color: var(--text); }
+.price-row__value { font-size: 17px; color: var(--text); white-space: nowrap; flex: none; }
 .price-row__value--muted { font-size: 15px; color: rgba(var(--text-rgb), .6); }
 .price-cta { padding-top: 30px; }
 .price-media { height: clamp(360px, 52vw, 560px); }
@@ -369,7 +369,7 @@ h1, h2, h3, h4 {
   grid-template-columns: repeat(auto-fit, minmax(min(420px, 100%), 1fr));
   grid-template-rows: auto auto auto;
   column-gap: clamp(24px, 4vw, 56px);
-  row-gap: 22px;
+  row-gap: clamp(44px, 6vw, 72px); /* между рядами карточек; внутри карточки свой row-gap */
 }
 .master {
   display: grid;
@@ -421,6 +421,7 @@ h1, h2, h3, h4 {
   color: rgba(var(--text-rgb), .6);
 }
 .master__rating .stars { font-size: inherit; letter-spacing: .12em; }
+.master__new { color: var(--gold); letter-spacing: .08em; }
 .master__rating-value {
   color: var(--text);
   font-family: var(--font-heading);
@@ -462,8 +463,8 @@ h1, h2, h3, h4 {
   background: rgba(var(--text-rgb), .18);
   transform: translateY(-4px);
 }
-.service-row__duration { font-size: 13px; color: rgba(var(--text-rgb), .5); }
-.service-row__price { font-size: 16px; }
+.service-row__duration { font-size: 13px; color: rgba(var(--text-rgb), .5); white-space: nowrap; flex: none; }
+.service-row__price { font-size: 16px; white-space: nowrap; flex: none; }
 
 @media (max-width: 560px) {
   .master__head { grid-template-columns: 1fr; }

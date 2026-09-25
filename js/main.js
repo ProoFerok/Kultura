@@ -26,6 +26,7 @@
   function masterFromUrl(url) {
     if (url.indexOf('4005910') > -1) return 'Гуляев Данил';
     if (url.indexOf('3545598') > -1) return 'Терёшкин Андрей';
+    if (url.indexOf('4615003') > -1) return 'Гребенщиков Максим';
     return 'unknown';
   }
 
