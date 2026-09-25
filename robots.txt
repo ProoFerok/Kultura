@@ -1,7 +1,4 @@
-# Поисковики читают robots.txt только из корня домена, поэтому по адресу
-# prooferok.github.io/Kultura/ этот файл не действует — заработает после
-# переезда на свой домен. Тогда же заменить адрес карты сайта ниже.
 User-agent: *
 Disallow: /admin.html
 
-Sitemap: https://prooferok.github.io/Kultura/sitemap.xml
+Sitemap: https://kultura-pnz.ru/sitemap.xml
