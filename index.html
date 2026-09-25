@@ -5,27 +5,252 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- Политика безопасности. GitHub Pages не даёт задавать HTTP-заголовки,
      поэтому CSP объявлена тегом. Перечислено ровно то, что сайту нужно:
-     свои скрипты/стили/шрифты, картинки мастеров с CDN DIKIDI, два фрейма
+     свои скрипты/стили/шрифты/картинки, два фрейма
      (запись DIKIDI и отзывы Яндекса) и отправка аналитики в Google-Форму.
      Всё остальное браузер заблокирует. При добавлении нового внешнего
      ресурса его нужно внести сюда, иначе он просто не загрузится. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' https://f2.dikidi.net data:; frame-src https://dikidi.net https://yandex.ru; connect-src https://docs.google.com; form-action 'none'; base-uri 'none'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; frame-src https://dikidi.net https://yandex.ru; connect-src https://docs.google.com; form-action 'none'; base-uri 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <title>Культура — барбершоп в Пензе, ул. Кулакова, 14А</title>
-<meta name="description" content="Мужская стрижка, борода и бритьё на Кулакова, 14А, Пенза. Рейтинг 5.0 на Яндекс.Картах. Онлайн-запись.">
+<meta name="description" content="Барбершоп «Культура» в Пензе: мужская и детская стрижка от 1 000 ₽, оформление бороды, камуфляж седины, королевское бритьё. Ул. Кулакова, 14А. Рейтинг 5.0 на Яндекс.Картах, онлайн-запись.">
+<!-- Адрес сайта. При переезде на свой домен заменить здесь, в og:url,
+     og:image, JSON-LD ниже, а также в robots.txt и sitemap.xml. -->
+<link rel="canonical" href="https://prooferok.github.io/Kultura/">
+<meta name="theme-color" content="#0e0e0d">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" href="assets/icon-512.png" type="image/png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:site_name" content="Барбершоп «Культура»">
+<meta property="og:title" content="Культура — барбершоп в Пензе, ул. Кулакова, 14А">
+<meta property="og:description" content="Мужская стрижка, борода и бритьё. Рейтинг 5.0 на Яндекс.Картах. Онлайн-запись к мастеру.">
+<meta property="og:url" content="https://prooferok.github.io/Kultura/">
+<meta property="og:image" content="https://prooferok.github.io/Kultura/assets/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Зал барбершопа «Культура» с логотипом">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preload" href="assets/interior-chairs.webp" as="image" type="image/webp">
 <link rel="stylesheet" href="css/fonts.css">
 <link rel="stylesheet" href="css/style.css">
+<!-- Структурированные данные для Яндекса и Google. Это данные, а не код:
+     CSP на них не распространяется. Цены и вопросы держать в согласии с
+     разметкой страницы. Рейтинг сюда не вносим: отзывы собраны на Яндексе,
+     а оценки о себе на своём сайте поисковики не показывают и могут счесть спамом. -->
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "HairSalon",
+ "@id": "https://prooferok.github.io/Kultura/#salon",
+ "name": "Барбершоп «Культура»",
+ "url": "https://prooferok.github.io/Kultura/",
+ "image": [
+  "https://prooferok.github.io/Kultura/assets/og-image.jpg",
+  "https://prooferok.github.io/Kultura/assets/interior-wide.webp",
+  "https://prooferok.github.io/Kultura/assets/facade.webp"
+ ],
+ "logo": "https://prooferok.github.io/Kultura/assets/icon-512.png",
+ "description": "Мужская и детская стрижка, оформление бороды, камуфляж седины и королевское бритьё в Пензе.",
+ "telephone": "+7-986-937-98-63",
+ "priceRange": "500–2000 ₽",
+ "currenciesAccepted": "RUB",
+ "address": {
+  "@type": "PostalAddress",
+  "streetAddress": "ул. Кулакова, 14А",
+  "addressLocality": "Пенза",
+  "addressRegion": "Пензенская область",
+  "addressCountry": "RU"
+ },
+ "hasMap": "https://yandex.ru/maps/org/kultura/171709673488/",
+ "sameAs": [
+  "https://yandex.ru/maps/org/kultura/171709673488/",
+  "https://dikidi.net/ru/profile/kultura_1645652"
+ ],
+ "potentialAction": {
+  "@type": "ReserveAction",
+  "target": "https://dikidi.net/ru/profile/kultura_1645652"
+ },
+ "employee": [
+  {
+   "@type": "Person",
+   "name": "Данил Гуляев",
+   "jobTitle": "Барбер"
+  },
+  {
+   "@type": "Person",
+   "name": "Андрей Терёшкин",
+   "jobTitle": "Барбер"
+  }
+ ],
+ "hasOfferCatalog": {
+  "@type": "OfferCatalog",
+  "name": "Услуги",
+  "itemListElement": [
+   {
+    "@type": "Offer",
+    "itemOffered": {
+     "@type": "Service",
+     "name": "Мужская стрижка"
+    },
+    "priceSpecification": {
+     "@type": "PriceSpecification",
+     "priceCurrency": "RUB",
+     "minPrice": 1200
+    }
+   },
+   {
+    "@type": "Offer",
+    "itemOffered": {
+     "@type": "Service",
+     "name": "Стрижка и оформление бороды"
+    },
+    "priceSpecification": {
+     "@type": "PriceSpecification",
+     "priceCurrency": "RUB",
+     "minPrice": 1700
+    }
+   },
+   {
+    "@type": "Offer",
+    "itemOffered": {
+     "@type": "Service",
+     "name": "Оформление бороды и усов"
+    },
+    "priceSpecification": {
+     "@type": "PriceSpecification",
+     "priceCurrency": "RUB",
+     "minPrice": 700
+    }
+   },
+   {
+    "@type": "Offer",
+    "itemOffered": {
+     "@type": "Service",
+     "name": "Королевское бритьё"
+    }
+   },
+   {
+    "@type": "Offer",
+    "itemOffered": {
+     "@type": "Service",
+     "name": "Детская стрижка (до 10 лет)"
+    },
+    "priceSpecification": {
+     "@type": "PriceSpecification",
+     "priceCurrency": "RUB",
+     "price": 1000
+    }
+   },
+   {
+    "@type": "Offer",
+    "itemOffered": {
+     "@type": "Service",
+     "name": "Камуфляж седины (борода)"
+    },
+    "priceSpecification": {
+     "@type": "PriceSpecification",
+     "priceCurrency": "RUB",
+     "price": 500
+    }
+   },
+   {
+    "@type": "Offer",
+    "itemOffered": {
+     "@type": "Service",
+     "name": "Депиляция воском (нос, уши, брови)"
+    },
+    "priceSpecification": {
+     "@type": "PriceSpecification",
+     "priceCurrency": "RUB",
+     "price": 200
+    }
+   }
+  ]
+ }
+}
+</script>
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "FAQPage",
+ "mainEntity": [
+  {
+   "@type": "Question",
+   "name": "Нужно ли записываться заранее?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Лучше да: у каждого мастера своё расписание, и в онлайн-записи сразу видно свободное время. Если хотите прийти сегодня — позвоните по телефону +7 (986) 937-98-63, подскажем, есть ли окно."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "Как перенести или отменить запись?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Через DIKIDI — по ссылке из подтверждения записи или в своём профиле, либо звонком. Пожалуйста, предупреждайте заранее: освободившееся время сможет занять другой гость."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "Я опаздываю — что делать?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Позвоните, как только поймёте, что не успеваете. Если после вас записан другой гость, мастер предложит перенести визит или сделать то, что успеет качественно."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "Сколько длится стрижка?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Мужская стрижка — около часа, оформление бороды — 30 минут, стрижка с бородой — 1 ч 15 мин – 1 ч 25 мин в зависимости от мастера."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "Стрижёте детей?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Да, детская стрижка для ребят до 10 лет — 1 000 ₽. Записывайтесь так же, как на взрослую."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "Что такое камуфляж седины?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Мягкое тонирование седых волос в бороде: седина становится менее заметной, но борода не выглядит крашеной. Занимает 20–30 минут, стоит 500 ₽."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "Как добраться?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Пенза, ул. Кулакова, 14А — около 200 метров от остановки «Улица Кулакова». Маршрут удобно построить в Яндекс.Картах."
+   }
+  }
+ ]
+}
+</script>
 </head>
 <body>
 
 <header class="header">
-  <a href="#top" class="header__brand"><img src="assets/logo-mark.png" alt="Культура"></a>
-  <nav class="nav">
+  <a href="#top" class="header__brand"><img src="assets/logo-mark.png" alt="Культура" width="618" height="222"></a>
+  <nav class="nav" aria-label="Разделы сайта">
+    <button type="button" class="nav__toggle" aria-expanded="false" aria-controls="nav-menu" aria-label="Меню">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="nav__menu" id="nav-menu">
     <a href="#services" class="nav__link">Услуги</a>
     <a href="#masters" class="nav__link">Мастера</a>
     <a href="#gallery" class="nav__link">Галерея</a>
     <a href="#reviews" class="nav__link">Отзывы</a>
+    <a href="#faq" class="nav__link">Вопросы</a>
     <a href="#contacts" class="nav__link">Контакты</a>
+    </div>
     <a href="https://dikidi.net/ru/profile/kultura_1645652?source=website_kultura&amp;utm_source=website_kultura&amp;utm_medium=website&amp;utm_campaign=kultura_site" target="_blank" rel="noopener" class="nav__cta btn btn--accent btn--sm">Записаться</a>
   </nav>
 </header>
@@ -46,7 +271,7 @@
     </div>
   </div>
   <div class="hero__media">
-    <img src="assets/interior-chairs.webp" alt="Интерьер барбершопа «Культура»">
+    <img src="assets/interior-chairs.webp" alt="Интерьер барбершопа «Культура» в Пензе" width="720" height="1280" fetchpriority="high">
   </div>
 </section>
 
@@ -79,6 +304,37 @@
         </div>
       </div>
     </div>
+  </div>
+</section>
+
+<section id="visit" class="section">
+  <div class="container">
+    <div class="section-head">
+      <h2 class="section-title">Как проходит визит</h2>
+      <div class="price-note">От записи до зеркала — без спешки и сюрпризов.</div>
+    </div>
+    <ol class="steps">
+      <li class="step">
+        <div class="step__num tnum">01</div>
+        <h3 class="step__title">Запись</h3>
+        <p class="step__text">Выбираете мастера, услугу и свободное время онлайн — или звоните, и мы подберём окно сами.</p>
+      </li>
+      <li class="step">
+        <div class="step__num tnum">02</div>
+        <h3 class="step__title">Разговор</h3>
+        <p class="step__text">Перед стрижкой обсуждаем форму, длину и то, как вы обычно укладываетесь. Можно показать фото.</p>
+      </li>
+      <li class="step">
+        <div class="step__num tnum">03</div>
+        <h3 class="step__title">Работа</h3>
+        <p class="step__text">Время на услугу заложено в записи целиком: на стрижку — около часа, следующий гость вас не торопит.</p>
+      </li>
+      <li class="step">
+        <div class="step__num tnum">04</div>
+        <h3 class="step__title">Итог</h3>
+        <p class="step__text">Показываем, как повторить укладку дома, и подсказываем, когда удобно прийти на коррекцию.</p>
+      </li>
+    </ol>
   </div>
 </section>
 
@@ -125,7 +381,7 @@
         </div>
       </div>
       <div class="frame price-media">
-        <img src="assets/master.webp" alt="Мастер за работой">
+        <img src="assets/master.webp" alt="Мастер барбершопа «Культура» за работой" width="960" height="1280" loading="lazy" decoding="async">
       </div>
     </div>
   </div>
@@ -145,7 +401,7 @@
         <div class="master__head">
           <div class="frame master__photo">
             <span class="master__photo-fallback">ГД</span>
-            <img src="https://f2.dikidi.net/c18/v17840/1obfvmnge1.jpg" alt="Гуляев Данил">
+            <img src="assets/master-danil.webp" alt="Барбер Данил Гуляев" width="640" height="642" loading="lazy" decoding="async">
           </div>
           <div>
             <h3 class="master__name">Гуляев Данил</h3>
@@ -205,7 +461,7 @@
         <div class="master__head">
           <div class="frame master__photo">
             <span class="master__photo-fallback">ТА</span>
-            <img src="https://f2.dikidi.net/c25/v24641/6nur3282nb.jpg" alt="Терёшкин Андрей">
+            <img src="assets/master-andrey.webp" alt="Барбер Андрей Терёшкин" width="640" height="640" loading="lazy" decoding="async">
           </div>
           <div>
             <h3 class="master__name">Терёшкин Андрей</h3>
@@ -293,13 +549,13 @@
     <h2 class="section-title" style="margin-bottom:44px">Внутри</h2>
     <div class="gallery-grid">
       <div class="frame">
-        <img src="assets/interior-wide.webp" alt="Зал барбершопа">
+        <img src="assets/interior-wide.webp" alt="Зал барбершопа «Культура»" width="960" height="1280" loading="lazy" decoding="async">
       </div>
       <div class="frame">
-        <img src="assets/interior-chairs.webp" alt="Кресла и зеркала">
+        <img src="assets/interior-chairs.webp" alt="Кресла и зеркала барбершопа" width="720" height="1280" loading="lazy" decoding="async">
       </div>
       <div class="frame">
-        <img src="assets/facade.webp" alt="Вход в барбершоп «Культура»">
+        <img src="assets/facade.webp" alt="Вход в барбершоп «Культура» на ул. Кулакова" width="1280" height="1035" loading="lazy" decoding="async">
       </div>
     </div>
   </div>
@@ -313,22 +569,45 @@
     <div class="works-grid">
       <figure class="work-figure">
         <div class="frame">
-          <img src="assets/work-1.webp" alt="Короткая стрижка с чётким контуром">
+          <img src="assets/work-1.webp" alt="Короткая мужская стрижка с чётким контуром" width="960" height="1280" loading="lazy" decoding="async">
         </div>
         <figcaption>Короткая стрижка · контур</figcaption>
       </figure>
       <figure class="work-figure">
         <div class="frame">
-          <img src="assets/work-2.webp" alt="Стрижка с оформлением бороды">
+          <img src="assets/work-2.webp" alt="Мужская стрижка с оформлением бороды" width="1114" height="1280" loading="lazy" decoding="async">
         </div>
         <figcaption>Стрижка · борода</figcaption>
       </figure>
       <figure class="work-figure">
         <div class="frame">
-          <img src="assets/work-3.webp" alt="Стрижка с текстурой сверху и плавным переходом">
+          <img src="assets/work-3.webp" alt="Мужская стрижка с текстурой сверху и плавным переходом" width="960" height="1280" loading="lazy" decoding="async">
         </div>
         <figcaption>Текстура · плавный переход</figcaption>
       </figure>
+    </div>
+  </div>
+</section>
+
+<section id="care" class="section">
+  <div class="container">
+    <div class="section-head">
+      <h2 class="section-title">Между визитами</h2>
+      <div class="price-note">Чтобы стрижка и борода выглядели аккуратно не только в первый день.</div>
+    </div>
+    <div class="care-grid">
+      <div class="care">
+        <div class="care__kicker">Стрижка</div>
+        <p class="care__text">Короткие формы с переходом теряют контур примерно через 3–4 недели, стрижки длиннее — через 5–6. Удобно сразу записаться на следующий раз.</p>
+      </div>
+      <div class="care">
+        <div class="care__kicker">Борода</div>
+        <p class="care__text">Линии щёк и шеи зарастают быстрее всего — оформление раз в 2–3 недели держит форму. Мыть бороду лучше мягким средством, а не шампунем для головы.</p>
+      </div>
+      <div class="care">
+        <div class="care__kicker">Укладка</div>
+        <p class="care__text">Средство наносится на слегка влажные волосы, от затылка ко лбу, и в меньшем количестве, чем кажется нужным. Мастер покажет на ваших волосах.</p>
+      </div>
     </div>
   </div>
 </section>
@@ -376,6 +655,45 @@
   </div>
 </section>
 
+<section id="faq" class="section">
+  <div class="container faq-layout">
+    <div>
+      <h2 class="section-title">Частые вопросы</h2>
+      <div class="about__rule"></div>
+    </div>
+    <div class="faq">
+      <details class="faq__item">
+        <summary>Нужно ли записываться заранее?</summary>
+        <p>Лучше да: у каждого мастера своё расписание, и в онлайн-записи сразу видно свободное время. Если хотите прийти сегодня — позвоните по телефону <a href="tel:+79869379863" class="tnum">+7 (986) 937-98-63</a>, подскажем, есть ли окно.</p>
+      </details>
+      <details class="faq__item">
+        <summary>Как перенести или отменить запись?</summary>
+        <p>Через DIKIDI — по ссылке из подтверждения записи или в своём профиле, либо звонком. Пожалуйста, предупреждайте заранее: освободившееся время сможет занять другой гость.</p>
+      </details>
+      <details class="faq__item">
+        <summary>Я опаздываю — что делать?</summary>
+        <p>Позвоните, как только поймёте, что не успеваете. Если после вас записан другой гость, мастер предложит перенести визит или сделать то, что успеет качественно.</p>
+      </details>
+      <details class="faq__item">
+        <summary>Сколько длится стрижка?</summary>
+        <p>Мужская стрижка — около часа, оформление бороды — 30 минут, стрижка с бородой — 1 ч 15 мин – 1 ч 25 мин в зависимости от мастера.</p>
+      </details>
+      <details class="faq__item">
+        <summary>Стрижёте детей?</summary>
+        <p>Да, детская стрижка для ребят до 10 лет — 1 000 ₽. Записывайтесь так же, как на взрослую.</p>
+      </details>
+      <details class="faq__item">
+        <summary>Что такое камуфляж седины?</summary>
+        <p>Мягкое тонирование седых волос в бороде: седина становится менее заметной, но борода не выглядит крашеной. Занимает 20–30 минут, стоит 500 ₽.</p>
+      </details>
+      <details class="faq__item">
+        <summary>Как добраться?</summary>
+        <p>Пенза, ул. Кулакова, 14А — около 200 метров от остановки «Улица Кулакова». Маршрут удобно построить в <a href="https://yandex.ru/maps/org/kultura/171709673488/" target="_blank" rel="noopener">Яндекс.Картах</a>.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
 <section id="contacts" class="section" style="border-bottom:0">
   <div class="container contacts">
     <div>
@@ -402,7 +720,7 @@
       </div>
     </div>
     <div class="frame contacts-media">
-      <img src="assets/facade.webp" alt="Барбершоп «Культура», ул. Кулакова, 14А">
+      <img src="assets/facade.webp" alt="Барбершоп «Культура», Пенза, ул. Кулакова, 14А" width="1280" height="1035" loading="lazy" decoding="async">
     </div>
   </div>
 </section>
@@ -410,7 +728,7 @@
 <div class="stripe"></div>
 
 <footer class="footer">
-  <img src="assets/logo-mark.png" alt="Культура">
+  <img src="assets/logo-mark.png" alt="Культура" width="618" height="222" loading="lazy" decoding="async">
   <div class="footer__meta tnum">© 2026 Барбершоп «Культура» · Пенза, ул. Кулакова, 14А</div>
 </footer>
 
