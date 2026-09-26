@@ -591,6 +591,7 @@ h1, h2, h3, h4 {
 }
 .stat-card__value { font-family: var(--font-heading); font-size: 26px; color: var(--accent); }
 .stat-card__label { font-size: 15px; color: rgba(var(--text-rgb), .8); margin-top: 6px; }
+.stat-card__sub { font-size: 12px; color: rgba(var(--text-rgb), .5); margin-top: 4px; }
 .yandex-widget {
   margin-top: 26px;
   border: 1px solid rgba(var(--text-rgb), .18);
